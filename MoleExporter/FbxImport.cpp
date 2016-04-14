@@ -595,6 +595,33 @@ void FbxImport::processMaterials(FbxMesh * inputMesh)
 	}
 }
 
+void FbxImport::processJoints(FbxMesh * inputMesh)
+{
+	unsigned int deformerCount = inputMesh->GetDeformerCount(FbxDeformer::eSkin);
+	
+	//If we have a skeleton attacked to this mesh
+	if(deformerCount > 0)
+	{
+		//Do nothing here, for a while.
+	}
+
+	for (unsigned int deformerCounter = 0; deformerCounter < deformerCount; ++deformerCounter)
+	{
+		FbxSkin* currSkin = reinterpret_cast<FbxSkin*>(inputMesh->GetDeformer(0, FbxDeformer::eSkin));
+		if (!currSkin)
+			continue;
+		unsigned int clusterCount = currSkin->GetClusterCount();
+		for (unsigned int clusterCounter = 0; clusterCounter < clusterCount; ++clusterCounter)
+		{
+			FbxCluster* currCluster = currSkin->GetCluster(clusterCounter);
+
+
+		}
+	}
+	
+
+}
+
 void FbxImport::processTextures(FbxMesh * inputMesh)
 {
 	FbxProperty propDiffus, propSpecular, propNormal;
@@ -848,4 +875,6 @@ bool FbxImport::checkMaterialName(const char* materialName)
 	return true; /*The two material names are not identical.*/
 
 }
+
+
 
