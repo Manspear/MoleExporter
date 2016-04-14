@@ -38,7 +38,7 @@ void FbxImport::initializeImporter()
 
 	FbxImporter* pImporter = FbxImporter::Create(pmManager, "");
 
-	bool importStatus = pImporter->Initialize("C:/Users/pixet/Documents/fbx_box.fbx", -1, pmManager->GetIOSettings());
+	bool importStatus = pImporter->Initialize("C:/Users/pixet/Documents/fbx_test.fbx", -1, pmManager->GetIOSettings());
 	/*Abort if the importer can't be intitialized.*/
 	if (importStatus == false) {
 		FBXSDK_printf("Error: Can't initialize the importer. Aborting...\n");
@@ -60,9 +60,7 @@ void FbxImport::initializeImporter()
 
 	for (int childIndex = 0; childIndex < pmRootNode->GetChildCount(); childIndex++)
 	{
-		/*Getting the child nodes in the scene and their node attr
-
-		ibute types.*/
+		/*Getting the child nodes in the scene and their node attribute types.*/
 		FbxNode* childNode = pmRootNode->GetChild(childIndex);
 		FbxNodeAttribute::EType attributeType = childNode->GetNodeAttribute()->GetAttributeType();
 
@@ -89,7 +87,7 @@ void FbxImport::initializeImporter()
 		{
 			processLight((FbxLight*)childNode->GetNodeAttribute());
 
-			headerData.lightCount = mLightList.size();
+			headerData.lightCount = mDirPointList.size() + mSpotList.size();
 		}
 
 		if (attributeType == FbxNodeAttribute::eCamera)
@@ -104,7 +102,7 @@ void FbxImport::initializeImporter()
 
 void FbxImport::processMesh(FbxMesh * inputMesh)
 {
-	meshData = sMeshData();
+	meshTempData = sTempMesh();
 
 	processVertices(inputMesh);
 
@@ -122,12 +120,11 @@ void FbxImport::processMesh(FbxMesh * inputMesh)
 
 	processTransformations(inputMesh);
 
-	meshData.vertexCount = meshData.mVertexList.size();
+	meshData.vertexCount = meshTempData.mVertexList.size();
 
 	meshData.materialCount = mMaterialList.size();
 
-	mMeshList.push_back(meshData);
-
+	mMeshList.push_back(meshTempData);
 }
 
 void FbxImport::processVertices(FbxMesh * inputMesh)
@@ -157,7 +154,7 @@ void FbxImport::processVertices(FbxMesh * inputMesh)
 				(float)vertices[polygonVertex].mData[1] << " " <<
 				(float)vertices[polygonVertex].mData[1] << "\n";
 
-			meshData.mVertexList.push_back(vertexData);
+			meshTempData.mVertexList.push_back(vertexData);
 		}
 	}
 }
@@ -194,9 +191,9 @@ void FbxImport::processNormals(FbxMesh * inputMesh)
 
 				cout << "\n" << "Normal: " << normals.mData[0] << " " << normals.mData[1] << " " << normals.mData[2] << "\n";
 
-				meshData.mVertexList.at(vertexIndex).vertexNormal[0] = normals.mData[0];
-				meshData.mVertexList.at(vertexIndex).vertexNormal[1] = normals.mData[1];
-				meshData.mVertexList.at(vertexIndex).vertexNormal[2] = normals.mData[2];
+				meshTempData.mVertexList.at(vertexIndex).vertexNormal[0] = normals.mData[0];
+				meshTempData.mVertexList.at(vertexIndex).vertexNormal[1] = normals.mData[1];
+				meshTempData.mVertexList.at(vertexIndex).vertexNormal[2] = normals.mData[2];
 			}
 		}
 
@@ -230,9 +227,9 @@ void FbxImport::processNormals(FbxMesh * inputMesh)
 
 					cout << "\n" << "Normal: " << normals.mData[0] << " " << normals.mData[1] << " " << normals.mData[2] << "\n";
 
-					meshData.mVertexList.at(indexPolygonVertex).vertexNormal[0] = normals.mData[0];
-					meshData.mVertexList.at(indexPolygonVertex).vertexNormal[1] = normals.mData[1];
-					meshData.mVertexList.at(indexPolygonVertex).vertexNormal[2] = normals.mData[2];
+					meshTempData.mVertexList.at(indexPolygonVertex).vertexNormal[0] = normals.mData[0];
+					meshTempData.mVertexList.at(indexPolygonVertex).vertexNormal[1] = normals.mData[1];
+					meshTempData.mVertexList.at(indexPolygonVertex).vertexNormal[2] = normals.mData[2];
 
 					indexPolygonVertex++;
 				}
@@ -271,9 +268,9 @@ void FbxImport::processTangents(FbxMesh * inputMesh)
 
 					cout << "\n" << "Tangent Normals: " << tangents.mData[0] << " " << tangents.mData[1] << " " << tangents.mData[2] << "\n";
 
-					meshData.mVertexList.at(vertexIndex).tangentNormal[0] = tangents.mData[0];
-					meshData.mVertexList.at(vertexIndex).tangentNormal[1] = tangents.mData[1];
-					meshData.mVertexList.at(vertexIndex).tangentNormal[2] = tangents.mData[2];
+					meshTempData.mVertexList.at(vertexIndex).tangentNormal[0] = tangents.mData[0];
+					meshTempData.mVertexList.at(vertexIndex).tangentNormal[1] = tangents.mData[1];
+					meshTempData.mVertexList.at(vertexIndex).tangentNormal[2] = tangents.mData[2];
 				}
 
 			}
@@ -304,9 +301,9 @@ void FbxImport::processTangents(FbxMesh * inputMesh)
 
 						cout << "\n" << "Tangent Normals: " << tangents.mData[0] << " " << tangents.mData[1] << " " << tangents.mData[2] << "\n";
 
-						meshData.mVertexList.at(indexPolygonVertex).tangentNormal[0] = tangents.mData[0];
-						meshData.mVertexList.at(indexPolygonVertex).tangentNormal[1] = tangents.mData[1];
-						meshData.mVertexList.at(indexPolygonVertex).tangentNormal[2] = tangents.mData[2];
+						meshTempData.mVertexList.at(indexPolygonVertex).tangentNormal[0] = tangents.mData[0];
+						meshTempData.mVertexList.at(indexPolygonVertex).tangentNormal[1] = tangents.mData[1];
+						meshTempData.mVertexList.at(indexPolygonVertex).tangentNormal[2] = tangents.mData[2];
 
 						indexPolygonVertex++;
 					}
@@ -346,9 +343,9 @@ void FbxImport::processBiTangents(FbxMesh * inputMesh)
 
 					cout << "\n" << "BiTangent normals: " << biTangents.mData[0] << " " << biTangents.mData[1] << " " << biTangents.mData[2] << "\n";
 
-					meshData.mVertexList.at(vertexIndex).biTangentNormal[0] = biTangents.mData[0];
-					meshData.mVertexList.at(vertexIndex).biTangentNormal[1] = biTangents.mData[1];
-					meshData.mVertexList.at(vertexIndex).biTangentNormal[2] = biTangents.mData[2];
+					meshTempData.mVertexList.at(vertexIndex).biTangentNormal[0] = biTangents.mData[0];
+					meshTempData.mVertexList.at(vertexIndex).biTangentNormal[1] = biTangents.mData[1];
+					meshTempData.mVertexList.at(vertexIndex).biTangentNormal[2] = biTangents.mData[2];
 				}
 			}
 
@@ -378,9 +375,9 @@ void FbxImport::processBiTangents(FbxMesh * inputMesh)
 
 						cout << "\n" << "BiTangent Normals: " << biTangents.mData[0] << " " << biTangents.mData[1] << " " << biTangents.mData[2] << "\n";
 
-						meshData.mVertexList.at(indexPolygonVertex).biTangentNormal[0] = biTangents.mData[0];
-						meshData.mVertexList.at(indexPolygonVertex).biTangentNormal[1] = biTangents.mData[1];
-						meshData.mVertexList.at(indexPolygonVertex).biTangentNormal[2] = biTangents.mData[2];
+						meshTempData.mVertexList.at(indexPolygonVertex).biTangentNormal[0] = biTangents.mData[0];
+						meshTempData.mVertexList.at(indexPolygonVertex).biTangentNormal[1] = biTangents.mData[1];
+						meshTempData.mVertexList.at(indexPolygonVertex).biTangentNormal[2] = biTangents.mData[2];
 
 						indexPolygonVertex++;
 					}
@@ -441,8 +438,8 @@ void FbxImport::processUVs(FbxMesh * inputMesh)
 
 					cout << "\n" << "UV: " << UVs.mData[0] << " " << UVs.mData[1] << "\n";
 
-					meshData.mVertexList.at(vertexIndex).vertexUV[0] = UVs.mData[0];
-					meshData.mVertexList.at(vertexIndex).vertexUV[1] = UVs.mData[1];
+					meshTempData.mVertexList.at(vertexIndex).vertexUV[0] = UVs.mData[0];
+					meshTempData.mVertexList.at(vertexIndex).vertexUV[1] = UVs.mData[1];
 				}
 			}
 		}
@@ -464,8 +461,9 @@ void FbxImport::processUVs(FbxMesh * inputMesh)
 
 					cout << "\n" << "UV: " << UVs.mData[0] << " " << UVs.mData[1] << "\n";
 
-					meshData.mVertexList.at(polyIndexCount).vertexUV[0] = UVs.mData[0];
-					meshData.mVertexList.at(polyIndexCount).vertexUV[1] = UVs.mData[1];
+					meshTempData.mVertexList.at(polyIndexCount).vertexUV[0] = UVs.mData[0];
+					meshTempData.
+						mVertexList.at(polyIndexCount).vertexUV[1] = UVs.mData[1];
 
 					polyIndexCount++;
 				}
@@ -539,11 +537,6 @@ void FbxImport::processMaterials(FbxMesh * inputMesh)
 						cout << "\n" << "Shininess factor: " << shininess << "\n";
 
 					}
-
-					else
-					{
-
-					}
 				}
 
 				else if (material->GetClassId().Is(FbxSurfaceLambert::ClassId))
@@ -583,11 +576,6 @@ void FbxImport::processMaterials(FbxMesh * inputMesh)
 						mMaterialList[meshData.materialID].specularColor[1] = 0;
 						mMaterialList[meshData.materialID].specularColor[2] = 0;
 						mMaterialList[meshData.materialID].shinyFactor = 0;
-					}
-
-					else
-					{
-
 					}
 				}
 			}
@@ -717,63 +705,128 @@ void FbxImport::processTransformations(FbxMesh* inputMesh)
 	transformData.scale[1] = scale.mData[1];
 	transformData.scale[2] = scale.mData[2];
 
-	cout << "\n" << "Rotation: " << rotat.mData[0] << " " << rotat.mData[1] << " " << rotat.mData[2] << "\n";
+	cout << "\n" << "Rotation: " << rotat.mData[0] << " " << rotat.mData[1] << " " << rotat.mData[2] << "\n\n";
 
 	transformData.rotation[0] = rotat.mData[0];
 	transformData.rotation[1] = rotat.mData[1];
 	transformData.rotation[2] = rotat.mData[2];
 
-	meshData.mTransformList.push_back(transformData);
+	meshTempData.mTransformList.push_back(transformData);
 }
 
 void FbxImport::processLight(FbxLight * inputLight)
 {
 	FbxString lightName = inputLight->GetNode()->GetName();
 
-	cout << "\n" << "Light nr " << lightCounter++ << ": " << lightName;
+	int lightType = inputLight->LightType.Get();
 
-	FbxVector4 lightColor = inputLight->Color.Get();
+	if (lightType == 0 || lightType == 1) /*If the lighttype is a Pointlight or a DirectionalLight.*/
+	{
+		cout << "\n" << "Light nr " << lightCounter++ << ": " << lightName;
 
-	lightData.color[0] = lightColor.mData[0];
-	lightData.color[1] = lightColor.mData[1];
-	lightData.color[2] = lightColor.mData[2];
+		FbxVector4 lightColor = inputLight->Color.Get();
 
-	cout << "\n" << "Light color: " << lightColor.mData[0] << " "
-		<< lightColor.mData[1] << " " << lightColor.mData[2];
+		dirPointData.color[0] = lightColor.mData[0];
+		dirPointData.color[1] = lightColor.mData[1];
+		dirPointData.color[2] = lightColor.mData[2];
 
-	float lightIntensity = inputLight->Intensity.Get();
+		cout << "\n" << "Light color: " << lightColor.mData[0] << " "
+			<< lightColor.mData[1] << " " << lightColor.mData[2];
 
-	lightData.intensity = lightIntensity;
+		float lightIntensity = inputLight->Intensity.Get();
 
-	cout << "\n" << "Light intensity: " << lightIntensity;
+		dirPointData.intensity = lightIntensity;
 
-	FbxAMatrix lightPosition = inputLight->GetNode()->EvaluateGlobalTransform();
+		cout << "\n" << "Light intensity: " << lightIntensity;
 
-	FbxVector4 trans, rot, scal;
+		FbxAMatrix lightPosition = inputLight->GetNode()->EvaluateGlobalTransform();
 
-	trans = lightPosition.GetT();
-	rot = lightPosition.GetR();
-	scal = lightPosition.GetS();
+		FbxVector4 trans, rot, scal;
 
-	lightData.lightPos[0] = trans.mData[0];
-	lightData.lightPos[1] = trans.mData[1];
-	lightData.lightPos[2] = trans.mData[2];
+		trans = lightPosition.GetT();
+		rot = lightPosition.GetR();
+		scal = lightPosition.GetS();
 
-	cout << "\n" << "Light position: " << trans.mData[0] << " " << trans.mData[1] << " " << trans.mData[2];
+		dirPointData.lightPos[0] = trans.mData[0];
+		dirPointData.lightPos[1] = trans.mData[1];
+		dirPointData.lightPos[2] = trans.mData[2];
 
-	lightData.lightScale[0] = rot.mData[0];
-	lightData.lightScale[1] = rot.mData[1];
-	lightData.lightScale[2] = rot.mData[2];
+		cout << "\n" << "Light position: " << trans.mData[0] << " " << trans.mData[1] << " " << trans.mData[2];
 
-	cout << "\n" << "Light orientation: " << rot.mData[0] << " " << rot.mData[1] << " " << rot.mData[2];
+		dirPointData.lightScale[0] = rot.mData[0];
+		dirPointData.lightScale[1] = rot.mData[1];
+		dirPointData.lightScale[2] = rot.mData[2];
 
-	lightData.lightRot[0] = scal.mData[0];
-	lightData.lightRot[0] = scal.mData[1];
-	lightData.lightRot[0] = scal.mData[2];
+		cout << "\n" << "Light orientation: " << rot.mData[0] << " " << rot.mData[1] << " " << rot.mData[2];
 
-	cout << "\n" << "Light scale: " << scal.mData[0] << " " << scal.mData[1] << " " << scal.mData[2];
+		dirPointData.lightRot[0] = scal.mData[0];
+		dirPointData.lightRot[0] = scal.mData[1];
+		dirPointData.lightRot[0] = scal.mData[2];
 
-	mLightList.push_back(lightData);
+		cout << "\n" << "Light scale: " << scal.mData[0] << " " << scal.mData[1] << " " << scal.mData[2] << "\n\n";
+
+		mDirPointList.push_back(dirPointData);
+
+		lightData.countDirectionalPoint = mDirPointList.size();
+	}
+
+	if (lightType == 2) /*If the light type is a Spotlight.*/
+	{
+		cout << "\n" << "Light nr " << lightCounter++ << ": " << lightName;
+
+		FbxVector4 lightColor = inputLight->Color.Get();
+
+		dirPointData.color[0] = lightColor.mData[0];
+		dirPointData.color[1] = lightColor.mData[1];
+		dirPointData.color[2] = lightColor.mData[2];
+
+		cout << "\n" << "Light color: " << lightColor.mData[0] << " "
+			<< lightColor.mData[1] << " " << lightColor.mData[2];
+
+		float lightIntensity = inputLight->Intensity.Get();
+
+		spotData.intensity = lightIntensity;
+
+		cout << "\n" << "Light intensity: " << lightIntensity;
+
+		float innerAngle = inputLight->InnerAngle.Get();
+		float outerAngle = inputLight->OuterAngle.Get();
+
+		spotData.innerAngle = innerAngle;
+		spotData.outerAngle = outerAngle;
+
+		cout << "\n" << "Inner angle: " << innerAngle << " " << "Outer angle: " << outerAngle;
+
+		FbxAMatrix lightPosition = inputLight->GetNode()->EvaluateGlobalTransform();
+
+		FbxVector4 trans, rot, scal;
+
+		trans = lightPosition.GetT();
+		rot = lightPosition.GetR();
+		scal = lightPosition.GetS();
+
+		spotData.lightPos[0] = trans.mData[0];
+		spotData.lightPos[1] = trans.mData[1];
+		spotData.lightPos[2] = trans.mData[2];
+
+		cout << "\n" << "Light position: " << trans.mData[0] << " " << trans.mData[1] << " " << trans.mData[2];
+
+		spotData.lightScale[0] = rot.mData[0];
+		spotData.lightScale[1] = rot.mData[1];
+		spotData.lightScale[2] = rot.mData[2];
+
+		cout << "\n" << "Light orientation: " << rot.mData[0] << " " << rot.mData[1] << " " << rot.mData[2];
+
+		spotData.lightRot[0] = scal.mData[0];
+		spotData.lightRot[0] = scal.mData[1];
+		spotData.lightRot[0] = scal.mData[2];
+
+		cout << "\n" << "Light scale: " << scal.mData[0] << " " << scal.mData[1] << " " << scal.mData[2] << "\n\n";
+
+		mSpotList.push_back(spotData);
+
+		lightData.countSpotlight = mSpotList.size();
+	}
 }
 
 void FbxImport::processCamera(FbxCamera * inputCamera)

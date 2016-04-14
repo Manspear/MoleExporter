@@ -26,9 +26,7 @@ struct sTransformData
 
 struct sMeshData
 {
-	std::vector<sVertexData> mVertexList;
-	std::vector<sTransformData> mTransformList;
-	int materialID;
+	unsigned int materialID;
 
 	unsigned int vertexCount;
 	unsigned int materialCount;
@@ -60,11 +58,28 @@ struct sMaterialData
 	wchar_t* normalTexture;
 };
 
-
 struct sLightData
+{
+	unsigned int countDirectionalPoint;
+	unsigned int countSpotlight; 
+};
+
+struct sDirectionalPoint
 {
 	float color[3];
 	float intensity;
+
+	float lightPos[3];
+	float lightRot[3];
+	float lightScale[3];
+};
+
+struct sSpotLight
+{
+	float color[3];
+	float intensity;
+	float innerAngle;
+	float outerAngle;
 
 	float lightPos[3];
 	float lightRot[3];

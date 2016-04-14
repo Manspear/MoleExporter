@@ -13,6 +13,15 @@ using namespace std;
 class FbxImport
 {
 public:
+
+	/*Structs*/
+
+	struct sTempMesh
+	{
+		std::vector<sVertexData> mVertexList;
+		std::vector<sTransformData> mTransformList;
+	};
+
 	/*Functions*/
 
 	void initializeImporter();
@@ -37,20 +46,33 @@ public:
 
 	bool checkMaterialName(const char* materialName);
 
-	std::vector<sMeshData> mMeshList;
-	std::vector<sLightData> mLightList;
-	std::vector<sCamData> mCameraList;
-	std::vector<sMaterialData> mMaterialList;
+	/*Lists*/
+	std::vector<sTempMesh> mMeshList;
 
+	std::vector<sMaterialData> mMaterialList;
+	std::vector<sCamData> mCameraList;
+
+	std::vector<sLightData> mLightList;
+	std::vector<sDirectionalPoint> mDirPointList;
+	std::vector<sSpotLight> mSpotList;
+
+	/*Struct objects*/
 	sMainHeader headerData;
+
+	sMeshData meshData;
+	sTempMesh meshTempData;
 
 	sVertexData vertexData;
 	sTransformData transformData;
 	sMaterialData materialData;
-	sMeshData meshData;
+
 	sLightData lightData;
+	sDirectionalPoint dirPointData;
+	sSpotLight spotData;
+
 	sCamData camData;
 
+	/*Constructor and destructor*/
 	FbxImport();
 	~FbxImport();
 
