@@ -33,6 +33,7 @@ public:
 	void processBiTangents(FbxMesh* inputMesh);
 	void processUVs(FbxMesh* inputMesh);
 	void processMaterials(FbxMesh* inputMesh);
+	void processJoints(FbxMesh* inputMesh);
 
 	void processTextures(FbxMesh* inputMesh);
 	void processDiffuseMaps(FbxProperty inputProp);
