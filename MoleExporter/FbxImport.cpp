@@ -38,7 +38,7 @@ void FbxImport::initializeImporter()
 
 	FbxImporter* pImporter = FbxImporter::Create(pmManager, "");
 
-	bool importStatus = pImporter->Initialize("Models/fbx_box.fbx", -1, pmManager->GetIOSettings());
+	bool importStatus = pImporter->Initialize("C:/Users/pixet/Documents/fbx_box.fbx", -1, pmManager->GetIOSettings());
 	/*Abort if the importer can't be intitialized.*/
 	if (importStatus == false) {
 		FBXSDK_printf("Error: Can't initialize the importer. Aborting...\n");
@@ -81,16 +81,22 @@ void FbxImport::initializeImporter()
 
 			processMesh((FbxMesh*)childNode->GetNodeAttribute());
 			meshCounter += 1;
+
+			headerData.meshCount = mMeshList.size(); 
 		}
 
 		if (attributeType == FbxNodeAttribute::eLight)
 		{
 			processLight((FbxLight*)childNode->GetNodeAttribute());
+
+			headerData.lightCount = mLightList.size();
 		}
 
 		if (attributeType == FbxNodeAttribute::eCamera)
 		{
 			processCamera((FbxCamera*)childNode->GetNodeAttribute());
+
+			headerData.cameraCount = mCameraList.size();
 		}
 	}
 
@@ -116,8 +122,9 @@ void FbxImport::processMesh(FbxMesh * inputMesh)
 
 	processTransformations(inputMesh);
 
-	/*How to put all the information for a mesh in a new lis
-	t???*/
+	meshData.vertexCount = meshData.mVertexList.size();
+
+	meshData.materialCount = mMaterialList.size();
 
 	mMeshList.push_back(meshData);
 

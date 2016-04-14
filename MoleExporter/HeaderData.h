@@ -1,5 +1,12 @@
 #pragma once
 
+struct sMainHeader
+{
+	unsigned int meshCount;
+	unsigned int lightCount;
+	unsigned int cameraCount;
+};
+
 struct sVertexData
 {
 	float vertexPos[3];
@@ -7,17 +14,6 @@ struct sVertexData
 	float tangentNormal[3];
 	float biTangentNormal[3];
 	float vertexUV[2];
-};
-
-struct sVertexAnimData
-{
-	float vertexPos[3];
-	float vertexNormal[3];
-	float tangentNormal[3];
-	float biTangentNormal[3];
-	float vertexUV[2];
-	float influences[4];
-	float weights[4];
 };
 
 struct sTransformData
@@ -32,8 +28,21 @@ struct sMeshData
 {
 	std::vector<sVertexData> mVertexList;
 	std::vector<sTransformData> mTransformList;
-
 	int materialID;
+
+	unsigned int vertexCount;
+	unsigned int materialCount;
+};
+
+struct sVertexAnimData
+{
+	float vertexPos[3];
+	float vertexNormal[3];
+	float tangentNormal[3];
+	float biTangentNormal[3];
+	float vertexUV[2];
+	float influences[4];
+	float weights[4];
 };
 
 struct sMaterialData

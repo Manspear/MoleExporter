@@ -5,7 +5,6 @@
 #include <iostream>
 #include <string>
 #include "fbxsdk.h"
-#include <map>
 
 #include "HeaderData.h"
 
@@ -43,7 +42,7 @@ public:
 	std::vector<sCamData> mCameraList;
 	std::vector<sMaterialData> mMaterialList;
 
-	std::map<const char*, int> mapMaterialID;
+	sMainHeader headerData;
 
 	sVertexData vertexData;
 	sTransformData transformData;
