@@ -38,7 +38,7 @@ void FbxImport::initializeImporter()
 
 	FbxImporter* pImporter = FbxImporter::Create(pmManager, "");
 
-	bool importStatus = pImporter->Initialize("C:/Users/pixet/Documents/fbx_test.fbx", -1, pmManager->GetIOSettings());
+	bool importStatus = pImporter->Initialize("Models/fbx_test.fbx", -1, pmManager->GetIOSettings());
 	/*Abort if the importer can't be intitialized.*/
 	if (importStatus == false) {
 		FBXSDK_printf("Error: Can't initialize the importer. Aborting...\n");
