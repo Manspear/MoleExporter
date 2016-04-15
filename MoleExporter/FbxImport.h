@@ -24,7 +24,7 @@ public:
 
 	/*Functions*/
 
-	void initializeImporter();
+	void initializeImporter(const char* filePath);
 	void processMesh(FbxMesh* inputMesh);
 
 	void processVertices(FbxMesh* inputMesh);
@@ -46,6 +46,8 @@ public:
 	void processCamera(FbxCamera* inputCamera);
 
 	bool checkMaterialName(const char* materialName);
+
+	void convertFbxMatrixToFloatArray(FbxAMatrix inputMatrix, float inputArray[16]);
 
 	/*Lists*/
 	std::vector<sTempMesh> mMeshList;
@@ -78,7 +80,6 @@ public:
 	~FbxImport();
 
 private:
-
 	FbxNode* pmRootNode;
 	FbxManager* pmManager;
 	FbxIOSettings* pmSettings;

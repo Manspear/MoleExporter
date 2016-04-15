@@ -6,8 +6,8 @@ using namespace std;
 int main()
 {
 	FbxImport fbx;
-
-	fbx.initializeImporter();
+	//"C:/Users/Dator/Documents/MoleExporter/MoleExporter/Models/jointCube.fbx"
+	fbx.initializeImporter("Models/jointCube.fbx");
 	//int baby = 0; Have linked.
 	cin.get();
 	return 0;
