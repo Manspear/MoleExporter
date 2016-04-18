@@ -169,9 +169,13 @@ void FbxImport::processVertices(FbxMesh * inputMesh)
 				(float)vertices[polygonVertex].mData[1] << " " <<
 				(float)vertices[polygonVertex].mData[1] << "\n";
 
+<<<<<<< HEAD
 			meshData.mVertexList.push_back(vertexData);
+=======
+			meshTempData.mVertexList.push_back(vertexData);
 
 			//Will have two lists. A list holding all control points, and a list holding indices.
+>>>>>>> 4ccefeb8ea899dd448ef440559ae66eb2e3847ef
 		}
 	}
 }
@@ -1015,6 +1019,7 @@ bool FbxImport::checkMaterialName(const char* materialName)
 
 }
 
+<<<<<<< HEAD
 void FbxImport::assignToHeaderData()
 {
 	/*Assigning the count of mesh, material, light and camera.*/
@@ -1060,6 +1065,7 @@ void FbxImport::WriteToBinary()
 
 }
 
+=======
 void FbxImport::convertFbxMatrixToFloatArray(FbxAMatrix inputMatrix, float inputArray[16])
 {
 	//THis function assumes row-major matrices
@@ -1074,5 +1080,6 @@ void FbxImport::convertFbxMatrixToFloatArray(FbxAMatrix inputMatrix, float input
 		}
 	}
 }
+>>>>>>> 4ccefeb8ea899dd448ef440559ae66eb2e3847ef
 
 

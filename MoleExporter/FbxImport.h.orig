@@ -64,9 +64,14 @@ public:
 
 	bool checkMaterialName(const char* materialName);
 
+<<<<<<< HEAD
 	void assignToHeaderData();
+=======
 	void convertFbxMatrixToFloatArray(FbxAMatrix inputMatrix, float inputArray[16]);
 
+	/*Lists*/
+	std::vector<sTempMesh> mMeshList;
+>>>>>>> 4ccefeb8ea899dd448ef440559ae66eb2e3847ef
 
 	void WriteToBinary();
 
