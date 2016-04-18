@@ -17,7 +17,7 @@ FbxImport::FbxImport()
 }
 
 
-void FbxImport::initializeImporter()
+void FbxImport::initializeImporter(const char* filePath)
 {
 	/*Initialize memory allocator.*/
 	pmManager = FbxManager::Create();
@@ -39,7 +39,7 @@ void FbxImport::initializeImporter()
 
 	FbxImporter* pImporter = FbxImporter::Create(pmManager, "");
 
-	bool importStatus = pImporter->Initialize("Models/test.fbx", -1, pmManager->GetIOSettings());
+	bool importStatus = pImporter->Initialize(filePath, -1, pmManager->GetIOSettings());
 	/*Abort if the importer can't be intitialized.*/
 	if (importStatus == false) {
 		FBXSDK_printf("Error: Can't initialize the importer. Aborting...\n");
@@ -76,7 +76,7 @@ void FbxImport::initializeImporter()
 
 		if (attributeType == FbxNodeAttribute::eMesh)
 		{
-			cout << "\n" << "Object nr: " << meshCounter << " Name: " << childNode->GetName() << "\n";
+			std::cout << "\n" << "Object nr: " << meshCounter << " Name: " << childNode->GetName() << "\n";
 
 			processMesh((FbxMesh*)childNode->GetNodeAttribute());
 			meshCounter += 1;
@@ -123,6 +123,8 @@ void FbxImport::processMesh(FbxMesh * inputMesh)
 
 	processTransformations(inputMesh);
 
+	processJoints(inputMesh);
+
 	/*meshData.vertexCount = meshTempData.mVertexList.size();
 
 	headerData.materialCount = mMaterialList.size();*/
@@ -148,7 +150,7 @@ void FbxImport::processVertices(FbxMesh * inputMesh)
 
 		//All of those things can have differing mappingmodes.
 		
-	}
+	
 	//Hmm... For indexing, you have a small list of vertices containing values, and a large list of indices pointing toward the verticelist.
 	//But how till indexing ever be possible if ANYTHING uses eIndexByControlPoint?
 
@@ -172,17 +174,13 @@ void FbxImport::processVertices(FbxMesh * inputMesh)
 			vertexData.vertexPos[1] = (float)vertices[polygonVertex].mData[1];
 			vertexData.vertexPos[2] = (float)vertices[polygonVertex].mData[2];
 
-			cout << "\n" << "Position: " << (float)vertices[polygonVertex].mData[0] << " " <<
+			std::cout << "\n" << "Position: " << (float)vertices[polygonVertex].mData[0] << " " <<
 				(float)vertices[polygonVertex].mData[1] << " " <<
 				(float)vertices[polygonVertex].mData[1] << "\n";
 
 			importMeshData.mVertexList.push_back(vertexData);
 		}
 	}
-	int aids = meshTempData.mVertexList.size();
-	int iAmControlSize = inputMesh->GetControlPointsCount();
-	int iAmPolygonVertexSize = inputMesh->GetPolygonVertexCount();
-	float baloo = 5;
 }
 
 void FbxImport::processNormals(FbxMesh * inputMesh)
@@ -215,7 +213,7 @@ void FbxImport::processNormals(FbxMesh * inputMesh)
 				/*Normals of each vertex is obtained.*/
 				FbxVector4 normals = normalElement->GetDirectArray().GetAt(normalIndex);
 
-				cout << "\n" << "Normal: " << normals.mData[0] << " " << normals.mData[1] << " " << normals.mData[2] << "\n";
+				std::cout << "\n" << "Normal: " << normals.mData[0] << " " << normals.mData[1] << " " << normals.mData[2] << "\n";
 
 				importMeshData.mVertexList.at(vertexIndex).vertexNormal[0] = normals.mData[0];
 				importMeshData.mVertexList.at(vertexIndex).vertexNormal[1] = normals.mData[1];
@@ -251,7 +249,7 @@ void FbxImport::processNormals(FbxMesh * inputMesh)
 
 					FbxVector4 normals = normalElement->GetDirectArray().GetAt(normalIndex); //Obtain normals of each polygon-vertex
 
-					cout << "\n" << "Normal: " << normals.mData[0] << " " << normals.mData[1] << " " << normals.mData[2] << "\n";
+					std::cout << "\n" << "Normal: " << normals.mData[0] << " " << normals.mData[1] << " " << normals.mData[2] << "\n";
 
 					importMeshData.mVertexList.at(indexPolygonVertex).vertexNormal[0] = normals.mData[0];
 					importMeshData.mVertexList.at(indexPolygonVertex).vertexNormal[1] = normals.mData[1];
@@ -292,7 +290,7 @@ void FbxImport::processTangents(FbxMesh * inputMesh)
 
 					FbxVector4 tangents = tangentElement->GetDirectArray().GetAt(tangentIndex);
 
-					cout << "\n" << "Tangent Normals: " << tangents.mData[0] << " " << tangents.mData[1] << " " << tangents.mData[2] << "\n";
+					std::cout << "\n" << "Tangent Normals: " << tangents.mData[0] << " " << tangents.mData[1] << " " << tangents.mData[2] << "\n";
 
 					importMeshData.mVertexList.at(vertexIndex).tangentNormal[0] = tangents.mData[0];
 					importMeshData.mVertexList.at(vertexIndex).tangentNormal[1] = tangents.mData[1];
@@ -325,7 +323,7 @@ void FbxImport::processTangents(FbxMesh * inputMesh)
 
 						FbxVector4 tangents = tangentElement->GetDirectArray().GetAt(tangentIndex);
 
-						cout << "\n" << "Tangent Normals: " << tangents.mData[0] << " " << tangents.mData[1] << " " << tangents.mData[2] << "\n";
+						std::cout << "\n" << "Tangent Normals: " << tangents.mData[0] << " " << tangents.mData[1] << " " << tangents.mData[2] << "\n";
 
 						importMeshData.mVertexList.at(indexPolygonVertex).tangentNormal[0] = tangents.mData[0];
 						importMeshData.mVertexList.at(indexPolygonVertex).tangentNormal[1] = tangents.mData[1];
@@ -367,7 +365,7 @@ void FbxImport::processBiTangents(FbxMesh * inputMesh)
 
 					FbxVector4 biTangents = biElement->GetDirectArray().GetAt(biTangentIndex);
 
-					cout << "\n" << "BiTangent normals: " << biTangents.mData[0] << " " << biTangents.mData[1] << " " << biTangents.mData[2] << "\n";
+					std::cout << "\n" << "BiTangent normals: " << biTangents.mData[0] << " " << biTangents.mData[1] << " " << biTangents.mData[2] << "\n";
 
 					importMeshData.mVertexList.at(vertexIndex).biTangentNormal[0] = biTangents.mData[0];
 					importMeshData.mVertexList.at(vertexIndex).biTangentNormal[1] = biTangents.mData[1];
@@ -399,7 +397,7 @@ void FbxImport::processBiTangents(FbxMesh * inputMesh)
 
 						FbxVector4 biTangents = biElement->GetDirectArray().GetAt(biTangentIndex);
 
-						cout << "\n" << "BiTangent Normals: " << biTangents.mData[0] << " " << biTangents.mData[1] << " " << biTangents.mData[2] << "\n";
+						std::cout << "\n" << "BiTangent Normals: " << biTangents.mData[0] << " " << biTangents.mData[1] << " " << biTangents.mData[2] << "\n";
 
 						importMeshData.mVertexList.at(indexPolygonVertex).biTangentNormal[0] = biTangents.mData[0];
 						importMeshData.mVertexList.at(indexPolygonVertex).biTangentNormal[1] = biTangents.mData[1];
@@ -462,7 +460,7 @@ void FbxImport::processUVs(FbxMesh * inputMesh)
 
 					UVs = UVElement->GetDirectArray().GetAt(UVIndex); //Getting the UV coordinates.
 
-					cout << "\n" << "UV: " << UVs.mData[0] << " " << UVs.mData[1] << "\n";
+					std::cout << "\n" << "UV: " << UVs.mData[0] << " " << UVs.mData[1] << "\n";
 
 					importMeshData.mVertexList.at(vertexIndex).vertexUV[0] = UVs.mData[0];
 					importMeshData.mVertexList.at(vertexIndex).vertexUV[1] = UVs.mData[1];
@@ -485,7 +483,7 @@ void FbxImport::processUVs(FbxMesh * inputMesh)
 
 					UVs = UVElement->GetDirectArray().GetAt(UVIndex);
 
-					cout << "\n" << "UV: " << UVs.mData[0] << " " << UVs.mData[1] << "\n";
+					std::cout << "\n" << "UV: " << UVs.mData[0] << " " << UVs.mData[1] << "\n";
 
 					importMeshData.mVertexList.at(polyIndexCount).vertexUV[0] = UVs.mData[0];
 					importMeshData.mVertexList.at(polyIndexCount).vertexUV[1] = UVs.mData[1];
@@ -528,7 +526,7 @@ void FbxImport::processMaterials(FbxMesh * inputMesh)
 
 					if (materialFlag = true)
 					{
-						cout << "\n" << "Material Number " << materialCounter << ": " << materialName << "\n";
+						std::cout << "\n" << "Material Number " << materialCounter << ": " << materialName << "\n";
 
 						ambientColor = ((FbxSurfacePhong *)material)->Ambient;
 						diffuseColor = ((FbxSurfacePhong *)material)->Diffuse;
@@ -540,26 +538,26 @@ void FbxImport::processMaterials(FbxMesh * inputMesh)
 						mMaterialList[importMeshData.materialID].ambientColor[1] = ambientColor.mData[1];
 						mMaterialList[importMeshData.materialID].ambientColor[2] = ambientColor.mData[2];
 
-						cout << "\n" << "Ambient color: " << ambientColor.mData[0] << " " << ambientColor.mData[1] <<
+						std::cout << "\n" << "Ambient color: " << ambientColor.mData[0] << " " << ambientColor.mData[1] <<
 							" " << ambientColor.mData[2] << "\n";
 
 						mMaterialList[importMeshData.materialID].diffuseColor[0] = diffuseColor.mData[0];
 						mMaterialList[importMeshData.materialID].diffuseColor[1] = diffuseColor.mData[1];
 						mMaterialList[importMeshData.materialID].diffuseColor[2] = diffuseColor.mData[2];
 
-						cout << "\n" << "Diffuse color: " << diffuseColor.mData[0] << " " << diffuseColor.mData[1] <<
+						std::cout << "\n" << "Diffuse color: " << diffuseColor.mData[0] << " " << diffuseColor.mData[1] <<
 							" " << diffuseColor.mData[2] << "\n";
 
 						mMaterialList[importMeshData.materialID].specularColor[0] = specularColor.mData[0];
 						mMaterialList[importMeshData.materialID].specularColor[0] = specularColor.mData[0];
 						mMaterialList[importMeshData.materialID].specularColor[0] = specularColor.mData[0];
 
-						cout << "\n" << "Specular color: " << specularColor.mData[0] << " " << specularColor.mData[1] <<
+						std::cout << "\n" << "Specular color: " << specularColor.mData[0] << " " << specularColor.mData[1] <<
 							" " << specularColor.mData[2] << "\n";
 
 						mMaterialList[importMeshData.materialID].shinyFactor = shininess;
 
-						cout << "\n" << "Shininess factor: " << shininess << "\n";
+						std::cout << "\n" << "Shininess factor: " << shininess << "\n";
 
 					}
 				}
@@ -577,7 +575,7 @@ void FbxImport::processMaterials(FbxMesh * inputMesh)
 
 					if (materialFlag == true)
 					{
-						cout << "\n" << "Material Number " << materialCounter << ": " << materialName << "\n";
+						std::cout << "\n" << "Material Number " << materialCounter << ": " << materialName << "\n";
 
 						ambientColor = ((FbxSurfaceLambert *)material)->Ambient;
 						diffuseColor = ((FbxSurfaceLambert *)material)->Diffuse;
@@ -586,14 +584,14 @@ void FbxImport::processMaterials(FbxMesh * inputMesh)
 						mMaterialList[importMeshData.materialID].ambientColor[1] = ambientColor.mData[1];
 						mMaterialList[importMeshData.materialID].ambientColor[2] = ambientColor.mData[2];
 
-						cout << "\n" << "Ambient color: " << ambientColor.mData[0] << " " << ambientColor.mData[1] <<
+						std::cout << "\n" << "Ambient color: " << ambientColor.mData[0] << " " << ambientColor.mData[1] <<
 							" " << ambientColor.mData[2] << "\n";
 
 						mMaterialList[importMeshData.materialID].diffuseColor[0] = diffuseColor.mData[0];
 						mMaterialList[importMeshData.materialID].diffuseColor[1] = diffuseColor.mData[1];
 						mMaterialList[importMeshData.materialID].diffuseColor[2] = diffuseColor.mData[2];
 
-						cout << "\n" << "Diffuse color: " << diffuseColor.mData[0] << " " << diffuseColor.mData[1] <<
+						std::cout << "\n" << "Diffuse color: " << diffuseColor.mData[0] << " " << diffuseColor.mData[1] <<
 							" " << diffuseColor.mData[2] << "\n";
 
 						/*No specular attributes and shininess for lambert material, so set the values to 0.*/
@@ -612,9 +610,9 @@ void FbxImport::processMaterials(FbxMesh * inputMesh)
 void FbxImport::processJoints(FbxMesh * inputMesh)
 {
 	unsigned int deformerCount = inputMesh->GetDeformerCount(FbxDeformer::eSkin);
-	
+
 	//If we have a skeleton attacked to this mesh
-	if(deformerCount > 0)
+	if (deformerCount > 0)
 	{
 		//Do nothing here, for a while.
 	}
@@ -624,11 +622,82 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 		FbxSkin* currSkin = reinterpret_cast<FbxSkin*>(inputMesh->GetDeformer(0, FbxDeformer::eSkin));
 		if (!currSkin)
 			continue;
-		unsigned int clusterCount = currSkin->GetClusterCount();
+
+		const unsigned int clusterCount = currSkin->GetClusterCount();
 		for (unsigned int clusterCounter = 0; clusterCounter < clusterCount; ++clusterCounter)
 		{
 			FbxCluster* currCluster = currSkin->GetCluster(clusterCounter);
+			FbxNode* currJoint = currCluster->GetLink();
+			FbxAnimEvaluator* animationEvaluator = currJoint->GetAnimationEvaluator();
 
+			FbxAMatrix tempBindMatrix;
+			FbxAMatrix tempParentBindMatrix;
+			FbxAMatrix tempInvParentBindMatrix;
+
+			currCluster->GetTransformLinkMatrix(tempBindMatrix);
+			currCluster->GetTransformMatrix(tempParentBindMatrix);
+			tempInvParentBindMatrix.Inverse();
+
+			float bindMatrix[16];
+			float parentBindMatrix[16];
+			float invParentBindMatrix[16];
+
+			convertFbxMatrixToFloatArray(tempBindMatrix, bindMatrix);
+			convertFbxMatrixToFloatArray(tempParentBindMatrix, parentBindMatrix);
+			convertFbxMatrixToFloatArray(tempInvParentBindMatrix, invParentBindMatrix);
+
+			//push_back the matrices now onto the joint
+
+			//Start processing vertices, add weight and influence to those vertices
+			const unsigned int controlPointIndicesCount = currCluster->GetControlPointIndicesCount();
+			for (unsigned int i = 0; i < controlPointIndicesCount; ++i)
+			{
+				//The index of this joint serves as it's ID
+				int jointID = clusterCounter;
+				//The control point that this joint affects
+				int controlPointIndex = currCluster->GetControlPointIndices()[i];
+				//The weight from this joint that the control point get
+				float blendingWeight = currCluster->GetControlPointWeights()[i];
+				//Use controlPointIndex to find the vertex affected.
+				//On the affected vertex, push_back the jointID as an influence, and 
+				//push_back the blendingWeight as a weight.
+			}
+
+			//Start processing stacks holding animation layers.
+			const unsigned int stackCount = pmScene->GetSrcObjectCount<FbxAnimStack>();
+			for (unsigned int stackCounter = 0; stackCounter < stackCount; ++stackCounter)
+			{
+				FbxAnimStack* currStack = pmScene->GetSrcObject<FbxAnimStack>(stackCounter);
+
+				int layerCount = currStack->GetMemberCount<FbxAnimLayer>();
+
+				//Start processing layers, each working as an "key-data source" 
+				for (unsigned int layerCounter = 0; layerCounter < layerCount; layerCounter++)
+				{
+					FbxAnimLayer* currLayer = currStack->GetMember<FbxAnimLayer>();
+
+					FbxString stackName = currStack->GetName();
+
+					FbxAnimCurve* translationCurveX = currJoint->LclTranslation.GetCurve(currLayer, FBXSDK_CURVENODE_COMPONENT_X);
+
+					const unsigned int keyCount = translationCurveX->KeyGetCount();
+					for (unsigned int keyCounter = 0; keyCounter < keyCount; keyCounter++)
+					{
+						FbxAnimCurveKey currKey = translationCurveX->KeyGet(keyCounter);
+
+						FbxVector4 tempTranslation = animationEvaluator->GetNodeLocalTranslation(currJoint, currKey.GetTime());
+						FbxVector4 tempRotation = animationEvaluator->GetNodeLocalRotation(currJoint, currKey.GetTime());
+						FbxVector4 tempScale = animationEvaluator->GetNodeLocalRotation(currJoint, currKey.GetTime());
+
+						float keyTime = currKey.GetTime().GetSecondDouble();
+						float translation[4] = { tempTranslation[0],  tempTranslation[1], tempTranslation[2], tempTranslation[3] };
+						float rotation[4] = { tempRotation[0], tempRotation[1], tempRotation[2], tempRotation[3] };
+						float scale[4] = { tempScale[0], tempScale[1], tempScale[2], tempScale[3] };
+
+						//add these values to a sKey-struct, then append it to the keyFrame vector.
+					}
+				}
+			}
 
 		}
 	}
@@ -683,7 +752,7 @@ void FbxImport::processDiffuseMaps(FbxProperty diffuseProp)
 		FbxFileTexture* fileTexture = FbxCast<FbxFileTexture>(texture);
 		FbxString fileTextureName = fileTexture->GetName();
 
-		cout << "\n" << "Texturename Nr " << textureCounter + 1 << ": " << fileTextureName << "\n";
+		std::cout << "\n" << "Texturename Nr " << textureCounter + 1 << ": " << fileTextureName << "\n";
 
 		wchar_t* textureToWchar;
 		FbxUTF8ToWC(fileTextureName.Buffer(), textureToWchar, NULL);
@@ -704,7 +773,7 @@ void FbxImport::processSpecularMaps(FbxProperty propSpecular)
 		FbxFileTexture* fileTexture = FbxCast<FbxFileTexture>(texture);
 		FbxString fileTextureName = fileTexture->GetName();
 
-		cout << "\n" << "Texturename Nr " << textureCounter + 1 << ": " << fileTextureName << "\n";
+		std::cout << "\n" << "Texturename Nr " << textureCounter + 1 << ": " << fileTextureName << "\n";
 
 		wchar_t* textureToWchar;
 		FbxUTF8ToWC(fileTextureName.Buffer(), textureToWchar, NULL);
@@ -725,7 +794,7 @@ void FbxImport::processNormalMaps(FbxProperty propNormal)
 		FbxFileTexture* fileTexture = FbxCast<FbxFileTexture>(texture);
 		FbxString fileTextureName = fileTexture->GetName();
 
-		cout << "\n" << "Texturename Nr " << textureCounter + 1 << ": " << fileTextureName << "\n";
+		std::cout << "\n" << "Texturename Nr " << textureCounter + 1 << ": " << fileTextureName << "\n";
 
 		wchar_t* textureToWchar;
 		FbxUTF8ToWC(fileTextureName.Buffer(), textureToWchar, NULL);
@@ -746,19 +815,19 @@ void FbxImport::processTransformations(FbxMesh* inputMesh)
 	scale = transformMatrix.GetS();
 	rotat = transformMatrix.GetR();
 
-	cout << "\n" << "Position: " << trans.mData[0] << " " << trans.mData[1] << " " << trans.mData[2] << "\n";
+	std::cout << "\n" << "Position: " << trans.mData[0] << " " << trans.mData[1] << " " << trans.mData[2] << "\n";
 
 	importMeshData.translate[0] = trans.mData[0];
 	importMeshData.translate[1] = trans.mData[1];
 	importMeshData.translate[2] = trans.mData[2];
 
-	cout << "\n" << "Scale: " << scale.mData[0] << " " << scale.mData[1] << " " << scale.mData[2] << "\n";
+	std::cout << "\n" << "Scale: " << scale.mData[0] << " " << scale.mData[1] << " " << scale.mData[2] << "\n";
 
 	importMeshData.scale[0] = scale.mData[0];
 	importMeshData.scale[1] = scale.mData[1];
 	importMeshData.scale[2] = scale.mData[2];
 
-	cout << "\n" << "Rotation: " << rotat.mData[0] << " " << rotat.mData[1] << " " << rotat.mData[2] << "\n\n";
+	std::cout << "\n" << "Rotation: " << rotat.mData[0] << " " << rotat.mData[1] << " " << rotat.mData[2] << "\n\n";
 
 	importMeshData.rotation[0] = rotat.mData[0];
 	importMeshData.rotation[1] = rotat.mData[1];
@@ -773,7 +842,7 @@ void FbxImport::processLight(FbxLight * inputLight)
 
 	if (lightType == 0 || lightType == 1) /*If the lighttype is a Pointlight or a DirectionalLight.*/
 	{
-		cout << "\n" << "Light nr " << lightCounter++ << ": " << lightName;
+		std::cout << "\n" << "Light nr " << lightCounter++ << ": " << lightName;
 
 		FbxVector4 lightColor = inputLight->Color.Get();
 
@@ -781,14 +850,14 @@ void FbxImport::processLight(FbxLight * inputLight)
 		dirPointData.color[1] = lightColor.mData[1];
 		dirPointData.color[2] = lightColor.mData[2];
 
-		cout << "\n" << "Light color: " << lightColor.mData[0] << " "
+		std::cout << "\n" << "Light color: " << lightColor.mData[0] << " "
 			<< lightColor.mData[1] << " " << lightColor.mData[2];
 
 		float lightIntensity = inputLight->Intensity.Get();
 
 		dirPointData.intensity = lightIntensity;
 
-		cout << "\n" << "Light intensity: " << lightIntensity;
+		std::cout << "\n" << "Light intensity: " << lightIntensity;
 
 		FbxAMatrix lightPosition = inputLight->GetNode()->EvaluateGlobalTransform();
 
@@ -802,19 +871,19 @@ void FbxImport::processLight(FbxLight * inputLight)
 		dirPointData.lightPos[1] = trans.mData[1];
 		dirPointData.lightPos[2] = trans.mData[2];
 
-		cout << "\n" << "Light position: " << trans.mData[0] << " " << trans.mData[1] << " " << trans.mData[2];
+		std::cout << "\n" << "Light position: " << trans.mData[0] << " " << trans.mData[1] << " " << trans.mData[2];
 
 		dirPointData.lightScale[0] = rot.mData[0];
 		dirPointData.lightScale[1] = rot.mData[1];
 		dirPointData.lightScale[2] = rot.mData[2];
 
-		cout << "\n" << "Light orientation: " << rot.mData[0] << " " << rot.mData[1] << " " << rot.mData[2];
+		std::cout << "\n" << "Light orientation: " << rot.mData[0] << " " << rot.mData[1] << " " << rot.mData[2];
 
 		dirPointData.lightRot[0] = scal.mData[0];
 		dirPointData.lightRot[0] = scal.mData[1];
 		dirPointData.lightRot[0] = scal.mData[2];
 
-		cout << "\n" << "Light scale: " << scal.mData[0] << " " << scal.mData[1] << " " << scal.mData[2] << "\n\n";
+		std::cout << "\n" << "Light scale: " << scal.mData[0] << " " << scal.mData[1] << " " << scal.mData[2] << "\n\n";
 
 		mDirPointList.push_back(dirPointData);
 
@@ -823,7 +892,7 @@ void FbxImport::processLight(FbxLight * inputLight)
 
 	if (lightType == 2) /*If the light type is a Spotlight.*/
 	{
-		cout << "\n" << "Light nr " << lightCounter++ << ": " << lightName;
+		std::cout << "\n" << "Light nr " << lightCounter++ << ": " << lightName;
 
 		FbxVector4 lightColor = inputLight->Color.Get();
 
@@ -831,14 +900,14 @@ void FbxImport::processLight(FbxLight * inputLight)
 		dirPointData.color[1] = lightColor.mData[1];
 		dirPointData.color[2] = lightColor.mData[2];
 
-		cout << "\n" << "Light color: " << lightColor.mData[0] << " "
+		std::cout << "\n" << "Light color: " << lightColor.mData[0] << " "
 			<< lightColor.mData[1] << " " << lightColor.mData[2];
 
 		float lightIntensity = inputLight->Intensity.Get();
 
 		spotData.intensity = lightIntensity;
 
-		cout << "\n" << "Light intensity: " << lightIntensity;
+		std::cout << "\n" << "Light intensity: " << lightIntensity;
 
 		float innerAngle = inputLight->InnerAngle.Get();
 		float outerAngle = inputLight->OuterAngle.Get();
@@ -846,7 +915,7 @@ void FbxImport::processLight(FbxLight * inputLight)
 		spotData.innerAngle = innerAngle;
 		spotData.outerAngle = outerAngle;
 
-		cout << "\n" << "Inner angle: " << innerAngle << " " << "Outer angle: " << outerAngle;
+		std::cout << "\n" << "Inner angle: " << innerAngle << " " << "Outer angle: " << outerAngle;
 
 		FbxAMatrix lightPosition = inputLight->GetNode()->EvaluateGlobalTransform();
 
@@ -860,19 +929,19 @@ void FbxImport::processLight(FbxLight * inputLight)
 		spotData.lightPos[1] = trans.mData[1];
 		spotData.lightPos[2] = trans.mData[2];
 
-		cout << "\n" << "Light position: " << trans.mData[0] << " " << trans.mData[1] << " " << trans.mData[2];
+		std::cout << "\n" << "Light position: " << trans.mData[0] << " " << trans.mData[1] << " " << trans.mData[2];
 
 		spotData.lightScale[0] = rot.mData[0];
 		spotData.lightScale[1] = rot.mData[1];
 		spotData.lightScale[2] = rot.mData[2];
 
-		cout << "\n" << "Light orientation: " << rot.mData[0] << " " << rot.mData[1] << " " << rot.mData[2];
+		std::cout << "\n" << "Light orientation: " << rot.mData[0] << " " << rot.mData[1] << " " << rot.mData[2];
 
 		spotData.lightRot[0] = scal.mData[0];
 		spotData.lightRot[0] = scal.mData[1];
 		spotData.lightRot[0] = scal.mData[2];
 
-		cout << "\n" << "Light scale: " << scal.mData[0] << " " << scal.mData[1] << " " << scal.mData[2] << "\n\n";
+		std::cout << "\n" << "Light scale: " << scal.mData[0] << " " << scal.mData[1] << " " << scal.mData[2] << "\n\n";
 
 		mSpotList.push_back(spotData);
 
@@ -884,11 +953,11 @@ void FbxImport::processCamera(FbxCamera * inputCamera)
 {
 	FbxString cameraName = inputCamera->GetName();
 
-	cout << "\n\n" << "Camera nr " << cameraCounter++ << ": " << cameraName << "\n";
+	std::cout << "\n\n" << "Camera nr " << cameraCounter++ << ": " << cameraName << "\n";
 
 	FbxVector4 cameraPos = inputCamera->Position.Get();
 
-	cout << "\n" << "Camera position: " << cameraPos.mData[0] << " " << cameraPos.mData[1]
+	std::cout << "\n" << "Camera position: " << cameraPos.mData[0] << " " << cameraPos.mData[1]
 		<< " " << cameraPos.mData[2];
 
 	camData.camPos[0] = cameraPos.mData[0];
@@ -897,7 +966,7 @@ void FbxImport::processCamera(FbxCamera * inputCamera)
 
 	FbxVector4 camUpVector = inputCamera->UpVector.Get();
 
-	cout << "\n" << "Camera Up Vector: " << camUpVector.mData[0] << " " << camUpVector.mData[1]
+	std::cout << "\n" << "Camera Up Vector: " << camUpVector.mData[0] << " " << camUpVector.mData[1]
 		<< " " << camUpVector.mData[2];
 
 	camData.upVector[0] = camUpVector.mData[0];
@@ -906,19 +975,19 @@ void FbxImport::processCamera(FbxCamera * inputCamera)
 
 	float fov = inputCamera->FieldOfView.Get();
 
-	cout << "\n" << "Field of view: " << fov << " degrees";
+	std::cout << "\n" << "Field of view: " << fov << " degrees";
 
 	camData.fieldOfView = fov;
 
 	float nearPlane = inputCamera->NearPlane.Get();
 
-	cout << "\n" << "Near plane: " << nearPlane;
+	std::cout << "\n" << "Near plane: " << nearPlane;
 
 	camData.nearPlane = nearPlane;
 
 	float farPlane = inputCamera->FarPlane.Get();
 
-	cout << "\n" << "Far plane: " << farPlane;
+	std::cout << "\n" << "Far plane: " << farPlane;
 
 	camData.farPlane = farPlane;
 
@@ -978,29 +1047,29 @@ void FbxImport::assignToHeaderData()
 
 	mList.resize(mTempMeshList.size());
 
-	cout << mSMeshList.size() << "\n";
+	std::cout << mSMeshList.size() << "\n";
 
 	sVertex vertex;
 
 	for (int sMesh = 0; sMesh < mSMeshList.size(); sMesh++)
 	{
-		cout << "Mesh: " << sMesh + 1 << "\n";
+		std::cout << "Mesh: " << sMesh + 1 << "\n";
 
 		mSMeshList[sMesh].vertexCount = mTempMeshList[sMesh].mVertexList.size();
 
-		cout << "Vertex count: " << mSMeshList[sMesh].vertexCount << "\n";
+		std::cout << "Vertex count: " << mSMeshList[sMesh].vertexCount << "\n";
 
 		for (int vertices = 0; vertices < mTempMeshList[sMesh].mVertexList.size(); vertices++)
 		{
-			/*cout << "Position: " << mTempMeshList[sMesh].mVertexList[vertices].vertexPos[0] << " "
+			/*std::cout << "Position: " << mTempMeshList[sMesh].mVertexList[vertices].vertexPos[0] << " "
 				<< mTempMeshList[sMesh].mVertexList[vertices].vertexPos[1] << " "
 				<< mTempMeshList[sMesh].mVertexList[vertices].vertexPos[2] << "\n";
 
-			cout << "Normal: " << mTempMeshList[sMesh].mVertexList[vertices].vertexNormal[0] << " "
+			std::cout << "Normal: " << mTempMeshList[sMesh].mVertexList[vertices].vertexNormal[0] << " "
 				<< mTempMeshList[sMesh].mVertexList[vertices].vertexNormal[1] << " "
 				<< mTempMeshList[sMesh].mVertexList[vertices].vertexNormal[2] << "\n";
 
-			cout << "UV: " << mTempMeshList[sMesh].mVertexList[vertices].vertexUV[0] << " "
+			std::cout << "UV: " << mTempMeshList[sMesh].mVertexList[vertices].vertexUV[0] << " "
 				<< mTempMeshList[sMesh].mVertexList[vertices].vertexUV[1] << "\n";*/
 
 			vertex.vertexPos[0] = mTempMeshList[sMesh].mVertexList[vertices].vertexPos[0];
@@ -1030,6 +1099,21 @@ void FbxImport::assignToHeaderData()
 void FbxImport::WriteToBinary()
 {
 
+}
+
+void FbxImport::convertFbxMatrixToFloatArray(FbxAMatrix inputMatrix, float inputArray[16])
+{
+	//THis function assumes row-major matrices
+
+	unsigned int localCounter = 0;
+	for (unsigned int g = 0; g < 4; ++g)
+	{
+		for (unsigned int h = 0; h < 4; ++h)
+		{
+			inputArray[localCounter] = inputMatrix.Get(g, h);
+			localCounter++;
+		}
+	}
 }
 
 

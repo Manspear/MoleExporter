@@ -41,7 +41,7 @@ public:
 
 	/*Functions*/
 
-	void initializeImporter();
+	void initializeImporter(const char* filePath);
 	void processMesh(FbxMesh* inputMesh);
 
 	void processVertices(FbxMesh* inputMesh);
@@ -67,6 +67,8 @@ public:
 	void assignToHeaderData();
 
 	void WriteToBinary();
+
+	void convertFbxMatrixToFloatArray(FbxAMatrix inputMatrix, float inputArray[16]);
 
 	/*Lists*/
 	std::vector<sImportMeshData> mTempMeshList;
@@ -100,7 +102,7 @@ public:
 private:
 
 	FbxNode* pmRootNode;
-	FbxManager* pmManager;
+	fbxsdk::FbxManager* pmManager;
 	FbxIOSettings* pmSettings;
 	FbxScene* pmScene;
 
