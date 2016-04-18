@@ -17,7 +17,7 @@ FbxImport::FbxImport()
 }
 
 
-void FbxImport::initializeImporter()
+void FbxImport::initializeImporter(const char* inputFile)
 {
 	/*Initialize memory allocator.*/
 	pmManager = FbxManager::Create();
@@ -39,16 +39,16 @@ void FbxImport::initializeImporter()
 
 	FbxImporter* pImporter = FbxImporter::Create(pmManager, "");
 
-	bool importStatus = pImporter->Initialize("Models/test.fbx", -1, pmManager->GetIOSettings());
+	bool importStatus = pImporter->Initialize(inputFile, -1, pmManager->GetIOSettings());
 	/*Abort if the importer can't be intitialized.*/
 	if (importStatus == false) {
 		FBXSDK_printf("Error: Can't initialize the importer. Aborting...\n");
 		exit(1);
 	}
 
-	FbxScene* pScene = FbxScene::Create(pmManager, "MyScene");
+	pmScene = FbxScene::Create(pmManager, "MyScene");
 
-	importStatus = pImporter->Import(pScene);
+	importStatus = pImporter->Import(pmScene);
 	/*Abort if the scene can't be imported.*/
 	if (importStatus == false) {
 		FBXSDK_printf("Error: Can't import the scene. Aborting...\n");
@@ -57,7 +57,7 @@ void FbxImport::initializeImporter()
 	pImporter->Destroy();
 
 	/*Get the handle to all of the objects in the scene.*/
-	pmRootNode = pScene->GetRootNode();
+	pmRootNode = pmScene->GetRootNode();
 
 	for (int childIndex = 0; childIndex < pmRootNode->GetChildCount(); childIndex++)
 	{
@@ -148,7 +148,6 @@ void FbxImport::processVertices(FbxMesh * inputMesh)
 
 		//All of those things can have differing mappingmodes.
 		
-	}
 	//Hmm... For indexing, you have a small list of vertices containing values, and a large list of indices pointing toward the verticelist.
 	//But how till indexing ever be possible if ANYTHING uses eIndexByControlPoint?
 
@@ -179,10 +178,6 @@ void FbxImport::processVertices(FbxMesh * inputMesh)
 			importMeshData.mVertexList.push_back(vertexData);
 		}
 	}
-	int aids = meshTempData.mVertexList.size();
-	int iAmControlSize = inputMesh->GetControlPointsCount();
-	int iAmPolygonVertexSize = inputMesh->GetPolygonVertexCount();
-	float baloo = 5;
 }
 
 void FbxImport::processNormals(FbxMesh * inputMesh)

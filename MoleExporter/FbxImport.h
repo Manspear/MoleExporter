@@ -41,7 +41,7 @@ public:
 
 	/*Functions*/
 
-	void initializeImporter();
+	void initializeImporter(const char* inputFile);
 	void processMesh(FbxMesh* inputMesh);
 
 	void processVertices(FbxMesh* inputMesh);
