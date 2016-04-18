@@ -150,13 +150,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="FbxImport.cpp" />
-    <ClCompile Include="FileExporter.cpp" />
     <ClCompile Include="Joint.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FbxImport.h" />
-    <ClInclude Include="FileExporter.h" />
     <ClInclude Include="HeaderData.h" />
     <ClInclude Include="Joint.h" />
   </ItemGroup>

@@ -3,47 +3,46 @@
 struct sMainHeader
 {
 	unsigned int meshCount;
+	unsigned int materialCount;
 	unsigned int lightCount;
 	unsigned int cameraCount;
 };
 
-struct sVertexData
+struct sMesh
 {
-	float vertexPos[3];
-	float vertexNormal[3];
-	float tangentNormal[3];
-	float biTangentNormal[3];
-	float vertexUV[2];
-};
+	unsigned int materialID;
 
-struct sTransformData
-{
 	float translate[3];
 	float rotation[3];
 	float scale[3];
 
-};
-
-struct sMeshData
-{
-	unsigned int materialID;
-
 	unsigned int vertexCount;
-	unsigned int materialCount;
+	/*unsigned int skelAnimVertexCount;*/
+	/*unsigned int jointCount;*/
 };
 
-struct sVertexAnimData
+struct sVertex
 {
 	float vertexPos[3];
 	float vertexNormal[3];
+	float vertexUV[2];
 	float tangentNormal[3];
 	float biTangentNormal[3];
+	
+};
+
+struct sSkelAnimVertex
+{
+	float vertexPos[3];
+	float vertexNormal[3];
 	float vertexUV[2];
+	float tangentNormal[3];
+	float biTangentNormal[3];
 	float influences[4];
 	float weights[4];
 };
 
-struct sMaterialData
+struct sMaterial
 {
 	const char* materialName;
 
@@ -58,41 +57,41 @@ struct sMaterialData
 	wchar_t* normalTexture;
 };
 
-struct sLightData
+struct sLight
 {
-	unsigned int countDirectionalPoint;
-	unsigned int countSpotlight; 
+	unsigned int directionalPointCount;
+	unsigned int spotlightCount; 
 };
 
 struct sDirectionalPoint
 {
-	float color[3];
-	float intensity;
-
 	float lightPos[3];
 	float lightRot[3];
 	float lightScale[3];
+
+	float color[3];
+	float intensity;
 };
 
 struct sSpotLight
 {
-	float color[3];
-	float intensity;
-	float innerAngle;
-	float outerAngle;
-
 	float lightPos[3];
 	float lightRot[3];
 	float lightScale[3];
+
+	float color[3];
+	float intensity;
+
+	float innerAngle;
+	float outerAngle;
 };
 
-
-struct sCamData
+struct sCamera
 {
 	float camPos[3];
 	float upVector[3];
 
-	float fov;
+	float fieldOfView;
 	float nearPlane;
 	float farPlane;
 };

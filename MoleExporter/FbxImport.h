@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include "fbxsdk.h"
+#include <fstream>
 
 #include "HeaderData.h"
 
@@ -16,10 +17,26 @@ public:
 
 	/*Structs*/
 
-	struct sTempMesh
+	struct sImportMeshData
 	{
-		std::vector<sVertexData> mVertexList;
-		std::vector<sTransformData> mTransformList;
+		unsigned int materialID;
+
+		float translate[3];
+		float rotation[3];
+		float scale[3];
+
+		vector<sVertex> mVertexList;
+	};
+
+	struct sImportAnimMeshData
+	{
+		unsigned int materialID;
+
+		float translate[3];
+		float rotation[3];
+		float scale[3];
+
+		vector<sSkelAnimVertex> mVertexList;
 	};
 
 	/*Functions*/
@@ -47,31 +64,35 @@ public:
 
 	bool checkMaterialName(const char* materialName);
 
+	void assignToHeaderData();
+
+	void WriteToBinary();
+
 	/*Lists*/
-	std::vector<sTempMesh> mMeshList;
-
-	std::vector<sMaterialData> mMaterialList;
-	std::vector<sCamData> mCameraList;
-
-	std::vector<sLightData> mLightList;
+	std::vector<sImportMeshData> mTempMeshList;
+	std::vector<sMesh> mMeshList;
+	std::vector<sMaterial> mMaterialList;
 	std::vector<sDirectionalPoint> mDirPointList;
 	std::vector<sSpotLight> mSpotList;
+	std::vector<sCamera> mCameraList;
 
 	/*Struct objects*/
 	sMainHeader headerData;
-
-	sMeshData meshData;
-	sTempMesh meshTempData;
-
-	sVertexData vertexData;
-	sTransformData transformData;
-	sMaterialData materialData;
-
-	sLightData lightData;
+	sMesh realMeshData;
+	sImportMeshData meshData;
+	sVertex vertexData;
+	sMaterial materialData;
+	sLight lightData;
 	sDirectionalPoint dirPointData;
 	sSpotLight spotData;
+	sCamera camData;
 
-	sCamData camData;
+	/*Pointer to memory arrays where the vector store its owned elements*/
+	sVertex *vertexArray;
+	sMaterial *materialArray;
+	sDirectionalPoint *dirPointArray;
+	sSpotLight *spotlightArray;
+	sCamera *cameraArray;
 
 	/*Constructor and destructor*/
 	FbxImport();

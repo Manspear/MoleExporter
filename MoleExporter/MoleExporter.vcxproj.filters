@@ -21,18 +21,12 @@
     <ClCompile Include="FbxImport.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FileExporter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Joint.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FbxImport.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FileExporter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="HeaderData.h">
