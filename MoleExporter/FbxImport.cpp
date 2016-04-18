@@ -46,9 +46,9 @@ void FbxImport::initializeImporter(const char* filePath)
 		exit(1);
 	}
 
-	FbxScene* pScene = FbxScene::Create(pmManager, "MyScene");
+	pmScene = FbxScene::Create(pmManager, "MyScene");
 
-	importStatus = pImporter->Import(pScene);
+	importStatus = pImporter->Import(pmScene);
 	/*Abort if the scene can't be imported.*/
 	if (importStatus == false) {
 		FBXSDK_printf("Error: Can't import the scene. Aborting...\n");
@@ -57,7 +57,7 @@ void FbxImport::initializeImporter(const char* filePath)
 	pImporter->Destroy();
 
 	/*Get the handle to all of the objects in the scene.*/
-	pmRootNode = pScene->GetRootNode();
+	pmRootNode = pmScene->GetRootNode();
 
 	for (int childIndex = 0; childIndex < pmRootNode->GetChildCount(); childIndex++)
 	{
@@ -1024,53 +1024,71 @@ bool FbxImport::checkMaterialName(const char* materialName)
 
 void FbxImport::assignToHeaderData()
 {
-	/*The following lines of code is a copy from the temporary mesh list
-	to the one that will have the vertex count.*/
-
-	/*for (int i = 0; i < headerData.meshCount; i++)
-	{
-		mMeshList[i].vertexCount = mTempMeshList[i].mVertexList.size();
-
-		mMeshList[i].materialID = mTempMeshList[i].materialID;
-
-		for (int j = 0; j < 3; j++)
-		{
-			mMeshList[i].translate[j] = mTempMeshList[i].translate[j];
-			mMeshList[i].scale[j] = mTempMeshList[i].scale[j];
-			mMeshList[i].rotation[j] = mTempMeshList[i].rotation[j];
-		}
-	}*/
-
 	headerData.meshCount = mTempMeshList.size();
+	headerData.materialCount = mMaterialList.size();
+	headerData.lightCount = mDirPointList.size() + mSpotList.size();
+
+	lightData.directionalPointCount = mDirPointList.size();
+	lightData.spotlightCount = mSpotList.size();
+
+	headerData.cameraCount = mCameraList.size();
 
 	mSMeshList.resize(headerData.meshCount);
 
 	mList.resize(mTempMeshList.size());
 
 	std::cout << mSMeshList.size() << "\n";
+	cout << "\n\n" << "/////////////Information to binary format/////////////" << "\n\n";
+
+	cout << "Count of meshes: " << headerData.meshCount << "\n\n";
+	cout << "Count of materials: " << headerData.materialCount << "\n\n";
+	cout << "Count of lights: " << headerData.lightCount << "\n\n";
+	cout << "Count of cameras: " << headerData.cameraCount << "\n\n";
+
+	cout << "////////////////////////////////////////////////" << "\n\n";
 
 	sVertex vertex;
 
 	for (int sMesh = 0; sMesh < mSMeshList.size(); sMesh++)
 	{
-		std::cout << "Mesh: " << sMesh + 1 << "\n";
+		cout << "-------------------------------" << "\n\n";
+		cout << "Mesh: " << sMesh + 1 << "\n\n";
+
+		mSMeshList[sMesh].materialID = mTempMeshList[sMesh].materialID;
+
+		mSMeshList[sMesh].translate[0] = mTempMeshList[sMesh].translate[0];
+		mSMeshList[sMesh].translate[1] = mTempMeshList[sMesh].translate[1];
+		mSMeshList[sMesh].translate[2] = mTempMeshList[sMesh].translate[2];
+
+		mSMeshList[sMesh].rotation[0] = mTempMeshList[sMesh].rotation[0];
+		mSMeshList[sMesh].rotation[1] = mTempMeshList[sMesh].rotation[1];
+		mSMeshList[sMesh].rotation[2] = mTempMeshList[sMesh].rotation[2];
+
+		mSMeshList[sMesh].scale[0] = mTempMeshList[sMesh].scale[0];
+		mSMeshList[sMesh].scale[1] = mTempMeshList[sMesh].scale[1];
+		mSMeshList[sMesh].scale[2] = mTempMeshList[sMesh].scale[2];
 
 		mSMeshList[sMesh].vertexCount = mTempMeshList[sMesh].mVertexList.size();
 
 		std::cout << "Vertex count: " << mSMeshList[sMesh].vertexCount << "\n";
+		cout << "-------------------------------" << "\n\n";
+
+		cout << "Vertex count: " << mSMeshList[sMesh].vertexCount << "\n\n";
+
+		cout << "Vertex information: " << "\n\n";
 
 		for (int vertices = 0; vertices < mTempMeshList[sMesh].mVertexList.size(); vertices++)
 		{
-			/*std::cout << "Position: " << mTempMeshList[sMesh].mVertexList[vertices].vertexPos[0] << " "
+			cout << "Position: " << mTempMeshList[sMesh].mVertexList[vertices].vertexPos[0] << " "
 				<< mTempMeshList[sMesh].mVertexList[vertices].vertexPos[1] << " "
-				<< mTempMeshList[sMesh].mVertexList[vertices].vertexPos[2] << "\n";
+				<< mTempMeshList[sMesh].mVertexList[vertices].vertexPos[2] << "\n\n";
 
 			std::cout << "Normal: " << mTempMeshList[sMesh].mVertexList[vertices].vertexNormal[0] << " "
 				<< mTempMeshList[sMesh].mVertexList[vertices].vertexNormal[1] << " "
-				<< mTempMeshList[sMesh].mVertexList[vertices].vertexNormal[2] << "\n";
+				<< mTempMeshList[sMesh].mVertexList[vertices].vertexNormal[2] << "\n\n";
 
 			std::cout << "UV: " << mTempMeshList[sMesh].mVertexList[vertices].vertexUV[0] << " "
-				<< mTempMeshList[sMesh].mVertexList[vertices].vertexUV[1] << "\n";*/
+				<< mTempMeshList[sMesh].mVertexList[vertices].vertexUV[1] << "\n\n";
 
 			vertex.vertexPos[0] = mTempMeshList[sMesh].mVertexList[vertices].vertexPos[0];
 			vertex.vertexPos[1] = mTempMeshList[sMesh].mVertexList[vertices].vertexPos[1];
