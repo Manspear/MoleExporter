@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 
 struct sMainHeader
 {
@@ -28,8 +29,14 @@ struct sVertex
 	float vertexUV[2];
 	float tangentNormal[3];
 	float biTangentNormal[3];
-	
 };
+
+struct m
+{
+	std::vector<sVertex> vList;
+};
+
+static std::vector<m> mList;
 
 struct sSkelAnimVertex
 {

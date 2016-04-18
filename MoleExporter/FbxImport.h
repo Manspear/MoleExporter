@@ -41,7 +41,7 @@ public:
 
 	/*Functions*/
 
-	void initializeImporter(const char* filePath);
+	void initializeImporter();
 	void processMesh(FbxMesh* inputMesh);
 
 	void processVertices(FbxMesh* inputMesh);
@@ -65,14 +65,12 @@ public:
 	bool checkMaterialName(const char* materialName);
 
 	void assignToHeaderData();
-	void convertFbxMatrixToFloatArray(FbxAMatrix inputMatrix, float inputArray[16]);
-
 
 	void WriteToBinary();
 
 	/*Lists*/
 	std::vector<sImportMeshData> mTempMeshList;
-	std::vector<sMesh> mMeshList;
+	std::vector<sMesh> mSMeshList;
 	std::vector<sMaterial> mMaterialList;
 	std::vector<sDirectionalPoint> mDirPointList;
 	std::vector<sSpotLight> mSpotList;
@@ -80,8 +78,7 @@ public:
 
 	/*Struct objects*/
 	sMainHeader headerData;
-	sMesh realMeshData;
-	sImportMeshData meshData;
+	sImportMeshData importMeshData;
 	sVertex vertexData;
 	sMaterial materialData;
 	sLight lightData;
@@ -101,6 +98,7 @@ public:
 	~FbxImport();
 
 private:
+
 	FbxNode* pmRootNode;
 	FbxManager* pmManager;
 	FbxIOSettings* pmSettings;
