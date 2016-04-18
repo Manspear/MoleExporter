@@ -138,13 +138,28 @@ void FbxImport::processVertices(FbxMesh * inputMesh)
 	const unsigned int controlPointCount = inputMesh->GetControlPointsCount();
 	for (unsigned int controlPointCounter = 0; controlPointCounter < controlPointCount; ++controlPointCounter)
 	{
+		//Erm... Is it a good idéa to have "normal buffer", "tangent buffer", "UV Buffer" and "position buffer" ? 
+		//Not really. Takes alot of time for the GPU to "skip" the unused memory when taking indexed elements. 
+		//So we'll go with "sometimes indexed"? Sure. I'll just have to make sure that it's sometimes indexed. 
+		//Consult with the .obj format maybe? They've got some cool idéas.
+
+		//Ok. There's no performance gain to be had from having several separate buffers holding vertex data.
+		//So when one thing ain't "per control point", no thing is "per control point". 
+		//Then later, when you frustum-quadtree-cull stuff, you should sort meshes based on "isIndexed". 
+		//Soft edge meshes will be inside one vertex and index buffer. Hard edge meshes need no indexing, since all
+		//vertices will have unique normals. 
+
+		//All of those things can have differing mappingmodes.
 		float aids = vertices[0][0]; //Fill a vector with controlPoints
 		//Then use the int polygonVertex = inputMesh->GetPolygonVertex(i, j); 
 		//As an index for the index list! In the for loop below though.
+		
 	}
+	//Hmm... For indexing, you have a small list of vertices containing values, and a large list of indices pointing toward the verticelist.
+	//But how till indexing ever be possible if ANYTHING uses eIndexByControlPoint?
 
 	
-
+	//We assume eByPolyonVertex. Index list is "not allowed"
 	for (int i = 0; i < inputMesh->GetPolygonCount(); i++)
 	{
 		/*Getting vertices of a polygon in the mesh.*/
@@ -172,6 +187,10 @@ void FbxImport::processVertices(FbxMesh * inputMesh)
 			//Will have two lists. A list holding all control points, and a list holding indices.
 		}
 	}
+	int aids = meshTempData.mVertexList.size();
+	int iAmControlSize = inputMesh->GetControlPointsCount();
+	int iAmPolygonVertexSize = inputMesh->GetPolygonVertexCount();
+	float baloo = 5;
 }
 
 void FbxImport::processNormals(FbxMesh * inputMesh)
@@ -232,7 +251,7 @@ void FbxImport::processNormals(FbxMesh * inputMesh)
 					{
 						normalIndex = indexPolygonVertex;
 					}
-					/*Reference mose is index-to-direct, which means getting normals by index-to-direct.*/
+					/*Reference mode is index-to-direct, which means getting normals by index-to-direct.*/
 					if (normalElement->GetReferenceMode() == FbxGeometryElement::eIndexToDirect)
 					{
 						normalIndex = normalElement->GetIndexArray().GetAt(indexPolygonVertex);
@@ -477,8 +496,7 @@ void FbxImport::processUVs(FbxMesh * inputMesh)
 					std::cout << "\n" << "UV: " << UVs.mData[0] << " " << UVs.mData[1] << "\n";
 
 					meshTempData.mVertexList.at(polyIndexCount).vertexUV[0] = UVs.mData[0];
-					meshTempData.
-						mVertexList.at(polyIndexCount).vertexUV[1] = UVs.mData[1];
+					meshTempData.mVertexList.at(polyIndexCount).vertexUV[1] = UVs.mData[1];
 
 					polyIndexCount++;
 				}
