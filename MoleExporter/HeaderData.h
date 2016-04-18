@@ -22,6 +22,8 @@ struct sMesh
 	/*unsigned int jointCount;*/
 };
 
+static std::vector<sMesh> mSMeshList;
+
 struct sVertex
 {
 	float vertexPos[3];
@@ -64,11 +66,14 @@ struct sMaterial
 	wchar_t* normalTexture;
 };
 
+static std::vector<sMaterial> mMaterialList;
+
 struct sLight
 {
 	unsigned int directionalPointCount;
 	unsigned int spotlightCount; 
 };
+
 
 struct sDirectionalPoint
 {
@@ -93,6 +98,9 @@ struct sSpotLight
 	float outerAngle;
 };
 
+static std::vector<sDirectionalPoint> mDirPointList;
+static std::vector<sSpotLight> mSpotList;
+
 struct sCamera
 {
 	float camPos[3];
@@ -102,3 +110,5 @@ struct sCamera
 	float nearPlane;
 	float farPlane;
 };
+
+static std::vector<sCamera> mCameraList;

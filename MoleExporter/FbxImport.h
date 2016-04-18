@@ -70,12 +70,7 @@ public:
 
 	/*Lists*/
 	std::vector<sImportMeshData> mTempMeshList;
-	std::vector<sMesh> mSMeshList;
-	std::vector<sMaterial> mMaterialList;
-	std::vector<sDirectionalPoint> mDirPointList;
-	std::vector<sSpotLight> mSpotList;
-	std::vector<sCamera> mCameraList;
-
+	
 	/*Struct objects*/
 	sMainHeader headerData;
 	sImportMeshData importMeshData;
@@ -85,13 +80,6 @@ public:
 	sDirectionalPoint dirPointData;
 	sSpotLight spotData;
 	sCamera camData;
-
-	/*Pointer to memory arrays where the vector store its owned elements*/
-	sVertex *vertexArray;
-	sMaterial *materialArray;
-	sDirectionalPoint *dirPointArray;
-	sSpotLight *spotlightArray;
-	sCamera *cameraArray;
 
 	/*Constructor and destructor*/
 	FbxImport();
