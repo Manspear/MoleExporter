@@ -11,6 +11,9 @@
 
 using namespace std;
 
+#define DELTA 0.0001
+#define EQUAL(A,B) (abs((A)-(B)) < DELTA) ? true:false
+
 class FbxImport
 {
 public:
@@ -81,9 +84,13 @@ public:
 	/*Lists*/
 	std::vector<sImportMeshData> mTempMeshList;
 	
-	/*Struct objects*/
-	sMainHeader headerData;
+	//**
 	sImportMeshData importMeshData;
+
+
+	/*Struct objects*/
+	sMainHeader mainHeader;
+	sVertex vertex;
 	sMaterial materialData;
 	sLight lightData;
 	sDirectionalPoint dirPointData;
