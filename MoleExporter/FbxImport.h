@@ -39,6 +39,12 @@ public:
 		vector<sSkelAnimVertex> mVertexList;
 	};
 
+	struct sBlendData
+	{
+		int jointID, controlPointIndex;
+		float blendingWeight;
+	};
+
 	/*Functions*/
 
 	void initializeImporter(const char* filePath);
@@ -64,6 +70,8 @@ public:
 
 	bool checkMaterialName(const char* materialName);
 
+	sBlendData* findBlendDataForControlPoint(std::vector<sBlendData>& inputVector, unsigned int controlPointIndex);
+
 	void assignToHeaderData();
 
 	void WriteToBinary();
@@ -76,7 +84,6 @@ public:
 	/*Struct objects*/
 	sMainHeader headerData;
 	sImportMeshData importMeshData;
-	sVertex vertexData;
 	sMaterial materialData;
 	sLight lightData;
 	sDirectionalPoint dirPointData;

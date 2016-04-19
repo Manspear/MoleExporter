@@ -154,7 +154,11 @@ void FbxImport::processVertices(FbxMesh * inputMesh)
 	//Hmm... For indexing, you have a small list of vertices containing values, and a large list of indices pointing toward the verticelist.
 	//But how till indexing ever be possible if ANYTHING uses eIndexByControlPoint?
 
-	
+	unsigned int deformerCount = inputMesh->GetDeformerCount(FbxDeformer::eSkin);
+	if (deformerCount > 0)
+	{
+
+	}
 	//We assume eByPolyonVertex. Index list is "not allowed"
 	for (int i = 0; i < inputMesh->GetPolygonCount(); i++)
 	{
@@ -169,16 +173,27 @@ void FbxImport::processVertices(FbxMesh * inputMesh)
 		{
 			/*Getting the index to a control point "vertex".*/
 			int polygonVertex = inputMesh->GetPolygonVertex(i, j);
+			
+			sVertex vertexData;
+
 
 			vertexData.vertexPos[0] = (float)vertices[polygonVertex].mData[0];
 			vertexData.vertexPos[1] = (float)vertices[polygonVertex].mData[1];
 			vertexData.vertexPos[2] = (float)vertices[polygonVertex].mData[2];
 
 			std::cout << "\n" << "Position: " << (float)vertices[polygonVertex].mData[0] << " " <<
-				(float)vertices[polygonVertex].mData[1] << " " <<
-				(float)vertices[polygonVertex].mData[1] << "\n";
+											   	 (float)vertices[polygonVertex].mData[1] << " " <<
+											   	 (float)vertices[polygonVertex].mData[1] << "\n";
 
+			/*if (deformerCount > 0)
+			{
+				sSkelAnimVertex skelVertexData;
+				skelVertexData.shaderData = vertexData;
+
+			}
+			*/
 			importMeshData.mVertexList.push_back(vertexData);
+
 		}
 	}
 }
@@ -649,18 +664,49 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 			//push_back the matrices now onto the joint
 
 			//Start processing vertices, add weight and influence to those vertices
+
 			const unsigned int controlPointIndicesCount = currCluster->GetControlPointIndicesCount();
+			
+			vector <FbxImport::sBlendData> bdList;
+
 			for (unsigned int i = 0; i < controlPointIndicesCount; ++i)
 			{
+				FbxImport::sBlendData temp;
 				//The index of this joint serves as it's ID
 				int jointID = clusterCounter;
 				//The control point that this joint affects
 				int controlPointIndex = currCluster->GetControlPointIndices()[i];
 				//The weight from this joint that the control point get
 				float blendingWeight = currCluster->GetControlPointWeights()[i];
+
+				temp.jointID = jointID;
+				temp.controlPointIndex = controlPointIndex; //Use controlPointIndex to "find" the joints that affect the control point.
+				temp.blendingWeight = blendingWeight;
+
+				bdList.push_back(temp);
+				
 				//Use controlPointIndex to find the vertex affected.
 				//On the affected vertex, push_back the jointID as an influence, and 
 				//push_back the blendingWeight as a weight.
+			}
+			
+			const unsigned int polyCount = inputMesh->GetPolygonCount();
+			for (unsigned int polyCounter = 0; polyCounter < polyCount; polyCounter++)
+			{
+				const unsigned int polySize = inputMesh->GetPolygonSize(polyCounter);
+
+				for (unsigned int polyCorner = 0; polyCorner < polySize; polyCorner++)
+				{
+					const unsigned index = inputMesh->GetPolygonVertex(polyCounter, polyCorner);
+					sBlendData* currBlendData = findBlendDataForControlPoint(bdList, index);
+					if (currBlendData->blendingWeight < 0.000001)
+					{
+						//If the weight is 0, this joint is not an influence of the current vertex. 
+						continue;
+					}
+					//Add the weights and influences to the animated vertex
+
+				}
 			}
 
 			//Start processing stacks holding animation layers.
@@ -701,8 +747,6 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 
 		}
 	}
-	
-
 }
 
 void FbxImport::processTextures(FbxMesh * inputMesh)
@@ -1021,6 +1065,29 @@ bool FbxImport::checkMaterialName(const char* materialName)
 	return true; /*The two material names are not identical.*/
 
 }
+
+FbxImport::sBlendData* FbxImport::findBlendDataForControlPoint(std::vector<FbxImport::sBlendData>& inputVector, unsigned int controlPointIndex)
+{
+	const unsigned int vectorSize = inputVector.size();
+	for (unsigned int i = 0; i < vectorSize; i++)
+	{
+		if (inputVector[i].controlPointIndex == controlPointIndex)
+		{
+			return &inputVector[i];
+		}
+	}
+	sBlendData noneInfluence;
+	//Set 0 to say "This joint doesn't influence that vertex"
+	noneInfluence.blendingWeight = 0.0;
+	//The jointID of the joint that we're processing
+	noneInfluence.jointID = inputVector[0].jointID;
+	//The control point that isn't influenced.
+	noneInfluence.controlPointIndex = controlPointIndex;
+	
+	return &noneInfluence;
+}
+
+
 
 void FbxImport::assignToHeaderData()
 {

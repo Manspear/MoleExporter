@@ -42,11 +42,7 @@ static std::vector<m> mList;
 
 struct sSkelAnimVertex
 {
-	float vertexPos[3];
-	float vertexNormal[3];
-	float vertexUV[2];
-	float tangentNormal[3];
-	float biTangentNormal[3];
+	sVertex shaderData;
 	float influences[4];
 	float weights[4];
 };
