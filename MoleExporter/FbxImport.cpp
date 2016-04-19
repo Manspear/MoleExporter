@@ -170,15 +170,15 @@ void FbxImport::processVertices(FbxMesh * inputMesh)
 			/*Getting the index to a control point "vertex".*/
 			int polygonVertex = inputMesh->GetPolygonVertex(i, j);
 
-			vertexData.vertexPos[0] = (float)vertices[polygonVertex].mData[0];
-			vertexData.vertexPos[1] = (float)vertices[polygonVertex].mData[1];
-			vertexData.vertexPos[2] = (float)vertices[polygonVertex].mData[2];
+			vertex.vertexPos[0] = (float)vertices[polygonVertex].mData[0];
+			vertex.vertexPos[1] = (float)vertices[polygonVertex].mData[1];
+			vertex.vertexPos[2] = (float)vertices[polygonVertex].mData[2];
 
 			std::cout << "\n" << "Position: " << (float)vertices[polygonVertex].mData[0] << " " <<
 				(float)vertices[polygonVertex].mData[1] << " " <<
 				(float)vertices[polygonVertex].mData[1] << "\n";
 
-			importMeshData.mVertexList.push_back(vertexData);
+			importMeshData.mVertexList.push_back(vertex);
 		}
 	}
 }
@@ -534,28 +534,28 @@ void FbxImport::processMaterials(FbxMesh * inputMesh)
 
 						float shininess = ((FbxSurfacePhong*)material)->Shininess;
 
-						mMaterialList[importMeshData.materialID].ambientColor[0] = ambientColor.mData[0];
-						mMaterialList[importMeshData.materialID].ambientColor[1] = ambientColor.mData[1];
-						mMaterialList[importMeshData.materialID].ambientColor[2] = ambientColor.mData[2];
+						materialList[importMeshData.materialID].ambientColor[0] = ambientColor.mData[0];
+						materialList[importMeshData.materialID].ambientColor[1] = ambientColor.mData[1];
+						materialList[importMeshData.materialID].ambientColor[2] = ambientColor.mData[2];
 
 						std::cout << "\n" << "Ambient color: " << ambientColor.mData[0] << " " << ambientColor.mData[1] <<
 							" " << ambientColor.mData[2] << "\n";
 
-						mMaterialList[importMeshData.materialID].diffuseColor[0] = diffuseColor.mData[0];
-						mMaterialList[importMeshData.materialID].diffuseColor[1] = diffuseColor.mData[1];
-						mMaterialList[importMeshData.materialID].diffuseColor[2] = diffuseColor.mData[2];
+						materialList[importMeshData.materialID].diffuseColor[0] = diffuseColor.mData[0];
+						materialList[importMeshData.materialID].diffuseColor[1] = diffuseColor.mData[1];
+						materialList[importMeshData.materialID].diffuseColor[2] = diffuseColor.mData[2];
 
 						std::cout << "\n" << "Diffuse color: " << diffuseColor.mData[0] << " " << diffuseColor.mData[1] <<
 							" " << diffuseColor.mData[2] << "\n";
 
-						mMaterialList[importMeshData.materialID].specularColor[0] = specularColor.mData[0];
-						mMaterialList[importMeshData.materialID].specularColor[0] = specularColor.mData[0];
-						mMaterialList[importMeshData.materialID].specularColor[0] = specularColor.mData[0];
+						materialList[importMeshData.materialID].specularColor[0] = specularColor.mData[0];
+						materialList[importMeshData.materialID].specularColor[0] = specularColor.mData[0];
+						materialList[importMeshData.materialID].specularColor[0] = specularColor.mData[0];
 
 						std::cout << "\n" << "Specular color: " << specularColor.mData[0] << " " << specularColor.mData[1] <<
 							" " << specularColor.mData[2] << "\n";
 
-						mMaterialList[importMeshData.materialID].shinyFactor = shininess;
+						materialList[importMeshData.materialID].shinyFactor = shininess;
 
 						std::cout << "\n" << "Shininess factor: " << shininess << "\n";
 
@@ -580,26 +580,26 @@ void FbxImport::processMaterials(FbxMesh * inputMesh)
 						ambientColor = ((FbxSurfaceLambert *)material)->Ambient;
 						diffuseColor = ((FbxSurfaceLambert *)material)->Diffuse;
 
-						mMaterialList[importMeshData.materialID].ambientColor[0] = ambientColor.mData[0];
-						mMaterialList[importMeshData.materialID].ambientColor[1] = ambientColor.mData[1];
-						mMaterialList[importMeshData.materialID].ambientColor[2] = ambientColor.mData[2];
+						materialList[importMeshData.materialID].ambientColor[0] = ambientColor.mData[0];
+						materialList[importMeshData.materialID].ambientColor[1] = ambientColor.mData[1];
+						materialList[importMeshData.materialID].ambientColor[2] = ambientColor.mData[2];
 
 						std::cout << "\n" << "Ambient color: " << ambientColor.mData[0] << " " << ambientColor.mData[1] <<
 							" " << ambientColor.mData[2] << "\n";
 
-						mMaterialList[importMeshData.materialID].diffuseColor[0] = diffuseColor.mData[0];
-						mMaterialList[importMeshData.materialID].diffuseColor[1] = diffuseColor.mData[1];
-						mMaterialList[importMeshData.materialID].diffuseColor[2] = diffuseColor.mData[2];
+						materialList[importMeshData.materialID].diffuseColor[0] = diffuseColor.mData[0];
+						materialList[importMeshData.materialID].diffuseColor[1] = diffuseColor.mData[1];
+						materialList[importMeshData.materialID].diffuseColor[2] = diffuseColor.mData[2];
 
 						std::cout << "\n" << "Diffuse color: " << diffuseColor.mData[0] << " " << diffuseColor.mData[1] <<
 							" " << diffuseColor.mData[2] << "\n";
 
 						/*No specular attributes and shininess for lambert material, so set the values to 0.*/
-						mMaterialList[importMeshData.materialID].specularColor[0] = 0;
-						mMaterialList[importMeshData.materialID].specularColor[1] = 0;
-						mMaterialList[importMeshData.materialID].specularColor[2] = 0;
+						materialList[importMeshData.materialID].specularColor[0] = 0;
+						materialList[importMeshData.materialID].specularColor[1] = 0;
+						materialList[importMeshData.materialID].specularColor[2] = 0;
 
-						mMaterialList[importMeshData.materialID].shinyFactor = 0;
+						materialList[importMeshData.materialID].shinyFactor = 0;
 					}
 				}
 			}
@@ -757,7 +757,7 @@ void FbxImport::processDiffuseMaps(FbxProperty diffuseProp)
 		wchar_t* textureToWchar;
 		FbxUTF8ToWC(fileTextureName.Buffer(), textureToWchar, NULL);
 
-		mMaterialList[importMeshData.materialID].diffuseTexture = textureToWchar;
+		materialList[importMeshData.materialID].diffuseTexture = textureToWchar;
 
 		textureCounter++;
 	}
@@ -778,7 +778,7 @@ void FbxImport::processSpecularMaps(FbxProperty propSpecular)
 		wchar_t* textureToWchar;
 		FbxUTF8ToWC(fileTextureName.Buffer(), textureToWchar, NULL);
 
-		mMaterialList[importMeshData.materialID].specularTexture = textureToWchar;
+		materialList[importMeshData.materialID].specularTexture = textureToWchar;
 
 		textureCounter++;
 	}
@@ -799,7 +799,7 @@ void FbxImport::processNormalMaps(FbxProperty propNormal)
 		wchar_t* textureToWchar;
 		FbxUTF8ToWC(fileTextureName.Buffer(), textureToWchar, NULL);
 
-		mMaterialList[importMeshData.materialID].normalTexture = textureToWchar;
+		materialList[importMeshData.materialID].normalTexture = textureToWchar;
 
 		textureCounter++;
 	}
@@ -996,9 +996,9 @@ void FbxImport::processCamera(FbxCamera * inputCamera)
 
 bool FbxImport::checkMaterialName(const char* materialName)
 {
-	for (int nameIndex = 0; nameIndex < mMaterialList.size(); nameIndex++)
+	for (int nameIndex = 0; nameIndex < materialList.size(); nameIndex++)
 	{
-		if (std::strcmp(mMaterialList[nameIndex].materialName, materialName) == 0)
+		if (std::strcmp(materialList[nameIndex].materialName, materialName) == 0)
 		{
 			importMeshData.materialID = nameIndex;
 			return false; /*The material names are identical.*/
@@ -1008,15 +1008,15 @@ bool FbxImport::checkMaterialName(const char* materialName)
 	if (materialData.materialName == nullptr)
 	{
 		materialData.materialName = materialName;
-		mMaterialList.push_back(materialData);
+		materialList.push_back(materialData);
 		importMeshData.materialID = 0;
 		firstProcess = false;
 		return true; /*This is the first material name.*/
 	}
 
 	materialData.materialName = materialName;
-	mMaterialList.push_back(materialData);
-	importMeshData.materialID = mMaterialList.size() - 1;
+	materialList.push_back(materialData);
+	importMeshData.materialID = materialList.size() - 1;
 
 	return true; /*The two material names are not identical.*/
 
@@ -1024,56 +1024,56 @@ bool FbxImport::checkMaterialName(const char* materialName)
 
 void FbxImport::assignToHeaderData()
 {
-	headerData.meshCount = mTempMeshList.size();
-	headerData.materialCount = mMaterialList.size();
-	headerData.lightCount = mDirPointList.size() + mSpotList.size();
+	mainHeader.meshCount = mTempMeshList.size();
+	mainHeader.materialCount = materialList.size();
+	mainHeader.lightCount = mDirPointList.size() + mSpotList.size();
 
 	lightData.directionalPointCount = mDirPointList.size();
 	lightData.spotlightCount = mSpotList.size();
 
-	headerData.cameraCount = mCameraList.size();
+	mainHeader.cameraCount = mCameraList.size();
 
-	mSMeshList.resize(headerData.meshCount);
+	meshList.resize(mainHeader.meshCount);
 
 	mList.resize(mTempMeshList.size());
 
-	std::cout << mSMeshList.size() << "\n";
+	std::cout << meshList.size() << "\n";
 	cout << "\n\n" << "/////////////Information to binary format/////////////" << "\n\n";
 
-	cout << "Count of meshes: " << headerData.meshCount << "\n\n";
-	cout << "Count of materials: " << headerData.materialCount << "\n\n";
-	cout << "Count of lights: " << headerData.lightCount << "\n\n";
-	cout << "Count of cameras: " << headerData.cameraCount << "\n\n";
+	cout << "Count of meshes: " << mainHeader.meshCount << "\n\n";
+	cout << "Count of materials: " << mainHeader.materialCount << "\n\n";
+	cout << "Count of lights: " << mainHeader.lightCount << "\n\n";
+	cout << "Count of cameras: " << mainHeader.cameraCount << "\n\n";
 
 	cout << "////////////////////////////////////////////////" << "\n\n";
 
 	sVertex vertex;
 
-	for (int sMesh = 0; sMesh < mSMeshList.size(); sMesh++)
+	for (int sMesh = 0; sMesh < meshList.size(); sMesh++)
 	{
 		cout << "-------------------------------" << "\n\n";
 		cout << "Mesh: " << sMesh + 1 << "\n\n";
 
-		mSMeshList[sMesh].materialID = mTempMeshList[sMesh].materialID;
+		meshList[sMesh].materialID = mTempMeshList[sMesh].materialID;
 
-		mSMeshList[sMesh].translate[0] = mTempMeshList[sMesh].translate[0];
-		mSMeshList[sMesh].translate[1] = mTempMeshList[sMesh].translate[1];
-		mSMeshList[sMesh].translate[2] = mTempMeshList[sMesh].translate[2];
+		meshList[sMesh].translate[0] = mTempMeshList[sMesh].translate[0];
+		meshList[sMesh].translate[1] = mTempMeshList[sMesh].translate[1];
+		meshList[sMesh].translate[2] = mTempMeshList[sMesh].translate[2];
 
-		mSMeshList[sMesh].rotation[0] = mTempMeshList[sMesh].rotation[0];
-		mSMeshList[sMesh].rotation[1] = mTempMeshList[sMesh].rotation[1];
-		mSMeshList[sMesh].rotation[2] = mTempMeshList[sMesh].rotation[2];
+		meshList[sMesh].rotation[0] = mTempMeshList[sMesh].rotation[0];
+		meshList[sMesh].rotation[1] = mTempMeshList[sMesh].rotation[1];
+		meshList[sMesh].rotation[2] = mTempMeshList[sMesh].rotation[2];
 
-		mSMeshList[sMesh].scale[0] = mTempMeshList[sMesh].scale[0];
-		mSMeshList[sMesh].scale[1] = mTempMeshList[sMesh].scale[1];
-		mSMeshList[sMesh].scale[2] = mTempMeshList[sMesh].scale[2];
+		meshList[sMesh].scale[0] = mTempMeshList[sMesh].scale[0];
+		meshList[sMesh].scale[1] = mTempMeshList[sMesh].scale[1];
+		meshList[sMesh].scale[2] = mTempMeshList[sMesh].scale[2];
 
-		mSMeshList[sMesh].vertexCount = mTempMeshList[sMesh].mVertexList.size();
+		meshList[sMesh].vertexCount = mTempMeshList[sMesh].mVertexList.size();
 
-		std::cout << "Vertex count: " << mSMeshList[sMesh].vertexCount << "\n";
+		std::cout << "Vertex count: " << meshList[sMesh].vertexCount << "\n";
 		cout << "-------------------------------" << "\n\n";
 
-		cout << "Vertex count: " << mSMeshList[sMesh].vertexCount << "\n\n";
+		cout << "Vertex count: " << meshList[sMesh].vertexCount << "\n\n";
 
 		cout << "Vertex information: " << "\n\n";
 
@@ -1114,11 +1114,6 @@ void FbxImport::assignToHeaderData()
 	}
 }
 
-void FbxImport::WriteToBinary()
-{
-
-}
-
 void FbxImport::convertFbxMatrixToFloatArray(FbxAMatrix inputMatrix, float inputArray[16])
 {
 	//THis function assumes row-major matrices
@@ -1132,6 +1127,99 @@ void FbxImport::convertFbxMatrixToFloatArray(FbxAMatrix inputMatrix, float input
 			localCounter++;
 		}
 	}
+}
+
+void FbxImport::WriteToBinary()
+{
+	cout << ">>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<" << "\n" << "\n" << endl;
+	cout << "Binary Writer" << endl;
+	cout << "\n" << endl;
+	
+
+	std::ofstream outfile("testBin.bin", std::ofstream::binary);//				Öppnar en fil som är redo för binärt skriv
+																//				write header
+	outfile.write((const char*)&mainHeader, sizeof(sMainHeader));//				Information av hur många meshes som senare kommer att komma, och efter det hur många material osv, samt hur mycket minne den inten som berättar detta tar upp (reservation för vår header)
+	cout << "______________________" << endl;
+	cout << "Main Header" << endl;
+	cout << "meshCount:" << mainHeader.meshCount << endl;
+	cout << "materialCount:" << mainHeader.materialCount << endl;
+	cout << "______________________" << endl;
+	//cout << mainHeader.lightCount << endl;
+	//cout << mainHeader.cameraCount << endl;
+
+
+	for (int i = 0; i < mainHeader.meshCount; i++)
+	{
+		cout << "Mesh: " << i << endl;
+
+		outfile.write((const char*)&meshList[i], sizeof(sMesh));//													Information av hur många vertices som senare kommer att komma, och efter det hur många skelAnim verticear som kommer komma osv, samt hur mycket minne den inten som berättar detta tar upp(reservation för vår header).En int kommer först, den har värdet 100.  Och den inten kommer ta upp 4 bytes.
+
+		cout << "Mesh vector: " << endl;
+
+		cout << "\t";
+		cout << "xyz: ";
+		cout << meshList[i].translate[0];
+		cout << meshList[i].translate[1];
+		cout << meshList[i].translate[2] << endl;
+
+		cout << "\t";
+		cout << "rot: ";
+		cout << meshList[i].rotation[0];
+		cout << meshList[i].rotation[1];
+		cout << meshList[i].rotation[2] << endl;
+
+		cout << "\t";
+		cout << "scale: ";
+		cout << meshList[i].scale[0];
+		cout << meshList[i].scale[1];
+		cout << meshList[i].scale[2] << endl;
+		
+		cout << "\t";
+		cout << "Vertex Count: ";
+		cout << meshList[i].vertexCount << endl;
+		//cout << "SkelAnimVert Count: 0" << endl;
+		//cout << "Joint Count: 0"  << endl;
+
+		cout << "\t";
+		cout << "Material ID: ";
+		cout << meshList[i].materialID << endl;
+		//												detta är storleken av innehållet i vList.data()
+		
+		cout << "\n";
+		cout << "Vertex vector: " << endl; 
+
+		cout << "\t";
+		cout << mList[i].vList.data() << endl;
+
+		cout << "\t";
+		cout << "Allocated memory for " << meshList[i].vertexCount << " vertices" << endl;
+
+		outfile.write((const char*)mList[i].vList.data(), sizeof(sVertex) * meshList[i].vertexCount);//				Skriver ut alla vertices i får vArray, pos, nor, rgba 100 gånger. Och minnet 100 Vertices tar upp.
+		
+		//cout << "SkelAnimVert vector: NULL" << endl;
+
+		//cout << "Joint vector: NULL" << endl;
+
+		cout << "______________________" << endl;
+
+	}
+
+	for (int i = 0; i < mainHeader.materialCount; i++)
+	{
+		cout << "Material: " << i << endl;
+		
+		cout << "Material vector: " << endl;
+
+		cout << "\t";
+		cout << &materialList[i] << endl;
+
+		cout << "\t";
+		cout << "Allocated memory for " << mainHeader.materialCount << " materials" << endl;
+
+		outfile.write((const char*)&materialList[i], sizeof(sMaterial) * mainHeader.materialCount);//				Information av hur många material som senare kommer att komma, samt hur mycket minne den inten som berättar detta tar upp.
+		
+		cout << "______________________" << endl;
+	}	
 }
 
 

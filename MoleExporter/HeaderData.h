@@ -22,7 +22,7 @@ struct sMesh
 	/*unsigned int jointCount;*/
 };
 
-static std::vector<sMesh> mSMeshList;
+static std::vector<sMesh> meshList;
 
 struct sVertex
 {
@@ -66,7 +66,7 @@ struct sMaterial
 	wchar_t* normalTexture;
 };
 
-static std::vector<sMaterial> mMaterialList;
+static std::vector<sMaterial> materialList;
 
 struct sLight
 {
