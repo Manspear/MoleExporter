@@ -20,6 +20,33 @@ public:
 
 	/*Structs*/
 
+	struct sImportKeyFrame
+	{
+		float keyTime;
+		float keyPos[3];
+		float keyRotate[3];
+		float keyScale[3];
+	};
+
+	struct sImportAnimationState
+	{
+		std::vector<sImportKeyFrame> keyList;
+	};
+
+	struct sImportJointData
+	{
+		int jointID;
+		int parentJointID;
+
+		float pos[3];
+		float rot[3];
+		float scale[3];
+
+		float bindPoseInverse[16];
+		float globalBindPoseInverse[16];
+		std::vector<sImportAnimationState> animationState;
+	};
+
 	struct sImportMeshData
 	{
 		unsigned int materialID;
@@ -28,10 +55,13 @@ public:
 		float rotation[3];
 		float scale[3];
 
+		bool isAnimated;
 		vector<sVertex> mVertexList;
+		vector<sSkelAnimVertex> mSkelVertexList;
+		std::vector<sImportJointData> jointList;
 	};
 
-	struct sImportAnimMeshData
+	/*struct sImportAnimMeshData
 	{
 		unsigned int materialID;
 
@@ -40,7 +70,7 @@ public:
 		float scale[3];
 
 		vector<sSkelAnimVertex> mVertexList;
-	};
+	};*/
 
 	struct sBlendData
 	{
@@ -83,6 +113,7 @@ public:
 
 	/*Lists*/
 	std::vector<sImportMeshData> mTempMeshList;
+	//want to have mTempMeshList 
 	
 	//**
 	sImportMeshData importMeshData;
@@ -90,7 +121,6 @@ public:
 
 	/*Struct objects*/
 	sMainHeader mainHeader;
-	sVertex vertex;
 	sMaterial materialData;
 	sLight lightData;
 	sDirectionalPoint dirPointData;
@@ -116,6 +146,5 @@ private:
 
 	bool firstProcess;
 };
-
 
 

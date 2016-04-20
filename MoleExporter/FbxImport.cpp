@@ -157,39 +157,68 @@ void FbxImport::processVertices(FbxMesh * inputMesh)
 	unsigned int deformerCount = inputMesh->GetDeformerCount(FbxDeformer::eSkin);
 	if (deformerCount > 0)
 	{
-
-	}
-	//We assume eByPolyonVertex. Index list is "not allowed"
-	for (int i = 0; i < inputMesh->GetPolygonCount(); i++)
-	{
-		/*Getting vertices of a polygon in the mesh.*/
-		int numPolygonVertices = inputMesh->GetPolygonSize(i);
-
-		/*If the mesh is not triangulated, meaning that there are quads in the mesh,
-		then the program should abort, terminating the process.*/
-		assert(numPolygonVertices == 3);
-
-		for (int j = 0; j < numPolygonVertices; j++)
+		importMeshData.isAnimated = true;
+		for (int i = 0; i < inputMesh->GetPolygonCount(); i++)
 		{
-			/*Getting the index to a control point "vertex".*/
-			int polygonVertex = inputMesh->GetPolygonVertex(i, j);
-			
-			vertex.vertexPos[0] = (float)vertices[polygonVertex].mData[0];
-			vertex.vertexPos[1] = (float)vertices[polygonVertex].mData[1];
-			vertex.vertexPos[2] = (float)vertices[polygonVertex].mData[2];
+			/*Getting vertices of a polygon in the mesh.*/
+			int numPolygonVertices = inputMesh->GetPolygonSize(i);
 
-			std::cout << "\n" << "Position: " << (float)vertices[polygonVertex].mData[0] << " " <<
-											   	 (float)vertices[polygonVertex].mData[1] << " " <<
-											   	 (float)vertices[polygonVertex].mData[1] << "\n";
+			/*If the mesh is not triangulated, meaning that there are quads in the mesh,
+			then the program should abort, terminating the process.*/
+			assert(numPolygonVertices == 3);
 
-			/*if (deformerCount > 0)
+			for (int j = 0; j < numPolygonVertices; j++)
 			{
-				sSkelAnimVertex skelVertexData;
-				skelVertexData.shaderData = vertexData;
+				sSkelAnimVertex animVertex;
 
+				/*Getting the index to a control point "vertex".*/
+				int polygonVertex = inputMesh->GetPolygonVertex(i, j);
+
+				//Set influences to -1337 so that we know which index ain't set yet.
+				for (int c = 0; c < 4; c++) {
+					animVertex.influences[c] = -1337;
+				}
+
+				animVertex.vertexPos[0] = (float)vertices[polygonVertex].mData[0];
+				animVertex.vertexPos[1] = (float)vertices[polygonVertex].mData[1];
+				animVertex.vertexPos[2] = (float)vertices[polygonVertex].mData[2];
+
+				std::cout << "\n" << "Position: " << (float)vertices[polygonVertex].mData[0] << " " <<
+												   	 (float)vertices[polygonVertex].mData[1] << " " <<
+												   	 (float)vertices[polygonVertex].mData[1] << "\n";
+
+				importMeshData.mSkelVertexList.push_back(animVertex);
 			}
-			*/
-			importMeshData.mVertexList.push_back(vertex);
+		}
+	}
+	else
+	{
+		importMeshData.isAnimated = false;
+		for (int i = 0; i < inputMesh->GetPolygonCount(); i++)
+		{
+			/*Getting vertices of a polygon in the mesh.*/
+			int numPolygonVertices = inputMesh->GetPolygonSize(i);
+
+			/*If the mesh is not triangulated, meaning that there are quads in the mesh,
+			then the program should abort, terminating the process.*/
+			assert(numPolygonVertices == 3);
+
+			for (int j = 0; j < numPolygonVertices; j++)
+			{
+				sVertex vertex;
+				/*Getting the index to a control point "vertex".*/
+				int polygonVertex = inputMesh->GetPolygonVertex(i, j);
+
+				vertex.vertexPos[0] = (float)vertices[polygonVertex].mData[0];
+				vertex.vertexPos[1] = (float)vertices[polygonVertex].mData[1];
+				vertex.vertexPos[2] = (float)vertices[polygonVertex].mData[2];
+
+				std::cout << "\n" << "Position: " << (float)vertices[polygonVertex].mData[0] << " " <<
+													 (float)vertices[polygonVertex].mData[1] << " " <<
+													 (float)vertices[polygonVertex].mData[1] << "\n";
+
+				importMeshData.mVertexList.push_back(vertex);
+			}
 		}
 	}
 }
@@ -226,9 +255,19 @@ void FbxImport::processNormals(FbxMesh * inputMesh)
 
 				std::cout << "\n" << "Normal: " << normals.mData[0] << " " << normals.mData[1] << " " << normals.mData[2] << "\n";
 
-				importMeshData.mVertexList.at(vertexIndex).vertexNormal[0] = normals.mData[0];
-				importMeshData.mVertexList.at(vertexIndex).vertexNormal[1] = normals.mData[1];
-				importMeshData.mVertexList.at(vertexIndex).vertexNormal[2] = normals.mData[2];
+				if (importMeshData.isAnimated)
+				{
+					importMeshData.mSkelVertexList.at(vertexIndex).vertexNormal[0] = normals.mData[0];
+					importMeshData.mSkelVertexList.at(vertexIndex).vertexNormal[1] = normals.mData[1];
+					importMeshData.mSkelVertexList.at(vertexIndex).vertexNormal[2] = normals.mData[2];
+				}
+				else
+				{
+					importMeshData.mVertexList.at(vertexIndex).vertexNormal[0] = normals.mData[0];
+					importMeshData.mVertexList.at(vertexIndex).vertexNormal[1] = normals.mData[1];
+					importMeshData.mVertexList.at(vertexIndex).vertexNormal[2] = normals.mData[2];
+				}
+				
 			}
 		}
 
@@ -262,9 +301,18 @@ void FbxImport::processNormals(FbxMesh * inputMesh)
 
 					std::cout << "\n" << "Normal: " << normals.mData[0] << " " << normals.mData[1] << " " << normals.mData[2] << "\n";
 
-					importMeshData.mVertexList.at(indexPolygonVertex).vertexNormal[0] = normals.mData[0];
-					importMeshData.mVertexList.at(indexPolygonVertex).vertexNormal[1] = normals.mData[1];
-					importMeshData.mVertexList.at(indexPolygonVertex).vertexNormal[2] = normals.mData[2];
+					if (importMeshData.isAnimated)
+					{
+						importMeshData.mSkelVertexList.at(indexPolygonVertex).vertexNormal[0] = normals.mData[0];
+						importMeshData.mSkelVertexList.at(indexPolygonVertex).vertexNormal[1] = normals.mData[1];
+						importMeshData.mSkelVertexList.at(indexPolygonVertex).vertexNormal[2] = normals.mData[2];
+					}
+					else
+					{
+						importMeshData.mVertexList.at(indexPolygonVertex).vertexNormal[0] = normals.mData[0];
+						importMeshData.mVertexList.at(indexPolygonVertex).vertexNormal[1] = normals.mData[1];
+						importMeshData.mVertexList.at(indexPolygonVertex).vertexNormal[2] = normals.mData[2];
+					}
 
 					indexPolygonVertex++;
 				}
@@ -303,9 +351,19 @@ void FbxImport::processTangents(FbxMesh * inputMesh)
 
 					std::cout << "\n" << "Tangent Normals: " << tangents.mData[0] << " " << tangents.mData[1] << " " << tangents.mData[2] << "\n";
 
-					importMeshData.mVertexList.at(vertexIndex).tangentNormal[0] = tangents.mData[0];
-					importMeshData.mVertexList.at(vertexIndex).tangentNormal[1] = tangents.mData[1];
-					importMeshData.mVertexList.at(vertexIndex).tangentNormal[2] = tangents.mData[2];
+					if (importMeshData.isAnimated)
+					{
+						importMeshData.mSkelVertexList.at(vertexIndex).tangentNormal[0] = tangents.mData[0];
+						importMeshData.mSkelVertexList.at(vertexIndex).tangentNormal[1] = tangents.mData[1];
+						importMeshData.mSkelVertexList.at(vertexIndex).tangentNormal[2] = tangents.mData[2];
+					}
+					else
+					{
+						importMeshData.mVertexList.at(vertexIndex).tangentNormal[0] = tangents.mData[0];
+						importMeshData.mVertexList.at(vertexIndex).tangentNormal[1] = tangents.mData[1];
+						importMeshData.mVertexList.at(vertexIndex).tangentNormal[2] = tangents.mData[2];
+					}
+
 				}
 
 			}
@@ -336,9 +394,18 @@ void FbxImport::processTangents(FbxMesh * inputMesh)
 
 						std::cout << "\n" << "Tangent Normals: " << tangents.mData[0] << " " << tangents.mData[1] << " " << tangents.mData[2] << "\n";
 
-						importMeshData.mVertexList.at(indexPolygonVertex).tangentNormal[0] = tangents.mData[0];
-						importMeshData.mVertexList.at(indexPolygonVertex).tangentNormal[1] = tangents.mData[1];
-						importMeshData.mVertexList.at(indexPolygonVertex).tangentNormal[2] = tangents.mData[2];
+						if (importMeshData.isAnimated)
+						{
+							importMeshData.mSkelVertexList.at(indexPolygonVertex).tangentNormal[0] = tangents.mData[0];
+							importMeshData.mSkelVertexList.at(indexPolygonVertex).tangentNormal[1] = tangents.mData[1];
+							importMeshData.mSkelVertexList.at(indexPolygonVertex).tangentNormal[2] = tangents.mData[2];
+						}
+						else
+						{
+							importMeshData.mVertexList.at(indexPolygonVertex).tangentNormal[0] = tangents.mData[0];
+							importMeshData.mVertexList.at(indexPolygonVertex).tangentNormal[1] = tangents.mData[1];
+							importMeshData.mVertexList.at(indexPolygonVertex).tangentNormal[2] = tangents.mData[2];
+						}
 
 						indexPolygonVertex++;
 					}
@@ -378,9 +445,20 @@ void FbxImport::processBiTangents(FbxMesh * inputMesh)
 
 					std::cout << "\n" << "BiTangent normals: " << biTangents.mData[0] << " " << biTangents.mData[1] << " " << biTangents.mData[2] << "\n";
 
-					importMeshData.mVertexList.at(vertexIndex).biTangentNormal[0] = biTangents.mData[0];
-					importMeshData.mVertexList.at(vertexIndex).biTangentNormal[1] = biTangents.mData[1];
-					importMeshData.mVertexList.at(vertexIndex).biTangentNormal[2] = biTangents.mData[2];
+					if(importMeshData.isAnimated)
+					{
+						importMeshData.mSkelVertexList.at(vertexIndex).biTangentNormal[0] = biTangents.mData[0];
+						importMeshData.mSkelVertexList.at(vertexIndex).biTangentNormal[1] = biTangents.mData[1];
+						importMeshData.mSkelVertexList.at(vertexIndex).biTangentNormal[2] = biTangents.mData[2];
+					}
+					else
+					{
+						importMeshData.mVertexList.at(vertexIndex).biTangentNormal[0] = biTangents.mData[0];
+						importMeshData.mVertexList.at(vertexIndex).biTangentNormal[1] = biTangents.mData[1];
+						importMeshData.mVertexList.at(vertexIndex).biTangentNormal[2] = biTangents.mData[2];
+					}
+
+
 				}
 			}
 
@@ -410,9 +488,18 @@ void FbxImport::processBiTangents(FbxMesh * inputMesh)
 
 						std::cout << "\n" << "BiTangent Normals: " << biTangents.mData[0] << " " << biTangents.mData[1] << " " << biTangents.mData[2] << "\n";
 
-						importMeshData.mVertexList.at(indexPolygonVertex).biTangentNormal[0] = biTangents.mData[0];
-						importMeshData.mVertexList.at(indexPolygonVertex).biTangentNormal[1] = biTangents.mData[1];
-						importMeshData.mVertexList.at(indexPolygonVertex).biTangentNormal[2] = biTangents.mData[2];
+						if (importMeshData.isAnimated)
+						{
+							importMeshData.mSkelVertexList.at(indexPolygonVertex).biTangentNormal[0] = biTangents.mData[0];
+							importMeshData.mSkelVertexList.at(indexPolygonVertex).biTangentNormal[1] = biTangents.mData[1];
+							importMeshData.mSkelVertexList.at(indexPolygonVertex).biTangentNormal[2] = biTangents.mData[2];
+						}
+						else
+						{
+							importMeshData.mVertexList.at(indexPolygonVertex).biTangentNormal[0] = biTangents.mData[0];
+							importMeshData.mVertexList.at(indexPolygonVertex).biTangentNormal[1] = biTangents.mData[1];
+							importMeshData.mVertexList.at(indexPolygonVertex).biTangentNormal[2] = biTangents.mData[2];
+						}
 
 						indexPolygonVertex++;
 					}
@@ -473,8 +560,17 @@ void FbxImport::processUVs(FbxMesh * inputMesh)
 
 					std::cout << "\n" << "UV: " << UVs.mData[0] << " " << UVs.mData[1] << "\n";
 
-					importMeshData.mVertexList.at(vertexIndex).vertexUV[0] = UVs.mData[0];
-					importMeshData.mVertexList.at(vertexIndex).vertexUV[1] = UVs.mData[1];
+					if(importMeshData.isAnimated)
+					{
+						importMeshData.mSkelVertexList.at(vertexIndex).vertexUV[0] = UVs.mData[0];
+						importMeshData.mSkelVertexList.at(vertexIndex).vertexUV[1] = UVs.mData[1];
+					}
+					else
+					{
+						importMeshData.mVertexList.at(vertexIndex).vertexUV[0] = UVs.mData[0];
+						importMeshData.mVertexList.at(vertexIndex).vertexUV[1] = UVs.mData[1];
+					}
+					
 				}
 			}
 		}
@@ -496,9 +592,16 @@ void FbxImport::processUVs(FbxMesh * inputMesh)
 
 					std::cout << "\n" << "UV: " << UVs.mData[0] << " " << UVs.mData[1] << "\n";
 
-					importMeshData.mVertexList.at(polyIndexCount).vertexUV[0] = UVs.mData[0];
-					importMeshData.mVertexList.at(polyIndexCount).vertexUV[1] = UVs.mData[1];
-
+					if (importMeshData.isAnimated)
+					{
+						importMeshData.mSkelVertexList.at(polyIndexCount).vertexUV[0] = UVs.mData[0];
+						importMeshData.mSkelVertexList.at(polyIndexCount).vertexUV[1] = UVs.mData[1];
+					}
+					else
+					{
+						importMeshData.mVertexList.at(polyIndexCount).vertexUV[0] = UVs.mData[0];
+						importMeshData.mVertexList.at(polyIndexCount).vertexUV[1] = UVs.mData[1];
+					}
 					polyIndexCount++;
 				}
 			}
@@ -680,13 +783,10 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 				temp.blendingWeight = blendingWeight;
 
 				bdList.push_back(temp);
-				
-				//Use controlPointIndex to find the vertex affected.
-				//On the affected vertex, push_back the jointID as an influence, and 
-				//push_back the blendingWeight as a weight.
 			}
 			
 			const unsigned int polyCount = inputMesh->GetPolygonCount();
+			unsigned int indexCounter = 0;
 			for (unsigned int polyCounter = 0; polyCounter < polyCount; polyCounter++)
 			{
 				const unsigned int polySize = inputMesh->GetPolygonSize(polyCounter);
@@ -695,13 +795,27 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 				{
 					const unsigned index = inputMesh->GetPolygonVertex(polyCounter, polyCorner);
 					sBlendData* currBlendData = findBlendDataForControlPoint(bdList, index);
-					if (currBlendData->blendingWeight < 0.000001)
+					if (currBlendData->blendingWeight < 0.0001)
 					{
 						//If the weight is 0, this joint is not an influence of the current vertex. 
+						indexCounter++;
 						continue;
 					}
 					//Add the weights and influences to the animated vertex
-
+					//got to make sure that I don't replace shit thats already assignesd
+					for (int i = 0; i < 4; i++)
+					{
+						//If we've already added this joint as an influence to the current vertex, continue to the next vertex.
+						if (importMeshData.mSkelVertexList[indexCounter].influences[i] == currBlendData->jointID)
+							break;
+						if(importMeshData.mSkelVertexList[indexCounter].influences[i] == -1337)
+						{
+							importMeshData.mSkelVertexList[indexCounter].influences[i] = currBlendData->jointID;
+							importMeshData.mSkelVertexList[indexCounter].weights[i] = currBlendData->blendingWeight;
+							break;
+						}
+					}
+					indexCounter++;
 				}
 			}
 
@@ -721,6 +835,9 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 					FbxString stackName = currStack->GetName();
 
 					FbxAnimCurve* translationCurveX = currJoint->LclTranslation.GetCurve(currLayer, FBXSDK_CURVENODE_COMPONENT_X);
+
+					if (translationCurveX == nullptr)
+						continue; 
 
 					const unsigned int keyCount = translationCurveX->KeyGetCount();
 					for (unsigned int keyCounter = 0; keyCounter < keyCount; keyCounter++)
