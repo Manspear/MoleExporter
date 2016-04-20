@@ -743,29 +743,39 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 			FbxCluster* currCluster = currSkin->GetCluster(clusterCounter);
 			FbxNode* currJoint = currCluster->GetLink();
 			FbxAnimEvaluator* animationEvaluator = currJoint->GetAnimationEvaluator();
+			sImportJointData tempJoint;
 
 			FbxAMatrix tempBindMatrix;
 			FbxAMatrix tempParentBindMatrix;
-			FbxAMatrix tempInvParentBindMatrix;
 
-			currCluster->GetTransformLinkMatrix(tempBindMatrix);
 			currCluster->GetTransformMatrix(tempParentBindMatrix);
-			tempInvParentBindMatrix.Inverse();
+			currCluster->GetTransformLinkMatrix(tempBindMatrix);
+			
+			FbxAMatrix tempGlobalBindPoseInverse;
+			tempGlobalBindPoseInverse = tempBindMatrix * tempParentBindMatrix;
+			tempGlobalBindPoseInverse = tempGlobalBindPoseInverse.Inverse();
+			
+			FbxAMatrix tempBindPoseInverse;
+			tempBindPoseInverse = tempBindMatrix.Inverse();
 
-			float bindMatrix[16];
-			float parentBindMatrix[16];
-			float invParentBindMatrix[16];
+			float invBindMatrix[16];
+			float invGBindMatrix[16];
 
-			convertFbxMatrixToFloatArray(tempBindMatrix, bindMatrix);
-			convertFbxMatrixToFloatArray(tempParentBindMatrix, parentBindMatrix);
-			convertFbxMatrixToFloatArray(tempInvParentBindMatrix, invParentBindMatrix);
+			convertFbxMatrixToFloatArray(tempGlobalBindPoseInverse, invGBindMatrix);
+			convertFbxMatrixToFloatArray(tempParentBindMatrix, invBindMatrix);
+			//convertFbxMatrixToFloatArray(tempInvParentBindMatrix, invParentBindMatrix);
 
 			//push_back the matrices now onto the joint
+			for (unsigned int c = 0; c < 16; c++)
+			{
+				tempJoint.bindPoseInverse[c] = invBindMatrix[c];
+				tempJoint.globalBindPoseInverse[c] = invGBindMatrix[c];
+			}
+			tempJoint.jointID = clusterCounter;
+			tempJoint.parentJointID; //How to get parent joint? To be continued.
 
 			//Start processing vertices, add weight and influence to those vertices
-
 			const unsigned int controlPointIndicesCount = currCluster->GetControlPointIndicesCount();
-			
 			vector <FbxImport::sBlendData> bdList;
 
 			for (unsigned int i = 0; i < controlPointIndicesCount; ++i)
@@ -840,6 +850,8 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 						continue; 
 
 					const unsigned int keyCount = translationCurveX->KeyGetCount();
+					
+					sImportAnimationState currAnimation;
 					for (unsigned int keyCounter = 0; keyCounter < keyCount; keyCounter++)
 					{
 						FbxAnimCurveKey currKey = translationCurveX->KeyGet(keyCounter);
@@ -849,12 +861,21 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 						FbxVector4 tempScale = animationEvaluator->GetNodeLocalRotation(currJoint, currKey.GetTime());
 
 						float keyTime = currKey.GetTime().GetSecondDouble();
-						float translation[4] = { tempTranslation[0],  tempTranslation[1], tempTranslation[2], tempTranslation[3] };
-						float rotation[4] = { tempRotation[0], tempRotation[1], tempRotation[2], tempRotation[3] };
-						float scale[4] = { tempScale[0], tempScale[1], tempScale[2], tempScale[3] };
+						float translation[3] = { tempTranslation[0],  tempTranslation[1], tempTranslation[2] };
+						float rotation[3] = { tempRotation[0], tempRotation[1], tempRotation[2] };
+						float scale[3] = { tempScale[0], tempScale[1], tempScale[2] };
 
 						//add these values to a sKey-struct, then append it to the keyFrame vector.
+						sImportKeyFrame tempKey;
+						for (unsigned int k = 0; k < 3; k++)
+						{
+							tempKey.keyPos[k] = translation[k];
+							tempKey.keyRotate[k] = rotation[k];
+							tempKey.keyScale[k] = scale[k];
+						}
+						currAnimation.keyList.push_back(tempKey);
 					}
+					//importMeshData.jointList.push_back
 				}
 			}
 
