@@ -5,6 +5,51 @@ FbxImport::~FbxImport()
 {
 }
 
+void FbxImport::processJointHierarchy(FbxNode * inputRoot)
+{
+	for (int childIndex = 0; childIndex < inputRoot->GetChildCount(); ++childIndex) {
+		FbxNode* currNode = inputRoot->GetChild(childIndex);
+		recursiveJointHierarchyTraversal(currNode, 0, -1);
+	}
+}
+
+void FbxImport::recursiveJointHierarchyTraversal(FbxNode * inNode, int currIndex, int inNodeParentIndex)
+{
+	if (inNode->GetNodeAttribute() && inNode->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton)
+	{
+		sImportJointData currJoint;
+		currJoint.parentJointID = inNodeParentIndex;
+		currJoint.name = inNode->GetName();
+		currJoint.jointID = currIndex;
+		pmSceneJoints.push_back(currJoint);
+	}
+	for (int i = 0; i < inNode->GetChildCount(); i++) {
+		//currentIndex becomes the "old index". And the size of the joint-hierarchy-list "becomes" the currentIndex instead
+		//We process each and every child of this node, we search for children of AttributeType eSkeleton to add to the list of joints.
+		recursiveJointHierarchyTraversal(inNode->GetChild(i), pmSceneJoints.size(), currIndex);
+	}
+}
+
+unsigned int FbxImport::findJointIndexByName(const char * jointName)
+{
+	try
+	{
+		for (unsigned int i = 0; i < pmSceneJoints.size(); ++i)
+		{
+			//Note: * before pointer to get object
+			int compareValue = std::strcmp(jointName, pmSceneJoints[i].name);
+			if (compareValue == 0) { //Apparently no matching name can be found...
+				return pmSceneJoints[i].jointID; //parentIndex + 1 gets the index of this joint.
+			}
+		}
+	}
+
+	catch (const std::exception&)
+	{
+		printf("Error in FbxDawg::findJointIndexByName(const char* jointName): cannot find matching joint name\n");
+	}
+}
+
 FbxImport::FbxImport()
 {
 	meshCounter = 1;
@@ -58,6 +103,9 @@ void FbxImport::initializeImporter(const char* filePath)
 
 	/*Get the handle to all of the objects in the scene.*/
 	pmRootNode = pmScene->GetRootNode();
+
+	//Fill the "scene-joint-graph" with basic "parenting" values
+	processJointHierarchy(pmRootNode);
 
 	for (int childIndex = 0; childIndex < pmRootNode->GetChildCount(); childIndex++)
 	{
@@ -728,7 +776,7 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 	//If we have a skeleton attacked to this mesh
 	if (deformerCount > 0)
 	{
-		//Do nothing here, for a while.
+		
 	}
 
 	for (unsigned int deformerCounter = 0; deformerCounter < deformerCount; ++deformerCounter)
@@ -743,7 +791,9 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 			FbxCluster* currCluster = currSkin->GetCluster(clusterCounter);
 			FbxNode* currJoint = currCluster->GetLink();
 			FbxAnimEvaluator* animationEvaluator = currJoint->GetAnimationEvaluator();
-			sImportJointData tempJoint;
+
+			int currJointIndex = findJointIndexByName(currJoint->GetName());
+			//pmSceneJoints[currJointIndex];
 
 			FbxAMatrix tempBindMatrix;
 			FbxAMatrix tempParentBindMatrix;
@@ -768,11 +818,9 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 			//push_back the matrices now onto the joint
 			for (unsigned int c = 0; c < 16; c++)
 			{
-				tempJoint.bindPoseInverse[c] = invBindMatrix[c];
-				tempJoint.globalBindPoseInverse[c] = invGBindMatrix[c];
+				pmSceneJoints[currJointIndex].bindPoseInverse[c] = invBindMatrix[c];
+				pmSceneJoints[currJointIndex].globalBindPoseInverse[c] = invGBindMatrix[c];
 			}
-			tempJoint.jointID = clusterCounter;
-			tempJoint.parentJointID; //How to get parent joint? To be continued.
 
 			//Start processing vertices, add weight and influence to those vertices
 			const unsigned int controlPointIndicesCount = currCluster->GetControlPointIndicesCount();
@@ -875,10 +923,14 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 						}
 						currAnimation.keyList.push_back(tempKey);
 					}
+					pmSceneJoints[currJointIndex].animationState.push_back(currAnimation);
 					//importMeshData.jointList.push_back
 				}
 			}
 
+			importMeshData.jointList.push_back(pmSceneJoints[currJointIndex]);
+			importMeshData.jointList;
+			int momongo = 5;
 		}
 	}
 }

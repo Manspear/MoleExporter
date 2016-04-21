@@ -35,6 +35,9 @@ public:
 
 	struct sImportJointData
 	{
+		//Name helps with debugging
+		const char* name;
+
 		int jointID;
 		int parentJointID;
 
@@ -133,6 +136,11 @@ public:
 
 private:
 
+	//Initially filled inside the initlalizeImporter function.
+	//You fill this with the processJointHierarchy-function. You fill this some more in
+	//processJoints. In there you find the "current joint" by using findJointIndexByName()
+	std::vector<sImportJointData> pmSceneJoints;
+
 	FbxNode* pmRootNode;
 	fbxsdk::FbxManager* pmManager;
 	FbxIOSettings* pmSettings;
@@ -145,6 +153,10 @@ private:
 	int lightCounter;
 
 	bool firstProcess;
+
+	void processJointHierarchy(FbxNode* inputRoot);
+	void recursiveJointHierarchyTraversal(FbxNode* inNode, int currIndex, int inNodeParentIndex);
+	unsigned int findJointIndexByName(const char* jointName);
 };
 
 
