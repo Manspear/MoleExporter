@@ -4,7 +4,7 @@ using namespace std;
 int main()
 {
 	FbxImport fbx;
-	fbx.initializeImporter("Models/twoJointCube.fbx");
+	fbx.initializeImporter("Models/twoJointCube_Animated60fps.fbx");
 	
 	fbx.WriteToBinary();
 

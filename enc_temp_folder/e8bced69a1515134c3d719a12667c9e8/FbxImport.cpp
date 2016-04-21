@@ -225,6 +225,7 @@ void FbxImport::processVertices(FbxMesh * inputMesh)
 				//Set influences to -1337 so that we know which index ain't set yet.
 				for (int c = 0; c < 4; c++) {
 					animVertex.influences[c] = -1337;
+					animVertex.weights[c] = 0.0;
 				}
 
 				animVertex.vertexPos[0] = (float)vertices[polygonVertex].mData[0];
@@ -806,7 +807,7 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 			tempGlobalBindPoseInverse = tempGlobalBindPoseInverse.Inverse();
 			
 			FbxAMatrix tempBindPoseInverse;
-			tempBindPoseInverse = tempBindMatrix;
+			tempBindPoseInverse = tempBindMatrix.Inverse();
 
 			float invBindMatrix[16];
 			float invGBindMatrix[16];
@@ -894,6 +895,8 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 
 					FbxAnimCurve* translationCurveX = currJoint->LclTranslation.GetCurve(currLayer, FBXSDK_CURVENODE_COMPONENT_X);
 
+					
+
 					if (translationCurveX == nullptr)
 						continue; 
 
@@ -915,6 +918,8 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 
 						//add these values to a sKey-struct, then append it to the keyFrame vector.
 						sImportKeyFrame tempKey;
+						tempKey.keyTime = keyTime;
+
 						for (unsigned int k = 0; k < 3; k++)
 						{
 							tempKey.keyPos[k] = translation[k];
@@ -930,6 +935,8 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 
 			importMeshData.jointList.push_back(pmSceneJoints[currJointIndex]);
 			importMeshData.jointList;
+			importMeshData.mSkelVertexList;
+			importMeshData.mVertexList;
 			int momongo = 5;
 		}
 	}
