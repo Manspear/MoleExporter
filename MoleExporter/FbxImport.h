@@ -80,14 +80,7 @@ public:
 	sImportMeshData importMeshData;
 
 
-	/*Struct objects*/
-	sMainHeader mainHeader;
-	sVertex vertex;
-	sMaterial materialData;
-	sLight lightData;
-	sDirectionalPoint dirPointData;
-	sSpotLight spotData;
-	sCamera camData;
+
 
 	/*Constructor and destructor*/
 	FbxImport();

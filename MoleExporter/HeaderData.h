@@ -112,3 +112,11 @@ struct sCamera
 };
 
 static std::vector<sCamera> mCameraList;
+
+/*Struct objects*/
+sMainHeader static mainHeader;
+sMaterial static materialData;
+sLight static lightData;
+sDirectionalPoint static dirPointData;
+sSpotLight static spotData;
+sCamera static camData;
