@@ -157,6 +157,7 @@
     <ClInclude Include="FbxImport.h" />
     <ClInclude Include="HeaderData.h" />
     <ClInclude Include="Joint.h" />
+    <ClInclude Include="ReadHeaderData.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

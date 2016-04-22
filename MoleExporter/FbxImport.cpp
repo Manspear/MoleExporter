@@ -1,5 +1,6 @@
 #include "FbxImport.h"
 #include "HeaderData.h"
+#include "ReadHeaderData.h"
 
 FbxImport::~FbxImport()
 {
@@ -1533,7 +1534,7 @@ void FbxImport::WriteToBinary()
 	cout << ">>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<" << "\n" << "\n" << endl;
 	cout << "Binary Writer" << endl;
 	cout << "\n" << endl;
-	
+
 
 	std::ofstream outfile("testBin.bin", std::ofstream::binary);//				Öppnar en fil som är redo för binärt skriv
 																//				write header
@@ -1572,7 +1573,7 @@ void FbxImport::WriteToBinary()
 		cout << meshList[i].scale[0];
 		cout << meshList[i].scale[1];
 		cout << meshList[i].scale[2] << endl;
-		
+
 		cout << "\t";
 		cout << "Vertex Count: ";
 		cout << meshList[i].vertexCount << endl;
@@ -1583,9 +1584,9 @@ void FbxImport::WriteToBinary()
 		cout << "Material ID: ";
 		cout << meshList[i].materialID << endl;
 		//												detta är storleken av innehållet i vList.data()
-		
+
 		cout << "\n";
-		cout << "Vertex vector: " << endl; 
+		cout << "Vertex vector: " << endl;
 
 		cout << "\t";
 		cout << mList[i].vList.data() << endl;
@@ -1594,19 +1595,18 @@ void FbxImport::WriteToBinary()
 		cout << "Allocated memory for " << meshList[i].vertexCount << " vertices" << endl;
 
 		outfile.write((const char*)mList[i].vList.data(), sizeof(sVertex) * meshList[i].vertexCount);//				Skriver ut alla vertices i får vArray, pos, nor, rgba 100 gånger. Och minnet 100 Vertices tar upp.
-		
-		//cout << "SkelAnimVert vector: NULL" << endl;
 
-		//cout << "Joint vector: NULL" << endl;
+																									 //cout << "SkelAnimVert vector: NULL" << endl;
+
+																									 //cout << "Joint vector: NULL" << endl;
 
 		cout << "______________________" << endl;
-
 	}
 
 	for (int i = 0; i < mainHeader.materialCount; i++)
 	{
 		cout << "Material: " << i << endl;
-		
+
 		cout << "Material vector: " << endl;
 
 		cout << "\t";
@@ -1616,9 +1616,139 @@ void FbxImport::WriteToBinary()
 		cout << "Allocated memory for " << mainHeader.materialCount << " materials" << endl;
 
 		outfile.write((const char*)&materialList[i], sizeof(sMaterial) * mainHeader.materialCount);//				Information av hur många material som senare kommer att komma, samt hur mycket minne den inten som berättar detta tar upp.
-		
+
 		cout << "______________________" << endl;
-	}	
+	}
+
+	outfile.close();
+
+
+	//Read from binary
+
+
+	std::ifstream infile("testBin.bin", std::ifstream::binary);//		Öppnar filen vi nyss skapade men ska nu läsa istället
+
+
+	cout << ">>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<" << "\n" << "\n" << endl;
+	cout << "Binary Reader" << endl;
+	cout << "\n" << endl;
+
+
+	infile.read((char*)&read_mainHeader, sizeof(sMainHeader));//				Information av hur många meshes som senare kommer att komma, och efter det hur många material osv, samt hur mycket minne den inten som berättar detta tar upp (reservation för vår header)
+	cout << "______________________" << endl;
+	cout << "Main Header" << endl;
+	cout << "meshCount:" << read_mainHeader.meshCount << endl;
+	cout << "materialCount:" << read_mainHeader.materialCount << endl;
+	cout << "______________________" << endl;
+	//cout << mainHeader.lightCount << endl;
+	//cout << mainHeader.cameraCount << endl;
+
+
+	for (int i = 0; i < read_mainHeader.meshCount; i++)
+	{
+		cout << "Mesh: " << i << endl;
+
+		read_meshList.resize(read_mainHeader.meshCount);
+
+		infile.read((char*)&read_meshList[i], sizeof(sMesh));//													Information av hur många vertices som senare kommer att komma, och efter det hur många skelAnim verticear som kommer komma osv, samt hur mycket minne den inten som berättar detta tar upp(reservation för vår header).En int kommer först, den har värdet 100.  Och den inten kommer ta upp 4 bytes.
+
+		cout << "Mesh vector: " << endl;
+
+		cout << "\t";
+		cout << "xyz: ";
+		cout << read_meshList[i].translate[0];
+		cout << read_meshList[i].translate[1];
+		cout << read_meshList[i].translate[2] << endl;
+
+		cout << "\t";
+		cout << "rot: ";
+		cout << read_meshList[i].rotation[0];
+		cout << read_meshList[i].rotation[1];
+		cout << read_meshList[i].rotation[2] << endl;
+
+		cout << "\t";
+		cout << "scale: ";
+		cout << read_meshList[i].scale[0];
+		cout << read_meshList[i].scale[1];
+		cout << read_meshList[i].scale[2] << endl;
+
+		cout << "\t";
+		cout << "Vertex Count: ";
+		cout << read_meshList[i].vertexCount << endl;
+		//cout << "SkelAnimVert Count: 0" << endl;
+		//cout << "Joint Count: 0"  << endl;
+
+		cout << "\t";
+		cout << "Material ID: ";
+		cout << read_meshList[i].materialID << endl;
+		//												detta är storleken av innehållet i vList.data()
+
+		cout << "\n";
+		cout << "Vertex vector: " << endl;
+
+		cout << "\t";
+		cout << read_meshList[i].vList.data() << endl;
+
+		cout << "\t";
+		cout << "Allocated memory for " << read_meshList[i].vertexCount << " vertices" << endl;
+
+
+		read_meshList[i].vList.resize(read_meshList[i].vertexCount);
+
+		infile.read((char*)read_meshList[i].vList.data(), sizeof(sVertex) * read_meshList[i].vertexCount);//				Skriver ut alla vertices i får vArray, pos, nor, rgba 100 gånger. Och minnet 100 Vertices tar upp.
+
+																										  //cout << "SkelAnimVert vector: NULL" << endl;
+
+																										  //cout << "Joint vector: NULL" << endl;
+
+		cout << "______________________" << endl;
+	}
+
+	read_materialList.resize(read_mainHeader.materialCount);
+
+	for (int i = 0; i < read_mainHeader.materialCount; i++)
+	{
+		cout << "Material: " << i << endl;
+
+		cout << "Material vector: " << endl;
+
+		cout << "\t";
+		cout << &read_materialList[i] << endl;
+
+		cout << "\t";
+		cout << "Allocated memory for " << read_mainHeader.materialCount << " materials" << endl;
+
+		infile.read((char*)&read_materialList[i], sizeof(sMaterial) * read_mainHeader.materialCount);//				Information av hur många material som senare kommer att komma, samt hur mycket minne den inten som berättar detta tar upp.
+
+		cout << "______________________" << endl;
+	}
+
+
+	infile.close();
+
+	for (int i = 0; i < read_mainHeader.meshCount; i++)
+	{
+		int result = memcmp(read_meshList[i].vList.data(), mList[i].vList.data(), sizeof(read_sVertex) * meshList[i].vertexCount);
+
+		bool equal = true;
+
+		for (int v = 0; v < meshList[i].vertexCount; v++)//							Här jämför vi listan vi hade när vi SKREV ner med listan vi fyller när vi LÄSER in för att se om de är lika
+		{//																	Vi kollar bara position och stegar xyz efter xyz efter xyz
+			read_meshList[i].vList[v].vertexPos[0];
+
+			if (!EQUAL(mList[i].vList[v].vertexPos[0], read_meshList[i].vList[v].vertexPos[0]) ||
+				!EQUAL(mList[i].vList[v].vertexPos[1], read_meshList[i].vList[v].vertexPos[1]) ||
+				!EQUAL(mList[i].vList[v].vertexPos[2], read_meshList[i].vList[v].vertexPos[2]))
+			{
+				equal = false;//											Så fort den finner att någon utav dessa xyzan inte är lika så sätts vår equal bool till false. Standard för den är true
+				break;
+			}
+		}
+
+		std::cout << "Streams positions are equal: " << equal << std::endl;// Om vArray.pos var samma som vArray_read.pos	
+		std::cout << "Memory compare are equal: " << (result == 0) << std::endl;// Om memory compare på dessa listor var samma
+	}
+
 }
 
 
