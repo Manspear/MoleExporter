@@ -4,7 +4,7 @@ using namespace std;
 int main()
 {
 	FbxImport fbx;
-	fbx.initializeImporter("Models/smoothDisabled.fbx");
+	fbx.initializeImporter("Models/softPlane.fbx");
 	
 	fbx.WriteToBinary();
 

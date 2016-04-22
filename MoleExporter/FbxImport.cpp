@@ -7,14 +7,50 @@ FbxImport::~FbxImport()
 
 bool FbxImport::determineIfIndexed(FbxMesh * inputMesh)
 {
+	return false;
+
 	bool isIndexed = false;
 	FbxGeometryElementNormal* normalElement = inputMesh->GetElementNormal();
 	if (normalElement->GetMappingMode() == FbxGeometryElement::eByControlPoint)
 	{
+		int normalCount = normalElement->GetDirectArray().GetCount();
+		int normalIndexCount = normalElement->GetIndexArray().GetCount();
+
 		int tangentCount = inputMesh->GetElementTangentCount();
+		if (tangentCount == 0)
+		{
+			FbxStringList UVSetNameList;
+			inputMesh->GetUVSetNames(UVSetNameList);
+			for (int setIndex = 0; setIndex < UVSetNameList.GetCount(); setIndex++)
+			{
+				const char* UVSetName = UVSetNameList.GetStringAt(setIndex);
+				const FbxGeometryElementUV* UVElement = inputMesh->GetElementUV(UVSetName);
+
+				int cpCount = inputMesh->GetControlPointsCount();
+				int UVCount = UVElement->GetDirectArray().GetCount();
+				int UVIndexCount = UVElement->GetIndexArray().GetCount();
+
+				if (cpCount == UVCount && UVIndexCount > UVCount)
+				{
+					isIndexed = true;
+					return isIndexed;
+				}
+
+				/*if (UVElement->GetMappingMode() == FbxGeometryElement::eByControlPoint)
+				{
+					isIndexed = true;
+				}*/
+				break;
+			}
+		}
+
 		for (int i = 0; i < tangentCount; i++)
 		{
 			FbxGeometryElementTangent* tangentElement = inputMesh->GetElementTangent(i);
+			int cpCount = inputMesh->GetControlPointsCount();
+			int tangentCount = tangentElement->GetDirectArray().GetCount();
+			int tangentIndexCount = tangentElement->GetIndexArray().GetCount();
+
 			if (tangentElement->GetMappingMode() == FbxGeometryElement::eByControlPoint)
 			{
 				int biTangentCount = inputMesh->GetElementBinormalCount();
@@ -29,6 +65,15 @@ bool FbxImport::determineIfIndexed(FbxMesh * inputMesh)
 						{
 							const char* UVSetName = UVSetNameList.GetStringAt(setIndex);
 							const FbxGeometryElementUV* UVElement = inputMesh->GetElementUV(UVSetName);
+
+							int cpCount = inputMesh->GetControlPointsCount();
+							int UVCount = UVElement->GetDirectArray().GetCount();
+							int UVIndexCount = UVElement->GetIndexArray().GetCount();
+
+							if (cpCount == UVCount && UVIndexCount > UVCount)
+							{
+								isIndexed = true;
+							}
 
 							if (UVElement->GetMappingMode() == FbxGeometryElement::eByControlPoint)
 							{
@@ -239,6 +284,7 @@ void FbxImport::processMesh(FbxMesh * inputMesh)
 void FbxImport::processVertices(FbxMesh * inputMesh)
 {
 	//Calls a function to see if indexation is worthwhile
+	//For the moment it is not.
 	importMeshData.isIndexed = determineIfIndexed(inputMesh);
 
 	/*Array of the control points of mesh.*/
@@ -268,6 +314,20 @@ void FbxImport::processVertices(FbxMesh * inputMesh)
 		else
 		{
 			importMeshData.isAnimated = false;
+			//First get the control-point-vertices
+			const unsigned int controlPointCount = inputMesh->GetControlPointsCount();
+			for (unsigned int cpCounter = 0; cpCounter < controlPointCount; cpCounter++)
+			{
+				sVertex vertex;
+
+				vertex.vertexPos[0] = vertices[cpCounter].mData[0];
+				vertex.vertexPos[1] = vertices[cpCounter].mData[1];
+				vertex.vertexPos[2] = vertices[cpCounter].mData[2];
+
+				importMeshData.mVertexList.push_back(vertex);
+			}
+			//Then get the indices
+			processIndices(inputMesh);
 		}
 	}
 
@@ -660,6 +720,9 @@ void FbxImport::processUVs(FbxMesh * inputMesh)
 
 		const int polyCount = inputMesh->GetPolygonCount(); //Get the polygon count of mesh.
 
+		int wololo = UVElement->GetDirectArray().GetCount();
+		int kekek = UVElement->GetIndexArray().GetCount();
+		int koala = 5;
 															/*If the mapping mode is "eByControlPoint".*/
 		if (UVElement->GetMappingMode() == FbxGeometryElement::eByControlPoint)
 		{
@@ -865,6 +928,8 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 			FbxNode* currJoint = currCluster->GetLink();
 			FbxAnimEvaluator* animationEvaluator = currJoint->GetAnimationEvaluator();
 
+			FbxAMatrix bindposeTransform = currJoint->EvaluateGlobalTransform();
+
 			int currJointIndex = findJointIndexByName(currJoint->GetName());
 			//pmSceneJoints[currJointIndex];
 
@@ -874,6 +939,8 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 			currCluster->GetTransformMatrix(tempParentBindMatrix);
 			currCluster->GetTransformLinkMatrix(tempBindMatrix);
 			
+
+
 			FbxAMatrix tempGlobalBindPoseInverse;
 			tempGlobalBindPoseInverse = tempBindMatrix * tempParentBindMatrix;
 			tempGlobalBindPoseInverse = tempGlobalBindPoseInverse.Inverse();
