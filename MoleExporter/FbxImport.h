@@ -57,8 +57,11 @@ public:
 		float translate[3];
 		float rotation[3];
 		float scale[3];
-
+		
 		bool isAnimated;
+		bool isIndexed;
+
+		vector<int> mIndexList;
 		vector<sVertex> mVertexList;
 		vector<sSkelAnimVertex> mSkelVertexList;
 		std::vector<sImportJointData> jointList;
@@ -154,6 +157,8 @@ private:
 
 	bool firstProcess;
 
+	bool determineIfIndexed(FbxMesh* inputMesh);
+	void processIndices(FbxMesh* inputMesh);
 	void processJointHierarchy(FbxNode* inputRoot);
 	void recursiveJointHierarchyTraversal(FbxNode* inNode, int currIndex, int inNodeParentIndex);
 	unsigned int findJointIndexByName(const char* jointName);

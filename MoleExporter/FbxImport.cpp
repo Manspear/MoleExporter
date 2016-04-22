@@ -5,6 +5,62 @@ FbxImport::~FbxImport()
 {
 }
 
+bool FbxImport::determineIfIndexed(FbxMesh * inputMesh)
+{
+	bool isIndexed = false;
+	FbxGeometryElementNormal* normalElement = inputMesh->GetElementNormal();
+	if (normalElement->GetMappingMode() == FbxGeometryElement::eByControlPoint)
+	{
+		int tangentCount = inputMesh->GetElementTangentCount();
+		for (int i = 0; i < tangentCount; i++)
+		{
+			FbxGeometryElementTangent* tangentElement = inputMesh->GetElementTangent(i);
+			if (tangentElement->GetMappingMode() == FbxGeometryElement::eByControlPoint)
+			{
+				int biTangentCount = inputMesh->GetElementBinormalCount();
+				for (int biIndex = 0; biIndex < biTangentCount; biIndex++)
+				{
+					FbxGeometryElementBinormal* biElement = inputMesh->GetElementBinormal(biIndex);
+					if (biElement->GetMappingMode() == FbxGeometryElement::eByControlPoint)
+					{
+						FbxStringList UVSetNameList;
+						inputMesh->GetUVSetNames(UVSetNameList);
+						for (int setIndex = 0; setIndex < UVSetNameList.GetCount(); setIndex++)
+						{
+							const char* UVSetName = UVSetNameList.GetStringAt(setIndex);
+							const FbxGeometryElementUV* UVElement = inputMesh->GetElementUV(UVSetName);
+
+							if (UVElement->GetMappingMode() == FbxGeometryElement::eByControlPoint)
+							{
+								isIndexed = true;
+							}
+							break;
+						}
+					}
+					break;
+				}
+			}
+			break;
+		}
+	}
+
+	return isIndexed;
+}
+
+void FbxImport::processIndices(FbxMesh * inputMesh)
+{
+	for (unsigned int polyCounter = 0; polyCounter < inputMesh->GetPolygonCount(); polyCounter++)
+	{
+		const unsigned int polySize = inputMesh->GetPolygonSize(polyCounter);
+		assert(polySize == 3 && "The size of polygon nr: %d is not 3.", polyCounter);
+		for (unsigned int polyCorner = 0; polyCorner < 3; polyCorner++)
+		{
+			const unsigned int index = inputMesh->GetPolygonVertex(polyCounter, polyCorner);
+			importMeshData.mIndexList.push_back(index);
+		}
+	}
+}
+
 void FbxImport::processJointHierarchy(FbxNode * inputRoot)
 {
 	for (int childIndex = 0; childIndex < inputRoot->GetChildCount(); ++childIndex) {
@@ -182,91 +238,108 @@ void FbxImport::processMesh(FbxMesh * inputMesh)
 
 void FbxImport::processVertices(FbxMesh * inputMesh)
 {
+	//Calls a function to see if indexation is worthwhile
+	importMeshData.isIndexed = determineIfIndexed(inputMesh);
+
 	/*Array of the control points of mesh.*/
 	FbxVector4* vertices = inputMesh->GetControlPoints();
 
-		//Erm... Is it a good idéa to have "normal buffer", "tangent buffer", "UV Buffer" and "position buffer" ? 
-		//Not really. Takes alot of time for the GPU to "skip" the unused memory when taking indexed elements. 
-		//So we'll go with "sometimes indexed"? Sure. I'll just have to make sure that it's sometimes indexed. 
-		//Consult with the .obj format maybe? They've got some cool idéas.
-
-		//Ok. There's no performance gain to be had from having several separate buffers holding vertex data.
-		//So when one thing ain't "per control point", no thing is "per control point". 
-		//Then later, when you frustum-quadtree-cull stuff, you should sort meshes based on "isIndexed". 
-		//Soft edge meshes will be inside one vertex and index buffer. Hard edge meshes need no indexing, since all
-		//vertices will have unique normals. 
-
-		//All of those things can have differing mappingmodes.
-		
-	
-	//Hmm... For indexing, you have a small list of vertices containing values, and a large list of indices pointing toward the verticelist.
-	//But how till indexing ever be possible if ANYTHING uses eIndexByControlPoint?
-
-	unsigned int deformerCount = inputMesh->GetDeformerCount(FbxDeformer::eSkin);
-	if (deformerCount > 0)
+	if (importMeshData.isIndexed)
 	{
-		importMeshData.isAnimated = true;
-		for (int i = 0; i < inputMesh->GetPolygonCount(); i++)
+		unsigned int deformerCount = inputMesh->GetDeformerCount(FbxDeformer::eSkin);
+		if (deformerCount > 0)
 		{
-			/*Getting vertices of a polygon in the mesh.*/
-			int numPolygonVertices = inputMesh->GetPolygonSize(i);
-
-			/*If the mesh is not triangulated, meaning that there are quads in the mesh,
-			then the program should abort, terminating the process.*/
-			assert(numPolygonVertices == 3);
-
-			for (int j = 0; j < numPolygonVertices; j++)
+			importMeshData.isAnimated = true;
+			//First get the control-point-vertices
+			const unsigned int controlPointCount = inputMesh->GetControlPointsCount();
+			for (unsigned int cpCounter = 0; cpCounter < controlPointCount; cpCounter++)
 			{
 				sSkelAnimVertex animVertex;
-
-				/*Getting the index to a control point "vertex".*/
-				int polygonVertex = inputMesh->GetPolygonVertex(i, j);
-
-				//Set influences to -1337 so that we know which index ain't set yet.
-				for (int c = 0; c < 4; c++) {
-					animVertex.influences[c] = -1337;
-					animVertex.weights[c] = 0.0;
-				}
-
-				animVertex.vertexPos[0] = (float)vertices[polygonVertex].mData[0];
-				animVertex.vertexPos[1] = (float)vertices[polygonVertex].mData[1];
-				animVertex.vertexPos[2] = (float)vertices[polygonVertex].mData[2];
-
-				std::cout << "\n" << "Position: " << (float)vertices[polygonVertex].mData[0] << " " <<
-												   	 (float)vertices[polygonVertex].mData[1] << " " <<
-												   	 (float)vertices[polygonVertex].mData[1] << "\n";
+				
+				animVertex.vertexPos[0] = vertices[cpCounter].mData[0];
+				animVertex.vertexPos[1] = vertices[cpCounter].mData[1];
+				animVertex.vertexPos[2] = vertices[cpCounter].mData[2];
 
 				importMeshData.mSkelVertexList.push_back(animVertex);
 			}
+			//Then get the indices
+			processIndices(inputMesh);
+		}
+		else
+		{
+			importMeshData.isAnimated = false;
 		}
 	}
-	else
+
+	if (!importMeshData.isIndexed)
 	{
-		importMeshData.isAnimated = false;
-		for (int i = 0; i < inputMesh->GetPolygonCount(); i++)
+
+		unsigned int deformerCount = inputMesh->GetDeformerCount(FbxDeformer::eSkin);
+		if (deformerCount > 0)
 		{
-			/*Getting vertices of a polygon in the mesh.*/
-			int numPolygonVertices = inputMesh->GetPolygonSize(i);
-
-			/*If the mesh is not triangulated, meaning that there are quads in the mesh,
-			then the program should abort, terminating the process.*/
-			assert(numPolygonVertices == 3);
-
-			for (int j = 0; j < numPolygonVertices; j++)
+			importMeshData.isAnimated = true;
+			for (int i = 0; i < inputMesh->GetPolygonCount(); i++)
 			{
-				sVertex vertex;
-				/*Getting the index to a control point "vertex".*/
-				int polygonVertex = inputMesh->GetPolygonVertex(i, j);
+				/*Getting vertices of a polygon in the mesh.*/
+				int numPolygonVertices = inputMesh->GetPolygonSize(i);
 
-				vertex.vertexPos[0] = (float)vertices[polygonVertex].mData[0];
-				vertex.vertexPos[1] = (float)vertices[polygonVertex].mData[1];
-				vertex.vertexPos[2] = (float)vertices[polygonVertex].mData[2];
+				/*If the mesh is not triangulated, meaning that there are quads in the mesh,
+				then the program should abort, terminating the process.*/
+				assert(numPolygonVertices == 3);
 
-				std::cout << "\n" << "Position: " << (float)vertices[polygonVertex].mData[0] << " " <<
-													 (float)vertices[polygonVertex].mData[1] << " " <<
-													 (float)vertices[polygonVertex].mData[1] << "\n";
+				for (int j = 0; j < numPolygonVertices; j++)
+				{
+					sSkelAnimVertex animVertex;
 
-				importMeshData.mVertexList.push_back(vertex);
+					/*Getting the index to a control point "vertex".*/
+					int polygonVertex = inputMesh->GetPolygonVertex(i, j);
+
+					//Set influences to -1337 so that we know which index ain't set yet.
+					for (int c = 0; c < 4; c++) {
+						animVertex.influences[c] = -1337;
+						animVertex.weights[c] = 0.0;
+					}
+
+					animVertex.vertexPos[0] = (float)vertices[polygonVertex].mData[0];
+					animVertex.vertexPos[1] = (float)vertices[polygonVertex].mData[1];
+					animVertex.vertexPos[2] = (float)vertices[polygonVertex].mData[2];
+
+					std::cout << "\n" << "Position: " << (float)vertices[polygonVertex].mData[0] << " " <<
+						(float)vertices[polygonVertex].mData[1] << " " <<
+						(float)vertices[polygonVertex].mData[1] << "\n";
+
+					importMeshData.mSkelVertexList.push_back(animVertex);
+				}
+			}
+		}
+		else
+		{
+			importMeshData.isAnimated = false;
+			for (int i = 0; i < inputMesh->GetPolygonCount(); i++)
+			{
+				/*Getting vertices of a polygon in the mesh.*/
+				int numPolygonVertices = inputMesh->GetPolygonSize(i);
+
+				/*If the mesh is not triangulated, meaning that there are quads in the mesh,
+				then the program should abort, terminating the process.*/
+				assert(numPolygonVertices == 3);
+
+				for (int j = 0; j < numPolygonVertices; j++)
+				{
+					sVertex vertex;
+					/*Getting the index to a control point "vertex".*/
+					int polygonVertex = inputMesh->GetPolygonVertex(i, j);
+
+					vertex.vertexPos[0] = (float)vertices[polygonVertex].mData[0];
+					vertex.vertexPos[1] = (float)vertices[polygonVertex].mData[1];
+					vertex.vertexPos[2] = (float)vertices[polygonVertex].mData[2];
+
+					std::cout << "\n" << "Position: " << (float)vertices[polygonVertex].mData[0] << " " <<
+						(float)vertices[polygonVertex].mData[1] << " " <<
+						(float)vertices[polygonVertex].mData[1] << "\n";
+
+					importMeshData.mVertexList.push_back(vertex);
+				}
 			}
 		}
 	}
@@ -412,7 +485,6 @@ void FbxImport::processTangents(FbxMesh * inputMesh)
 						importMeshData.mVertexList.at(vertexIndex).tangentNormal[1] = tangents.mData[1];
 						importMeshData.mVertexList.at(vertexIndex).tangentNormal[2] = tangents.mData[2];
 					}
-
 				}
 
 			}
