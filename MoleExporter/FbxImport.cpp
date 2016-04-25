@@ -929,10 +929,18 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 			FbxNode* currJoint = currCluster->GetLink();
 			FbxAnimEvaluator* animationEvaluator = currJoint->GetAnimationEvaluator();
 
+			//The pos/rot/scale of the joint at bindtime
 			FbxAMatrix bindposeTransform = currJoint->EvaluateGlobalTransform();
 
 			int currJointIndex = findJointIndexByName(currJoint->GetName());
-			//pmSceneJoints[currJointIndex];
+			
+			for (unsigned int x = 0; x < 3; x++)
+			{
+				pmSceneJoints[currJointIndex].pos[x] = bindposeTransform.GetT()[x];
+				pmSceneJoints[currJointIndex].rot[x] = bindposeTransform.GetR()[x];
+				pmSceneJoints[currJointIndex].scale[x] = bindposeTransform.GetS()[x];
+			}
+			
 
 			FbxAMatrix tempBindMatrix;
 			FbxAMatrix tempParentBindMatrix;
