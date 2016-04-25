@@ -20,6 +20,36 @@ public:
 
 	/*Structs*/
 
+	struct sImportKeyFrame
+	{
+		float keyTime;
+		float keyPos[3];
+		float keyRotate[3];
+		float keyScale[3];
+	};
+
+	struct sImportAnimationState
+	{
+		std::vector<sImportKeyFrame> keyList;
+	};
+
+	struct sImportJointData
+	{
+		//Name helps with debugging
+		const char* name;
+
+		int jointID;
+		int parentJointID;
+
+		float pos[3];
+		float rot[3];
+		float scale[3];
+
+		float bindPoseInverse[16];
+		float globalBindPoseInverse[16];
+		std::vector<sImportAnimationState> animationState;
+	};
+
 	struct sImportMeshData
 	{
 		unsigned int materialID;
@@ -28,10 +58,13 @@ public:
 		float rotation[3];
 		float scale[3];
 
+		bool isAnimated;
 		vector<sVertex> mVertexList;
+		vector<sSkelAnimVertex> mSkelVertexList;
+		std::vector<sImportJointData> jointList;
 	};
 
-	struct sImportAnimMeshData
+	/*struct sImportAnimMeshData
 	{
 		unsigned int materialID;
 
@@ -40,6 +73,12 @@ public:
 		float scale[3];
 
 		vector<sSkelAnimVertex> mVertexList;
+	};*/
+
+	struct sBlendData
+	{
+		int jointID, controlPointIndex;
+		float blendingWeight;
 	};
 
 	/*Functions*/
@@ -67,6 +106,8 @@ public:
 
 	bool checkMaterialName(const char* materialName);
 
+	sBlendData* findBlendDataForControlPoint(std::vector<sBlendData>& inputVector, unsigned int controlPointIndex);
+
 	void assignToHeaderData();
 
 	void WriteToBinary();
@@ -75,6 +116,7 @@ public:
 
 	/*Lists*/
 	std::vector<sImportMeshData> mTempMeshList;
+	//want to have mTempMeshList 
 	
 	//**
 	sImportMeshData importMeshData;
@@ -88,6 +130,11 @@ public:
 
 private:
 
+	//Initially filled inside the initlalizeImporter function.
+	//You fill this with the processJointHierarchy-function. You fill this some more in
+	//processJoints. In there you find the "current joint" by using findJointIndexByName()
+	std::vector<sImportJointData> pmSceneJoints;
+
 	FbxNode* pmRootNode;
 	fbxsdk::FbxManager* pmManager;
 	FbxIOSettings* pmSettings;
@@ -100,7 +147,10 @@ private:
 	int lightCounter;
 
 	bool firstProcess;
-};
 
+	void processJointHierarchy(FbxNode* inputRoot);
+	void recursiveJointHierarchyTraversal(FbxNode* inNode, int currIndex, int inNodeParentIndex);
+	unsigned int findJointIndexByName(const char* jointName);
+};
 
 

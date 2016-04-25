@@ -11,6 +11,9 @@
 
 using namespace std;
 
+#define DELTA 0.0001
+#define EQUAL(A,B) (abs((A)-(B)) < DELTA) ? true:false
+
 class FbxImport
 {
 public:
@@ -39,6 +42,12 @@ public:
 		vector<sSkelAnimVertex> mVertexList;
 	};
 
+	struct sBlendData
+	{
+		int jointID, controlPointIndex;
+		float blendingWeight;
+	};
+
 	/*Functions*/
 
 	void initializeImporter(const char* filePath);
@@ -64,50 +73,41 @@ public:
 
 	bool checkMaterialName(const char* materialName);
 
-<<<<<<< HEAD
-	void assignToHeaderData();
-=======
-	void convertFbxMatrixToFloatArray(FbxAMatrix inputMatrix, float inputArray[16]);
+	sBlendData* findBlendDataForControlPoint(std::vector<sBlendData>& inputVector, unsigned int controlPointIndex);
 
-	/*Lists*/
-	std::vector<sTempMesh> mMeshList;
->>>>>>> 4ccefeb8ea899dd448ef440559ae66eb2e3847ef
+	void assignToHeaderData();
 
 	void WriteToBinary();
 
+	void convertFbxMatrixToFloatArray(FbxAMatrix inputMatrix, float inputArray[16]);
+
 	/*Lists*/
 	std::vector<sImportMeshData> mTempMeshList;
-	std::vector<sMesh> mMeshList;
-	std::vector<sMaterial> mMaterialList;
-	std::vector<sDirectionalPoint> mDirPointList;
-	std::vector<sSpotLight> mSpotList;
-	std::vector<sCamera> mCameraList;
+	
+	//**
+	sImportMeshData importMeshData;
+<<<<<<< HEAD
+=======
+
 
 	/*Struct objects*/
-	sMainHeader headerData;
-	sMesh realMeshData;
-	sImportMeshData meshData;
-	sVertex vertexData;
+	sMainHeader mainHeader;
+	sVertex vertex;
+>>>>>>> 3a1961b32dfa0267b1238d943017eb4adb67c80e
 	sMaterial materialData;
 	sLight lightData;
 	sDirectionalPoint dirPointData;
 	sSpotLight spotData;
 	sCamera camData;
 
-	/*Pointer to memory arrays where the vector store its owned elements*/
-	sVertex *vertexArray;
-	sMaterial *materialArray;
-	sDirectionalPoint *dirPointArray;
-	sSpotLight *spotlightArray;
-	sCamera *cameraArray;
-
 	/*Constructor and destructor*/
 	FbxImport();
 	~FbxImport();
 
 private:
+
 	FbxNode* pmRootNode;
-	FbxManager* pmManager;
+	fbxsdk::FbxManager* pmManager;
 	FbxIOSettings* pmSettings;
 	FbxScene* pmScene;
 

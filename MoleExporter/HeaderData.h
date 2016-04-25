@@ -47,9 +47,40 @@ struct sSkelAnimVertex
 	float vertexUV[2];
 	float tangentNormal[3];
 	float biTangentNormal[3];
-	float influences[4];
+
+	/*Set to -1337 in FbxImport::processVertices(FbxMesh * inputMesh)
+	to say "this is not a set value"*/
+	int influences[4];
 	float weights[4];
 };
+
+struct sJoint
+{
+	int jointID;
+	int parentJointID;
+
+	float pos[3];
+	float rot[3];
+	float scale[3];
+
+	float bindPoseInverse[16];
+	float globalBindPoseInverse[16];
+	int animationStateCount;
+};
+
+struct sAnimationState
+{
+	int keyFrames;
+};
+
+struct sKeyFrame
+{
+	float keyTime;
+	float keyScale;
+	float keyRotate[3];
+};
+
+
 
 struct sMaterial
 {
