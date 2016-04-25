@@ -37,6 +37,8 @@ public:
 	{
 		//Name helps with debugging
 		const char* name;
+		const char* bboxMeshName;
+		int bBoxID;
 
 		int jointID;
 		int parentJointID;
@@ -52,13 +54,20 @@ public:
 
 	struct sImportMeshData
 	{
+		const char* meshName; //The meshname is used for finding bboxmeshes. Use a function like "findMeshIDByName" when all of the meshi are processed.
+		unsigned int meshID; //The "order that the meshes are read" is the mesh ID. 0-based.
+
 		unsigned int materialID;
 
 		float translate[3];
 		float rotation[3];
 		float scale[3];
-
+		
+		bool isBoundingBox;
 		bool isAnimated;
+		bool isIndexed;
+
+		vector<int> mIndexList;
 		vector<sVertex> mVertexList;
 		vector<sSkelAnimVertex> mSkelVertexList;
 		std::vector<sImportJointData> jointList;
@@ -92,7 +101,12 @@ public:
 	void processBiTangents(FbxMesh* inputMesh);
 	void processUVs(FbxMesh* inputMesh);
 	void processMaterials(FbxMesh* inputMesh);
+	/**
+	Looks puts jointdata from Fbx and std::vector<sImportJointData> pmSceneJoints;
+	into the current-mesh-struct.
+	**/
 	void processJoints(FbxMesh* inputMesh);
+	void processBoundingBoxes();
 
 	void processTextures(FbxMesh* inputMesh);
 	void processDiffuseMaps(FbxProperty inputProp);
@@ -115,6 +129,8 @@ public:
 	void readFromBinary();
 
 	void convertFbxMatrixToFloatArray(FbxAMatrix inputMatrix, float inputArray[16]);
+
+	
 
 	/*Lists*/
 	std::vector<sImportMeshData> mTempMeshList;
@@ -149,10 +165,36 @@ private:
 	int lightCounter;
 
 	bool firstProcess;
-
+	/**
+	FUNCTION DEVELOPMENT ON HOLD - Indexing an FBX-file takes up too much time.
+	Goes through mappingmodes for pos, nor, tangent, bitangent and uv.
+	For UV, mappingmode is not functional, so a logical solution is made
+	**/
+	bool determineIfIndexed(FbxMesh* inputMesh);
+	/** 
+	If the model is indexed, result gotten from determineIfIndexed(FbxMesh* inputMesh)
+	Loop through each vertex, for each polygon, and query it's index from FBX. 
+	Indices are put into the sImportMeshData::mIndexData - vector. 
+	**/
+	void processIndices(FbxMesh* inputMesh);
+	/**
+	A function that loops through all of the child-Nodes of the FbxScene-root-node.
+	Each child is sent into void recursiveJointHierarchyTraversal(FbxNode* inNode, int currIndex, int inNodeParentIndex)
+	**/
 	void processJointHierarchy(FbxNode* inputRoot);
+	/**
+	A function called upon by void processJointHierarchy(FbxNode* inputRoot).
+	It checks if the attribute of the incoming FbxNode is FbxNodeAttribute::eSkeleton
+	If it is, relationship-data of that joint is pushed into the "all-joints-in-scene-vector"
+	called std::vector<sImportJointData> pmSceneJoints
+	**/
 	void recursiveJointHierarchyTraversal(FbxNode* inNode, int currIndex, int inNodeParentIndex);
+	/**
+	Looks through the std::vector<sImportJointData> pmSceneJoints vector for a name matching the 
+	input parameter jointName.
+	**/
 	unsigned int findJointIndexByName(const char* jointName);
+	void findBBoxByName(const char* bBoxName, int meshIndex, int jointIndex);
 };
 
 

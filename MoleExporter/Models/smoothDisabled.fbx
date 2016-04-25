@@ -11,10 +11,10 @@ FBXHeaderExtension:  {
 		Year: 2016
 		Month: 4
 		Day: 22
-		Hour: 16
-		Minute: 2
-		Second: 59
-		Millisecond: 358
+		Hour: 14
+		Minute: 1
+		Second: 47
+		Millisecond: 369
 	}
 	Creator: "FBX SDK/FBX Plugins version 2016.0"
 	SceneInfo: "SceneInfo::GlobalInfo", "UserData" {
@@ -30,19 +30,19 @@ FBXHeaderExtension:  {
 			Comment: ""
 		}
 		Properties70:  {
-			P: "DocumentUrl", "KString", "Url", "", "C:\Users\Dator\Documents\MoleExporter\MoleExporter\MoleExporter\Models\softPlane.fbx"
-			P: "SrcDocumentUrl", "KString", "Url", "", "C:\Users\Dator\Documents\MoleExporter\MoleExporter\MoleExporter\Models\softPlane.fbx"
+			P: "DocumentUrl", "KString", "Url", "", "C:\Users\Dator\Documents\MoleExporter\MoleExporter\MoleExporter\Models\smoothDisabled.fbx"
+			P: "SrcDocumentUrl", "KString", "Url", "", "C:\Users\Dator\Documents\MoleExporter\MoleExporter\MoleExporter\Models\smoothDisabled.fbx"
 			P: "Original", "Compound", "", ""
 			P: "Original|ApplicationVendor", "KString", "", "", "Autodesk"
 			P: "Original|ApplicationName", "KString", "", "", "Maya"
 			P: "Original|ApplicationVersion", "KString", "", "", "2016"
-			P: "Original|DateTime_GMT", "DateTime", "", "", "22/04/2016 14:02:59.356"
-			P: "Original|FileName", "KString", "", "", "C:/Users/Dator/Documents/MoleExporter/MoleExporter/MoleExporter/Models/softPlane.fbx"
+			P: "Original|DateTime_GMT", "DateTime", "", "", "22/04/2016 12:01:47.366"
+			P: "Original|FileName", "KString", "", "", "C:/Users/Dator/Documents/MoleExporter/MoleExporter/MoleExporter/Models/smoothDisabled.fbx"
 			P: "LastSaved", "Compound", "", ""
 			P: "LastSaved|ApplicationVendor", "KString", "", "", "Autodesk"
 			P: "LastSaved|ApplicationName", "KString", "", "", "Maya"
 			P: "LastSaved|ApplicationVersion", "KString", "", "", "2016"
-			P: "LastSaved|DateTime_GMT", "DateTime", "", "", "22/04/2016 14:02:59.356"
+			P: "LastSaved|DateTime_GMT", "DateTime", "", "", "22/04/2016 12:01:47.366"
 		}
 	}
 }
@@ -77,7 +77,7 @@ GlobalSettings:  {
 
 Documents:  {
 	Count: 1
-	Document: 1405225480880, "", "Scene" {
+	Document: 1405158443664, "", "Scene" {
 		Properties70:  {
 			P: "SourceObject", "object", "", ""
 			P: "ActiveAnimStackName", "KString", "", "", "Take 001"
@@ -250,7 +250,7 @@ Definitions:  {
 ;------------------------------------------------------------------
 
 Objects:  {
-	Geometry: 1405158384480, "Geometry::", "Mesh" {
+	Geometry: 1404879136384, "Geometry::", "Mesh" {
 		Vertices: *12 {
 			a: -0.5,-0.323471814393997,0.5,0.5,-1.11022302462516e-016,0.5,-0.5,1.11022302462516e-016,-0.5,0.5,1.11022302462516e-016,-0.5
 		} 
@@ -356,7 +356,7 @@ Objects:  {
 			}
 		}
 	}
-	Model: 1405222434512, "Model::pPlane1", "Mesh" {
+	Model: 1405222422912, "Model::pPlane1", "Mesh" {
 		Version: 232
 		Properties70:  {
 			P: "RotationActive", "bool", "", "",1
@@ -369,7 +369,7 @@ Objects:  {
 		Shading: T
 		Culling: "CullingOff"
 	}
-	Material: 1405223466528, "Material::lambert1", "" {
+	Material: 1405143563056, "Material::lambert1", "" {
 		Version: 102
 		ShadingModel: "lambert"
 		MultiLayer: 0
@@ -384,7 +384,7 @@ Objects:  {
 			P: "Opacity", "double", "Number", "",1
 		}
 	}
-	AnimationStack: 1405158613984, "AnimStack::Take 001", "" {
+	AnimationStack: 1405158701760, "AnimStack::Take 001", "" {
 		Properties70:  {
 			P: "LocalStart", "KTime", "Time", "",1924423250
 			P: "LocalStop", "KTime", "Time", "",230930790000
@@ -392,7 +392,7 @@ Objects:  {
 			P: "ReferenceStop", "KTime", "Time", "",230930790000
 		}
 	}
-	AnimationLayer: 1405290538400, "AnimLayer::BaseLayer", "" {
+	AnimationLayer: 1405149032352, "AnimLayer::BaseLayer", "" {
 	}
 }
 
@@ -402,16 +402,16 @@ Objects:  {
 Connections:  {
 	
 	;Model::pPlane1, Model::RootNode
-	C: "OO",1405222434512,0
+	C: "OO",1405222422912,0
 	
 	;AnimLayer::BaseLayer, AnimStack::Take 001
-	C: "OO",1405290538400,1405158613984
+	C: "OO",1405149032352,1405158701760
 	
 	;Geometry::, Model::pPlane1
-	C: "OO",1405158384480,1405222434512
+	C: "OO",1404879136384,1405222422912
 	
 	;Material::lambert1, Model::pPlane1
-	C: "OO",1405223466528,1405222434512
+	C: "OO",1405143563056,1405222422912
 }
 ;Takes section
 ;----------------------------------------------------
