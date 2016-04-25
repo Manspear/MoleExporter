@@ -286,7 +286,9 @@ void FbxImport::initializeImporter(const char* filePath)
 			/*headerData.cameraCount = mCameraList.size();*/
 		}
 	}
+	//---------------------------------------------------------
 	//Second pass to get the mesh-bbox-children into the vector
+	//---------------------------------------------------------
 	for (int childIndex = 0; childIndex < pmRootNode->GetChildCount(); childIndex++)
 	{
 		FbxNode* childNode = pmRootNode->GetChild(childIndex);
@@ -334,7 +336,6 @@ void FbxImport::initializeImporter(const char* filePath)
 					}
 				}
 			}
-			//processMesh();
 		}
 
 
