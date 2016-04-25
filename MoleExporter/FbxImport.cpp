@@ -1583,7 +1583,6 @@ void FbxImport::convertFbxMatrixToFloatArray(FbxAMatrix inputMatrix, float input
 		}
 	}
 }
-
 void FbxImport::WriteToBinary()
 {
 	cout << ">>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<" << "\n" << "\n" << endl;
@@ -1598,6 +1597,7 @@ void FbxImport::WriteToBinary()
 	cout << "Main Header" << endl;
 	cout << "meshCount:" << mainHeader.meshCount << endl;
 	cout << "materialCount:" << mainHeader.materialCount << endl;
+	cout << "lightCount:" << mainHeader.lightCount << endl;
 	cout << "______________________" << endl;
 	//cout << mainHeader.lightCount << endl;
 	//cout << mainHeader.cameraCount << endl;
@@ -1675,8 +1675,20 @@ void FbxImport::WriteToBinary()
 		cout << "______________________" << endl;
 	}
 
+	for (int i = 0; i < mainHeader.lightCount; i++)
+	{
+
+		cout << "Light: " << i << endl;
+
+		cout << "Light vector: " << endl;
+
+		cout << "\t";
+
+	}
+
+
 	outfile.close();
-	
+
 }
 
 void FbxImport::readFromBinary()
@@ -1764,46 +1776,6 @@ void FbxImport::readFromBinary()
 																											//cout << "Joint vector: NULL" << endl;
 
 		cout << "______________________" << endl;
-
-		cout << "Material vector: " << endl;
-
-		cout << "\t";
-		cout << &read_materialList[i] << endl;
-
-		cout << "\t";
-		cout << "Allocated memory for " << read_mainHeader.materialCount << " materials" << endl;
-
-		infile.read((char*)&read_materialList[i], sizeof(sMaterial) * read_mainHeader.materialCount);//				Information av hur många material som senare kommer att komma, samt hur mycket minne den inten som berättar detta tar upp.
-
-		cout << "______________________" << endl;
-	}
-
-
-	infile.close();
-
-	for (int i = 0; i < read_mainHeader.meshCount; i++)
-	{
-		int result = memcmp(read_meshList[i].vList.data(), mList[i].vList.data(), sizeof(read_sVertex) * meshList[i].vertexCount);
-
-		bool equal = true;
-
-		for (int v = 0; v < meshList[i].vertexCount; v++)//							Här jämför vi listan vi hade när vi SKREV ner med listan vi fyller när vi LÄSER in för att se om de är lika
-		{//																	Vi kollar bara position och stegar xyz efter xyz efter xyz
-			read_meshList[i].vList[v].vertexPos[0];
-
-			if (!EQUAL(mList[i].vList[v].vertexPos[0], read_meshList[i].vList[v].vertexPos[0]) ||
-				!EQUAL(mList[i].vList[v].vertexPos[1], read_meshList[i].vList[v].vertexPos[1]) ||
-				!EQUAL(mList[i].vList[v].vertexPos[2], read_meshList[i].vList[v].vertexPos[2]))
-			{
-				equal = false;//											Så fort den finner att någon utav dessa xyzan inte är lika så sätts vår equal bool till false. Standard för den är true
-				break;
-			}
-		}
-
-		std::cout << "Streams positions are equal: " << equal << std::endl;// Om vArray.pos var samma som vArray_read.pos	
-		std::cout << "Memory compare are equal: " << (result == 0) << std::endl;// Om memory compare på dessa listor var samma
-	}
-
 	}
 
 	read_materialList.resize(read_mainHeader.materialCount);
