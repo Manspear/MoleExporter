@@ -37,6 +37,7 @@ public:
 	{
 		//Name helps with debugging
 		const char* name;
+		const char* bboxMeshName;
 
 		int jointID;
 		int parentJointID;
@@ -52,12 +53,16 @@ public:
 
 	struct sImportMeshData
 	{
+		const char* meshName; //The meshname is used for finding bboxmeshes. Use a function like "findMeshIDByName" when all of the meshi are processed.
+		unsigned int meshID; //The "order that the meshes are read" is the mesh ID. 0-based.
+
 		unsigned int materialID;
 
 		float translate[3];
 		float rotation[3];
 		float scale[3];
 		
+		bool isBoundingBox;
 		bool isAnimated;
 		bool isIndexed;
 
@@ -100,6 +105,7 @@ public:
 	into the current-mesh-struct.
 	**/
 	void processJoints(FbxMesh* inputMesh);
+	void processBoundingBoxes();
 
 	void processTextures(FbxMesh* inputMesh);
 	void processDiffuseMaps(FbxProperty inputProp);
@@ -120,6 +126,8 @@ public:
 	void WriteToBinary();
 
 	void convertFbxMatrixToFloatArray(FbxAMatrix inputMatrix, float inputArray[16]);
+
+	
 
 	/*Lists*/
 	std::vector<sImportMeshData> mTempMeshList;
@@ -189,6 +197,7 @@ private:
 	input parameter jointName.
 	**/
 	unsigned int findJointIndexByName(const char* jointName);
+	void findBBoxByName(const char* bBoxName);
 };
 
 

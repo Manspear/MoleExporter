@@ -123,6 +123,17 @@ void FbxImport::recursiveJointHierarchyTraversal(FbxNode * inNode, int currIndex
 		currJoint.parentJointID = inNodeParentIndex;
 		currJoint.name = inNode->GetName();
 		currJoint.jointID = currIndex;
+
+		//Adding bbox-children to the joint
+		for(int c = 0; c < inNode->GetChildCount(); c++)
+		{
+			FbxNodeAttribute::EType attributeType = inNode->GetChild(c)->GetNodeAttribute()->GetAttributeType();
+			if (attributeType == FbxNodeAttribute::eMesh) 
+			{
+				currJoint.bboxMeshName = inNode->GetChild(c)->GetName();
+			}
+		}
+
 		pmSceneJoints.push_back(currJoint);
 	}
 	for (int i = 0; i < inNode->GetChildCount(); i++) {
@@ -148,13 +159,34 @@ unsigned int FbxImport::findJointIndexByName(const char * jointName)
 
 	catch (const std::exception&)
 	{
-		printf("Error in FbxDawg::findJointIndexByName(const char* jointName): cannot find matching joint name\n");
+		printf("Error in FbxImport::findJointIndexByName(const char* jointName): cannot find matching joint name\n");
+	}
+}
+
+void FbxImport::findBBoxByName(const char * bBoxName)
+{
+	try
+	{
+		for (unsigned int i = 0; i < mTempMeshList.size(); ++i)
+		{
+			//Note: * before pointer to get object
+			int compareValue = std::strcmp(bBoxName, mTempMeshList[i].meshName);
+			if (compareValue == 0) {
+				//asdf
+				mTempMeshList[i].isBoundingBox = true;
+			}
+		}
+	}
+
+	catch (const std::exception&)
+	{
+		printf("Error in FbxImport::findBBoxByName(const char* bBoxName): cannot find matching mesh name\n");
 	}
 }
 
 FbxImport::FbxImport()
 {
-	meshCounter = 1;
+	meshCounter = 0;
 	materialCounter = 1;
 	textureCounter = 0;
 	cameraCounter = 1;
@@ -228,6 +260,11 @@ void FbxImport::initializeImporter(const char* filePath)
 		{
 			std::cout << "\n" << "Object nr: " << meshCounter << " Name: " << childNode->GetName() << "\n";
 
+			importMeshData = sImportMeshData();
+			importMeshData.meshName = childNode->GetName();
+			importMeshData.meshID = meshCounter;
+			importMeshData.isBoundingBox = false; //is by default false.
+
 			processMesh((FbxMesh*)childNode->GetNodeAttribute());
 			meshCounter += 1;
 
@@ -249,14 +286,14 @@ void FbxImport::initializeImporter(const char* filePath)
 		}
 	}
 
+	processBoundingBoxes();
+
 	assignToHeaderData();
 
 }
 
 void FbxImport::processMesh(FbxMesh * inputMesh)
 {
-	importMeshData = sImportMeshData();
-
 	processVertices(inputMesh);
 
 	processNormals(inputMesh);
@@ -1082,10 +1119,19 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 			}
 
 			importMeshData.jointList.push_back(pmSceneJoints[currJointIndex]);
-			importMeshData.jointList;
-			importMeshData.mSkelVertexList;
-			importMeshData.mVertexList;
-			int momongo = 5;
+		}
+	}
+}
+
+void FbxImport::processBoundingBoxes()
+{
+	const unsigned int meshCount = mTempMeshList.size();
+	for (unsigned int i = 0; i < meshCount; i++)
+	{
+		const unsigned int jointCount = mTempMeshList[i].jointList.size();
+		for (unsigned int j = 0; j < jointCount; j++)
+		{
+			findBBoxByName(mTempMeshList[i].jointList[j].bboxMeshName);
 		}
 	}
 }
