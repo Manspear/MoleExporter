@@ -30,19 +30,34 @@ struct  read_sMesh
 	//unsigned int skelAnimVertexCount;
 	//unsigned int jointCount;
 
+<<<<<<< HEAD
+=======
+	std::vector< read_sVertex> vList;
+>>>>>>> d58fd39d6179db1757e9cfcc4f7a0621cf3d8073
 };
 
 static std::vector< read_sMesh>  read_meshList;
 
+<<<<<<< HEAD
 
 struct  read_m
 {
 	std::vector< read_sVertex> vList;
+=======
+/*
+struct  read_m
+{
+std::vector< read_sVertex> vList;
+>>>>>>> d58fd39d6179db1757e9cfcc4f7a0621cf3d8073
 };
 
 static std::vector< read_m>  read_mList;
 
+<<<<<<< HEAD
 
+=======
+*/
+>>>>>>> d58fd39d6179db1757e9cfcc4f7a0621cf3d8073
 
 struct  read_sSkelAnimVertex
 {
@@ -119,6 +134,7 @@ static std::vector<read_sCamera>  read_mCameraList;
 
 //Struct objects
 
+<<<<<<< HEAD
 read_sMainHeader read_mainHeader;
 read_sVertex read_vertex;
 read_sMaterial read_materialData;
@@ -126,4 +142,13 @@ read_sLight read_lightData;
 read_sDirectionalPoint read_dirPointData;
 read_sSpotLight read_spotData;
 read_sCamera read_camData;
+=======
+sMainHeader read_mainHeader;
+sVertex read_vertex;
+sMaterial read_materialData;
+sLight read_lightData;
+sDirectionalPoint read_dirPointData;
+sSpotLight read_spotData;
+sCamera read_camData;
+>>>>>>> d58fd39d6179db1757e9cfcc4f7a0621cf3d8073
 

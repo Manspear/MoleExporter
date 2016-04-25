@@ -126,6 +126,8 @@ public:
 
 	void WriteToBinary();
 
+	void readFromBinary();
+
 	void convertFbxMatrixToFloatArray(FbxAMatrix inputMatrix, float inputArray[16]);
 
 	
@@ -138,13 +140,7 @@ public:
 	sImportMeshData importMeshData;
 
 
-	/*Struct objects*/
-	sMainHeader mainHeader;
-	sMaterial materialData;
-	sLight lightData;
-	sDirectionalPoint dirPointData;
-	sSpotLight spotData;
-	sCamera camData;
+
 
 	/*Constructor and destructor*/
 	FbxImport();

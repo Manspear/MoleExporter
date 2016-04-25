@@ -18,8 +18,8 @@ struct sMesh
 	float scale[3];
 
 	unsigned int vertexCount;
-	/*unsigned int skelAnimVertexCount;*/
-	/*unsigned int jointCount;*/
+	//unsigned int skelAnimVertexCount;
+	//unsigned int jointCount;
 };
 
 static std::vector<sMesh> meshList;
@@ -143,3 +143,11 @@ struct sCamera
 };
 
 static std::vector<sCamera> mCameraList;
+
+/*Struct objects*/
+sMainHeader static mainHeader;
+sMaterial static materialData;
+sLight static lightData;
+sDirectionalPoint static dirPointData;
+sSpotLight static spotData;
+sCamera static camData;

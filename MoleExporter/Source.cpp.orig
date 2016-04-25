@@ -5,13 +5,13 @@ int main()
 {
 	FbxImport fbx;
 <<<<<<< HEAD
-	//"C:/Users/Dator/Documents/MoleExporter/MoleExporter/Models/jointCube.fbx"
-	fbx.initializeImporter("Models/softPlane.fbx");
-=======
 	fbx.initializeImporter("Models/jesper_test.fbx");
+=======
+	fbx.initializeImporter("Models/jointCube_With_BBox.fbx");
+>>>>>>> d58fd39d6179db1757e9cfcc4f7a0621cf3d8073
 	
->>>>>>> 3a1961b32dfa0267b1238d943017eb4adb67c80e
 	fbx.WriteToBinary();
+	fbx.readFromBinary();
 
 	cin.get();
 	return 0;
