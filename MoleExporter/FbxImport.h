@@ -38,6 +38,7 @@ public:
 		//Name helps with debugging
 		const char* name;
 		const char* bboxMeshName;
+		int bBoxID;
 
 		int jointID;
 		int parentJointID;
@@ -197,7 +198,7 @@ private:
 	input parameter jointName.
 	**/
 	unsigned int findJointIndexByName(const char* jointName);
-	void findBBoxByName(const char* bBoxName);
+	void findBBoxByName(const char* bBoxName, int meshIndex, int jointIndex);
 };
 
 

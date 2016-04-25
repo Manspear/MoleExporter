@@ -163,7 +163,7 @@ unsigned int FbxImport::findJointIndexByName(const char * jointName)
 	}
 }
 
-void FbxImport::findBBoxByName(const char * bBoxName)
+void FbxImport::findBBoxByName(const char * bBoxName, int meshIndex, int jointIndex)
 {
 	try
 	{
@@ -174,6 +174,7 @@ void FbxImport::findBBoxByName(const char * bBoxName)
 			if (compareValue == 0) {
 				//asdf
 				mTempMeshList[i].isBoundingBox = true;
+				mTempMeshList[meshIndex].jointList[jointIndex].bBoxID = mTempMeshList[i].meshID;
 			}
 		}
 	}
@@ -1131,7 +1132,7 @@ void FbxImport::processBoundingBoxes()
 		const unsigned int jointCount = mTempMeshList[i].jointList.size();
 		for (unsigned int j = 0; j < jointCount; j++)
 		{
-			findBBoxByName(mTempMeshList[i].jointList[j].bboxMeshName);
+			findBBoxByName(mTempMeshList[i].jointList[j].bboxMeshName, i, j);
 		}
 	}
 }
