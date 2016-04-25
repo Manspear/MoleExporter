@@ -18,8 +18,8 @@ struct sMesh
 	float scale[3];
 
 	unsigned int vertexCount;
-	/*unsigned int skelAnimVertexCount;*/
-	/*unsigned int jointCount;*/
+	//unsigned int skelAnimVertexCount;
+	//unsigned int jointCount;
 };
 
 static std::vector<sMesh> meshList;

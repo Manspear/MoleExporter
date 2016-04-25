@@ -257,7 +257,7 @@ void FbxImport::processVertices(FbxMesh * inputMesh)
 				sVertex vertex;
 				/*Getting the index to a control point "vertex".*/
 				int polygonVertex = inputMesh->GetPolygonVertex(i, j);
-			sVertex vertex;
+		
 				vertex.vertexPos[0] = (float)vertices[polygonVertex].mData[0];
 				vertex.vertexPos[1] = (float)vertices[polygonVertex].mData[1];
 				vertex.vertexPos[2] = (float)vertices[polygonVertex].mData[2];
@@ -1475,10 +1475,14 @@ void FbxImport::WriteToBinary()
 	}	
 
 	outfile.close();
+	
+}
 
+void FbxImport::readFromBinary()
+{
 
 	//Read from binary
-	
+
 
 	std::ifstream infile("testBin.bin", std::ifstream::binary);//		Öppnar filen vi nyss skapade men ska nu läsa istället
 
@@ -1488,7 +1492,7 @@ void FbxImport::WriteToBinary()
 	cout << "\n" << endl;
 
 
-	infile.read((char*)&read_mainHeader, sizeof(sMainHeader));//				Information av hur många meshes som senare kommer att komma, och efter det hur många material osv, samt hur mycket minne den inten som berättar detta tar upp (reservation för vår header)
+	infile.read((char*)&read_mainHeader, sizeof(read_sMainHeader));//				Information av hur många meshes som senare kommer att komma, och efter det hur många material osv, samt hur mycket minne den inten som berättar detta tar upp (reservation för vår header)
 	cout << "______________________" << endl;
 	cout << "Main Header" << endl;
 	cout << "meshCount:" << read_mainHeader.meshCount << endl;
@@ -1504,7 +1508,7 @@ void FbxImport::WriteToBinary()
 
 		read_meshList.resize(read_mainHeader.meshCount);
 
-		infile.read((char*)&read_meshList[i], sizeof(sMesh));//													Information av hur många vertices som senare kommer att komma, och efter det hur många skelAnim verticear som kommer komma osv, samt hur mycket minne den inten som berättar detta tar upp(reservation för vår header).En int kommer först, den har värdet 100.  Och den inten kommer ta upp 4 bytes.
+		infile.read((char*)&read_meshList[i], sizeof(read_sMesh));//													Information av hur många vertices som senare kommer att komma, och efter det hur många skelAnim verticear som kommer komma osv, samt hur mycket minne den inten som berättar detta tar upp(reservation för vår header).En int kommer först, den har värdet 100.  Och den inten kommer ta upp 4 bytes.
 
 		cout << "Mesh vector: " << endl;
 
@@ -1540,20 +1544,23 @@ void FbxImport::WriteToBinary()
 		cout << "\n";
 		cout << "Vertex vector: " << endl;
 
+		read_mList.resize(read_mainHeader.meshCount);
+		cout << "mlist: " << endl;
+		read_mList[i].vList.resize(read_meshList[i].vertexCount);
 		cout << "\t";
-		cout << read_meshList[i].vList.data() << endl;
+		cout << read_mList[i].vList.data() << endl;
 
 		cout << "\t";
 		cout << "Allocated memory for " << read_meshList[i].vertexCount << " vertices" << endl;
 
 
-		read_meshList[i].vList.resize(read_meshList[i].vertexCount);
+		read_mList[i].vList.resize(read_meshList[i].vertexCount);
 
-		infile.read((char*)read_meshList[i].vList.data(), sizeof(sVertex) * read_meshList[i].vertexCount);//				Skriver ut alla vertices i får vArray, pos, nor, rgba 100 gånger. Och minnet 100 Vertices tar upp.
+		infile.read((char*)read_mList[i].vList.data(), sizeof(read_sVertex) * read_meshList[i].vertexCount);//				Skriver ut alla vertices i får vArray, pos, nor, rgba 100 gånger. Och minnet 100 Vertices tar upp.
 
-																									 //cout << "SkelAnimVert vector: NULL" << endl;
+																											//cout << "SkelAnimVert vector: NULL" << endl;
 
-																									 //cout << "Joint vector: NULL" << endl;
+																											//cout << "Joint vector: NULL" << endl;
 
 		cout << "______________________" << endl;
 	}
@@ -1572,35 +1579,11 @@ void FbxImport::WriteToBinary()
 		cout << "\t";
 		cout << "Allocated memory for " << read_mainHeader.materialCount << " materials" << endl;
 
-		infile.read((char*)&read_materialList[i], sizeof(sMaterial) * read_mainHeader.materialCount);//				Information av hur många material som senare kommer att komma, samt hur mycket minne den inten som berättar detta tar upp.
+		infile.read((char*)&read_materialList[i], sizeof(read_sMaterial) * read_mainHeader.materialCount);//				Information av hur många material som senare kommer att komma, samt hur mycket minne den inten som berättar detta tar upp.
 
 		cout << "______________________" << endl;
 	}
 
 
 	infile.close();
-
-	for (int i = 0; i < read_mainHeader.meshCount; i++)
-	{
-		int result = memcmp(read_meshList[i].vList.data(), mList[i].vList.data(), sizeof(read_sVertex) * meshList[i].vertexCount);
-
-		bool equal = true;
-
-		for (int v = 0; v < meshList[i].vertexCount; v++)//							Här jämför vi listan vi hade när vi SKREV ner med listan vi fyller när vi LÄSER in för att se om de är lika
-		{//																	Vi kollar bara position och stegar xyz efter xyz efter xyz
-			read_meshList[i].vList[v].vertexPos[0];
-				
-			if (!EQUAL(mList[i].vList[v].vertexPos[0], read_meshList[i].vList[v].vertexPos[0]) ||
-				!EQUAL(mList[i].vList[v].vertexPos[1], read_meshList[i].vList[v].vertexPos[1]) ||
-				!EQUAL(mList[i].vList[v].vertexPos[2], read_meshList[i].vList[v].vertexPos[2]))
-			{
-				equal = false;//											Så fort den finner att någon utav dessa xyzan inte är lika så sätts vår equal bool till false. Standard för den är true
-				break;
-			}
-		}
-
-		std::cout << "Streams positions are equal: " << equal << std::endl;// Om vArray.pos var samma som vArray_read.pos	
-		std::cout << "Memory compare are equal: " << (result == 0) << std::endl;// Om memory compare på dessa listor var samma
-	}
-	
 }

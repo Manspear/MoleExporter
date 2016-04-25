@@ -112,6 +112,8 @@ public:
 
 	void WriteToBinary();
 
+	void readFromBinary();
+
 	void convertFbxMatrixToFloatArray(FbxAMatrix inputMatrix, float inputArray[16]);
 
 	/*Lists*/
