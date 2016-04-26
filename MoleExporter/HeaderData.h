@@ -88,7 +88,7 @@ struct sKeyFrame
 
 struct sMaterial
 {
-	const char* materialName;
+	char* materialName = nullptr;
 
 	float ambientColor[3];
 	float diffuseColor[3];
@@ -96,9 +96,9 @@ struct sMaterial
 
 	float shinyFactor;
 
-	wchar_t* diffuseTexture;
-	wchar_t* specularTexture;
-	wchar_t* normalTexture;
+	wchar_t* diffuseTexture = nullptr;
+	wchar_t* specularTexture = nullptr;
+	wchar_t* normalTexture = nullptr;
 };
 
 static std::vector<sMaterial> mMaterialList;
