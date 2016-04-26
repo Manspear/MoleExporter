@@ -123,7 +123,6 @@ void FbxImport::recursiveJointHierarchyTraversal(FbxNode * inNode, int currIndex
 		currJoint.parentJointID = inNodeParentIndex;
 		currJoint.name = inNode->GetName();
 		currJoint.jointID = currIndex;
-		currJoint.bBoxID = -1337;
 
 		//Adding bbox-children to the joint
 		for(int c = 0; c < inNode->GetChildCount(); c++)
@@ -266,8 +265,9 @@ void FbxImport::initializeImporter(const char* filePath)
 			importMeshData.meshName = childNode->GetName();
 			importMeshData.meshID = meshCounter;
 			importMeshData.isBoundingBox = false; //is by default false.
-			
+
 			processMesh((FbxMesh*)childNode->GetNodeAttribute());
+			meshCounter += 1;
 
 			/*headerData.meshCount = mMeshList.size(); */
 		}
@@ -285,60 +285,6 @@ void FbxImport::initializeImporter(const char* filePath)
 
 			/*headerData.cameraCount = mCameraList.size();*/
 		}
-	}
-	//---------------------------------------------------------
-	//Second pass to get the mesh-bbox-children into the vector
-	//---------------------------------------------------------
-	for (int childIndex = 0; childIndex < pmRootNode->GetChildCount(); childIndex++)
-	{
-		FbxNode* childNode = pmRootNode->GetChild(childIndex);
-		FbxNodeAttribute::EType attributeType = childNode->GetNodeAttribute()->GetAttributeType();
-
-		if (childNode->GetNodeAttribute() == NULL)
-			continue;
-
-		if (attributeType != FbxNodeAttribute::eMesh)
-			continue;
-
-		if (attributeType == FbxNodeAttribute::eMesh)
-		{
-			std::cout << "\n" << "Object nr: " << meshCounter << " Name: " << childNode->GetName() << "\n";
-
-			importMeshData = sImportMeshData();
-			importMeshData.meshID = meshCounter;
-			importMeshData.isBoundingBox = false; //is by default false.
-
-			FbxMesh* currMesh = (FbxMesh*)childNode->GetNodeAttribute();
-
-			unsigned int deformerCount = currMesh->GetDeformerCount(FbxDeformer::eSkin);
-
-			for (unsigned int deformerCounter = 0; deformerCounter < deformerCount; ++deformerCounter)
-			{
-				FbxSkin* currSkin = reinterpret_cast<FbxSkin*>(currMesh->GetDeformer(0, FbxDeformer::eSkin));
-				if (!currSkin)
-					continue;
-
-				const unsigned int clusterCount = currSkin->GetClusterCount();
-				for (unsigned int clusterCounter = 0; clusterCounter < clusterCount; ++clusterCounter)
-				{
-					FbxCluster* currCluster = currSkin->GetCluster(clusterCounter);
-					FbxNode* currJoint = currCluster->GetLink();
-
-					const unsigned int jointChildCount = currJoint->GetChildCount();
-					for (int i = 0; i < jointChildCount; i++)
-					{
-						if(currJoint->GetChild(i)->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eMesh)
-						{
-							importMeshData.meshName = currJoint->GetChild(i)->GetName();
-							importMeshData.isBoundingBox = true;
-							processMesh((FbxMesh*)currJoint->GetChild(i)->GetNodeAttribute());
-						}
-					}
-				}
-			}
-		}
-
-
 	}
 
 	processBoundingBoxes();
@@ -372,8 +318,6 @@ void FbxImport::processMesh(FbxMesh * inputMesh)
 	headerData.materialCount = mMaterialList.size();*/
 
 	mTempMeshList.push_back(importMeshData);
-
-	meshCounter += 1;
 }
 
 void FbxImport::processVertices(FbxMesh * inputMesh)
@@ -927,28 +871,28 @@ void FbxImport::processMaterials(FbxMesh * inputMesh)
 
 						float shininess = ((FbxSurfacePhong*)material)->Shininess;
 
-						materialList[importMeshData.materialID].ambientColor[0] = ambientColor.mData[0];
-						materialList[importMeshData.materialID].ambientColor[1] = ambientColor.mData[1];
-						materialList[importMeshData.materialID].ambientColor[2] = ambientColor.mData[2];
+						mMaterialList[importMeshData.materialID].ambientColor[0] = ambientColor.mData[0];
+						mMaterialList[importMeshData.materialID].ambientColor[1] = ambientColor.mData[1];
+						mMaterialList[importMeshData.materialID].ambientColor[2] = ambientColor.mData[2];
 
 						std::cout << "\n" << "Ambient color: " << ambientColor.mData[0] << " " << ambientColor.mData[1] <<
 							" " << ambientColor.mData[2] << "\n";
 
-						materialList[importMeshData.materialID].diffuseColor[0] = diffuseColor.mData[0];
-						materialList[importMeshData.materialID].diffuseColor[1] = diffuseColor.mData[1];
-						materialList[importMeshData.materialID].diffuseColor[2] = diffuseColor.mData[2];
+						mMaterialList[importMeshData.materialID].diffuseColor[0] = diffuseColor.mData[0];
+						mMaterialList[importMeshData.materialID].diffuseColor[1] = diffuseColor.mData[1];
+						mMaterialList[importMeshData.materialID].diffuseColor[2] = diffuseColor.mData[2];
 
 						std::cout << "\n" << "Diffuse color: " << diffuseColor.mData[0] << " " << diffuseColor.mData[1] <<
 							" " << diffuseColor.mData[2] << "\n";
 
-						materialList[importMeshData.materialID].specularColor[0] = specularColor.mData[0];
-						materialList[importMeshData.materialID].specularColor[0] = specularColor.mData[0];
-						materialList[importMeshData.materialID].specularColor[0] = specularColor.mData[0];
+						mMaterialList[importMeshData.materialID].specularColor[0] = specularColor.mData[0];
+						mMaterialList[importMeshData.materialID].specularColor[0] = specularColor.mData[0];
+						mMaterialList[importMeshData.materialID].specularColor[0] = specularColor.mData[0];
 
 						std::cout << "\n" << "Specular color: " << specularColor.mData[0] << " " << specularColor.mData[1] <<
 							" " << specularColor.mData[2] << "\n";
 
-						materialList[importMeshData.materialID].shinyFactor = shininess;
+						mMaterialList[importMeshData.materialID].shinyFactor = shininess;
 
 						std::cout << "\n" << "Shininess factor: " << shininess << "\n";
 
@@ -973,26 +917,26 @@ void FbxImport::processMaterials(FbxMesh * inputMesh)
 						ambientColor = ((FbxSurfaceLambert *)material)->Ambient;
 						diffuseColor = ((FbxSurfaceLambert *)material)->Diffuse;
 
-						materialList[importMeshData.materialID].ambientColor[0] = ambientColor.mData[0];
-						materialList[importMeshData.materialID].ambientColor[1] = ambientColor.mData[1];
-						materialList[importMeshData.materialID].ambientColor[2] = ambientColor.mData[2];
+						mMaterialList[importMeshData.materialID].ambientColor[0] = ambientColor.mData[0];
+						mMaterialList[importMeshData.materialID].ambientColor[1] = ambientColor.mData[1];
+						mMaterialList[importMeshData.materialID].ambientColor[2] = ambientColor.mData[2];
 
 						std::cout << "\n" << "Ambient color: " << ambientColor.mData[0] << " " << ambientColor.mData[1] <<
 							" " << ambientColor.mData[2] << "\n";
 
-						materialList[importMeshData.materialID].diffuseColor[0] = diffuseColor.mData[0];
-						materialList[importMeshData.materialID].diffuseColor[1] = diffuseColor.mData[1];
-						materialList[importMeshData.materialID].diffuseColor[2] = diffuseColor.mData[2];
+						mMaterialList[importMeshData.materialID].diffuseColor[0] = diffuseColor.mData[0];
+						mMaterialList[importMeshData.materialID].diffuseColor[1] = diffuseColor.mData[1];
+						mMaterialList[importMeshData.materialID].diffuseColor[2] = diffuseColor.mData[2];
 
 						std::cout << "\n" << "Diffuse color: " << diffuseColor.mData[0] << " " << diffuseColor.mData[1] <<
 							" " << diffuseColor.mData[2] << "\n";
 
 						/*No specular attributes and shininess for lambert material, so set the values to 0.*/
-						materialList[importMeshData.materialID].specularColor[0] = 0;
-						materialList[importMeshData.materialID].specularColor[1] = 0;
-						materialList[importMeshData.materialID].specularColor[2] = 0;
+						mMaterialList[importMeshData.materialID].specularColor[0] = 0;
+						mMaterialList[importMeshData.materialID].specularColor[1] = 0;
+						mMaterialList[importMeshData.materialID].specularColor[2] = 0;
 
-						materialList[importMeshData.materialID].shinyFactor = 0;
+						mMaterialList[importMeshData.materialID].shinyFactor = 0;
 					}
 				}
 			}
@@ -1170,33 +1114,6 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 						}
 						currAnimation.keyList.push_back(tempKey);
 					}
-					const unsigned int jointChildCount = currJoint->GetChildCount();
-
-					for (int jointChildCounter = 0; jointChildCounter < jointChildCount; ++jointChildCounter)
-					{
-						FbxNode* childNode = currJoint->GetChild(jointChildCounter);
-						FbxNodeAttribute::EType attributeType = childNode->GetNodeAttribute()->GetAttributeType();
-						if (attributeType == FbxNodeAttribute::eMesh)
-						{
-							//Calling processMesh here because the mesh is "hidden" from the root node by the joint-parent.
-							//Hmm... meshID can be found here. 
-							//WAIT! If the meshCounter is called upon inside of the processMesh-function... Then this processMesh-call will overwrite the previous one. Fucked up.
-							
-							//processMesh((FbxMesh*)childNode->GetNodeAttribute());
-							
-							//Where should the meshIndex be? It is curr inside processMesh. 
-							//Answer: I shouldn't call processMesh inside of processMesh
-
-							//But it's here that I loop through joints. 
-							//Should I have a "second pass" of reading through all of the joints in the scene?
-							//Or should I have a "secondary mesh list" that I add on top of the current mesh list later? <--- Cool idéa. 
-							//I wanna use the same "processMesh" function for it. Or "gate" all functions with a bool saying "isSecondary"
-							//If "isSecondary" then the stuff is appended to the secondary vector.
-
-							//The less messy solution would be to (again) loop through all the meshes in the scene, but now just query for joints and their bBox-children.
-						}
-					}
-
 					pmSceneJoints[currJointIndex].animationState.push_back(currAnimation);
 					//importMeshData.jointList.push_back
 				}
@@ -1272,7 +1189,7 @@ void FbxImport::processDiffuseMaps(FbxProperty diffuseProp)
 		wchar_t* textureToWchar;
 		FbxUTF8ToWC(fileTextureName.Buffer(), textureToWchar, NULL);
 
-		materialList[importMeshData.materialID].diffuseTexture = textureToWchar;
+		mMaterialList[importMeshData.materialID].diffuseTexture = textureToWchar;
 
 		textureCounter++;
 	}
@@ -1293,7 +1210,7 @@ void FbxImport::processSpecularMaps(FbxProperty propSpecular)
 		wchar_t* textureToWchar;
 		FbxUTF8ToWC(fileTextureName.Buffer(), textureToWchar, NULL);
 
-		materialList[importMeshData.materialID].specularTexture = textureToWchar;
+		mMaterialList[importMeshData.materialID].specularTexture = textureToWchar;
 
 		textureCounter++;
 	}
@@ -1314,7 +1231,7 @@ void FbxImport::processNormalMaps(FbxProperty propNormal)
 		wchar_t* textureToWchar;
 		FbxUTF8ToWC(fileTextureName.Buffer(), textureToWchar, NULL);
 
-		materialList[importMeshData.materialID].normalTexture = textureToWchar;
+		mMaterialList[importMeshData.materialID].normalTexture = textureToWchar;
 
 		textureCounter++;
 	}
@@ -1460,9 +1377,9 @@ void FbxImport::processCamera(FbxCamera * inputCamera)
 
 bool FbxImport::checkMaterialName(const char* materialName)
 {
-	for (int nameIndex = 0; nameIndex < materialList.size(); nameIndex++)
+	for (int nameIndex = 0; nameIndex < mMaterialList.size(); nameIndex++)
 	{
-		if (std::strcmp(materialList[nameIndex].materialName, materialName) == 0)
+		if (std::strcmp(mMaterialList[nameIndex].materialName, materialName) == 0)
 		{
 			importMeshData.materialID = nameIndex;
 			return false; /*The material names are identical.*/
@@ -1472,15 +1389,15 @@ bool FbxImport::checkMaterialName(const char* materialName)
 	if (materialData.materialName == nullptr)
 	{
 		materialData.materialName = materialName;
-		materialList.push_back(materialData);
+		mMaterialList.push_back(materialData);
 		importMeshData.materialID = 0;
 		firstProcess = false;
 		return true; /*This is the first material name.*/
 	}
 
 	materialData.materialName = materialName;
-	materialList.push_back(materialData);
-	importMeshData.materialID = materialList.size() - 1;
+	mMaterialList.push_back(materialData);
+	importMeshData.materialID = mMaterialList.size() - 1;
 
 	return true; /*The two material names are not identical.*/
 
@@ -1512,7 +1429,7 @@ FbxImport::sBlendData* FbxImport::findBlendDataForControlPoint(std::vector<FbxIm
 void FbxImport::assignToHeaderData()
 {
 	mainHeader.meshCount = mTempMeshList.size();
-	mainHeader.materialCount = materialList.size();
+	mainHeader.materialCount = mMaterialList.size();
 	mainHeader.lightCount = mLightList.size();
 
 	mainHeader.cameraCount = mCameraList.size();
@@ -1691,12 +1608,12 @@ void FbxImport::WriteToBinary()
 		cout << "Material vector: " << endl;
 
 		cout << "\t";
-		cout << &materialList[i] << endl;
+		cout << &mMaterialList[i] << endl;
 
 		cout << "\t";
 		cout << "Allocated memory for " << mainHeader.materialCount << " materials" << endl;
 
-		outfile.write((const char*)&materialList[i], sizeof(sMaterial) * mainHeader.materialCount); //Information av hur många material som senare kommer att komma, samt hur mycket minne den inten som berättar detta tar upp.
+		outfile.write((const char*)&mMaterialList[i], sizeof(sMaterial) * mainHeader.materialCount); //Information av hur många material som senare kommer att komma, samt hur mycket minne den inten som berättar detta tar upp.
 
 		cout << "______________________" << endl;
 	}
@@ -1725,9 +1642,6 @@ void FbxImport::WriteToBinary()
 		cout << "Camera vector: " << endl;
 
 		cout << "\t";
-		cout << &mCameraList[i] << endl;
-
-		cout << "\t";
 		cout << "Allocated memory for " << mainHeader.cameraCount << " cameras" << endl;
 
 		outfile.write((const char*)&mCameraList[i], sizeof(sCamera) * mainHeader.cameraCount);
@@ -1753,17 +1667,18 @@ void FbxImport::readFromBinary()
 	cout << "Main Header" << endl;
 	cout << "meshCount: " << read_mainHeader.meshCount << endl;
 	cout << "materialCount: " << read_mainHeader.materialCount << endl;
-	cout << "lightCount: " << mainHeader.lightCount << endl;
-	cout << "cameraCount: " << mainHeader.cameraCount << endl;
+	cout << "lightCount: " << read_mainHeader.lightCount << endl;
+	cout << "cameraCount: " << read_mainHeader.cameraCount << endl;
 	cout << "______________________" << endl;
+
+
+	read_meshList.resize(read_mainHeader.meshCount);
 
 	for (int i = 0; i < read_mainHeader.meshCount; i++)
 	{
 		cout << "Mesh: " << i << endl;
 
-		read_meshList.resize(read_mainHeader.meshCount);
-
-		infile.read((char*)&read_meshList[i], sizeof(read_sMesh)); //Information av hur många vertices som senare kommer att komma, och efter det hur många skelAnim verticear som kommer komma osv, samt hur mycket minne den inten som berättar detta tar upp(reservation för vår header).En int kommer först, den har värdet 100.  Och den inten kommer ta upp 4 bytes.
+		infile.read((char*)&read_meshList[i], sizeof(read_sMesh));//													Information av hur många vertices som senare kommer att komma, och efter det hur många skelAnim verticear som kommer komma osv, samt hur mycket minne den inten som berättar detta tar upp(reservation för vår header).En int kommer först, den har värdet 100.  Och den inten kommer ta upp 4 bytes.
 
 		cout << "Mesh vector: " << endl;
 
@@ -1837,6 +1752,8 @@ void FbxImport::readFromBinary()
 		cout << "______________________" << endl;
 	}
 
+	read_mLightList.resize(mainHeader.lightCount);
+
 	for (int i = 0; i < mainHeader.lightCount; i++)
 	{
 		cout << "Light: " << i << endl;
@@ -1844,15 +1761,17 @@ void FbxImport::readFromBinary()
 		cout << "Light vector: " << endl;
 
 		cout << "\t";
-		cout << &mLightList[i] << endl;
+		cout << &read_mLightList[i] << endl;
 
 		cout << "\t";
-		cout << "Allocated memory for " << mainHeader.lightCount << " lights" << endl;
+		cout << "Allocated memory for " << read_mainHeader.lightCount << " lights" << endl;
 
-		infile.read((char*)&mLightList[i], sizeof(sLight) * mainHeader.lightCount);
+		infile.read((char*)&read_mLightList[i], sizeof(sLight) * read_mainHeader.lightCount);
 
 		cout << "______________________" << endl;
 	}
+
+	read_mCameraList.resize(mainHeader.cameraCount);
 
 	for (int i = 0; i < mainHeader.cameraCount; i++)
 	{
@@ -1861,12 +1780,9 @@ void FbxImport::readFromBinary()
 		cout << "Camera vector: " << endl;
 
 		cout << "\t";
-		cout << &mCameraList[i] << endl;
+		cout << "Allocated memory for " << read_mainHeader.cameraCount << " cameras" << endl;
 
-		cout << "\t";
-		cout << "Allocated memory for " << mainHeader.cameraCount << " cameras" << endl;
-
-		infile.read((char*)&mCameraList[i], sizeof(sCamera) * mainHeader.cameraCount);
+		infile.read((char*)&read_mCameraList[i], sizeof(sCamera) * read_mainHeader.cameraCount);
 
 		cout << "______________________" << endl;
 	}

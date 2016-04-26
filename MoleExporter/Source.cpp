@@ -4,7 +4,7 @@ using namespace std;
 int main()
 {
 	FbxImport fbx;
-	fbx.initializeImporter("Models/testCamera.fbx");
+	fbx.initializeImporter("Models/fbx_test.fbx");
 	
 	fbx.WriteToBinary();
 	fbx.readFromBinary();
