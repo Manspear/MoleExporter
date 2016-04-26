@@ -78,13 +78,6 @@ static std::vector< read_sMaterial>  read_materialList;
 
 struct  read_sLight
 {
-	unsigned int directionalPointCount;
-	unsigned int spotlightCount;
-};
-
-
-struct  read_sDirectionalPoint
-{
 	float lightPos[3];
 	float lightRot[3];
 	float lightScale[3];
@@ -93,21 +86,7 @@ struct  read_sDirectionalPoint
 	float intensity;
 };
 
-struct  read_sSpotLight
-{
-	float lightPos[3];
-	float lightRot[3];
-	float lightScale[3];
-
-	float color[3];
-	float intensity;
-
-	float innerAngle;
-	float outerAngle;
-};
-
-static std::vector< read_sDirectionalPoint>  read_mDirPointList;
-static std::vector< read_sSpotLight>  read_mSpotList;
+static std::vector< read_sLight>  read_mLightList;
 
 struct  read_sCamera
 {
@@ -127,7 +106,5 @@ read_sMainHeader read_mainHeader;
 read_sVertex read_vertex;
 read_sMaterial read_materialData;
 read_sLight read_lightData;
-read_sDirectionalPoint read_dirPointData;
-read_sSpotLight read_spotData;
 read_sCamera read_camData;
 

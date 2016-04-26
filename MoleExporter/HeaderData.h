@@ -101,7 +101,7 @@ struct sMaterial
 	wchar_t* normalTexture;
 };
 
-static std::vector<sMaterial> materialList;
+static std::vector<sMaterial> mMaterialList;
 
 struct sLight
 {

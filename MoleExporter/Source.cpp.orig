@@ -5,10 +5,10 @@ int main()
 {
 	FbxImport fbx;
 <<<<<<< HEAD
-	fbx.initializeImporter("Models/jesper_test.fbx");
+	fbx.initializeImporter("Models/twoJointCubes.fbx");
 =======
-	fbx.initializeImporter("Models/jointCube_With_BBox.fbx");
->>>>>>> d58fd39d6179db1757e9cfcc4f7a0621cf3d8073
+	fbx.initializeImporter("Models/fbx_test.fbx");
+>>>>>>> bca6fa3d35cb29994119509e6f28da0edb8e894b
 	
 	fbx.WriteToBinary();
 	fbx.readFromBinary();

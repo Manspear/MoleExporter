@@ -123,14 +123,21 @@ void FbxImport::recursiveJointHierarchyTraversal(FbxNode * inNode, int currIndex
 		currJoint.parentJointID = inNodeParentIndex;
 		currJoint.name = inNode->GetName();
 		currJoint.jointID = currIndex;
+<<<<<<< HEAD
+		currJoint.bBoxID = -1337;
+		currJoint.bboxMeshName = nullptr;
+=======
 
+>>>>>>> bca6fa3d35cb29994119509e6f28da0edb8e894b
 		//Adding bbox-children to the joint
 		for(int c = 0; c < inNode->GetChildCount(); c++)
 		{
 			FbxNodeAttribute::EType attributeType = inNode->GetChild(c)->GetNodeAttribute()->GetAttributeType();
 			if (attributeType == FbxNodeAttribute::eMesh) 
 			{
-				currJoint.bboxMeshName = inNode->GetChild(c)->GetName();
+				char* bBoxName;
+				bBoxName = const_cast<char*>(inNode->GetChild(c)->GetName());
+				currJoint.bboxMeshName = bBoxName;
 			}
 		}
 
@@ -170,7 +177,8 @@ void FbxImport::findBBoxByName(const char * bBoxName, int meshIndex, int jointIn
 		for (unsigned int i = 0; i < mTempMeshList.size(); ++i)
 		{
 			//Note: * before pointer to get object
-			int compareValue = std::strcmp(bBoxName, mTempMeshList[i].meshName);
+			const char* compareName = mTempMeshList[i].meshName;
+			int compareValue = std::strcmp(bBoxName, compareName);
 			if (compareValue == 0) {
 				//asdf
 				mTempMeshList[i].isBoundingBox = true;
@@ -423,27 +431,15 @@ void FbxImport::processVertices(FbxMesh * inputMesh)
 				then the program should abort, terminating the process.*/
 				assert(numPolygonVertices == 3);
 
-<<<<<<< HEAD
-			for (int j = 0; j < numPolygonVertices; j++)
-			{
-				sVertex vertex;
-				/*Getting the index to a control point "vertex".*/
-				int polygonVertex = inputMesh->GetPolygonVertex(i, j);
-		
-				vertex.vertexPos[0] = (float)vertices[polygonVertex].mData[0];
-				vertex.vertexPos[1] = (float)vertices[polygonVertex].mData[1];
-				vertex.vertexPos[2] = (float)vertices[polygonVertex].mData[2];
-=======
 				for (int j = 0; j < numPolygonVertices; j++)
 				{
 					sVertex vertex;
 					/*Getting the index to a control point "vertex".*/
 					int polygonVertex = inputMesh->GetPolygonVertex(i, j);
-
+		
 					vertex.vertexPos[0] = (float)vertices[polygonVertex].mData[0];
 					vertex.vertexPos[1] = (float)vertices[polygonVertex].mData[1];
 					vertex.vertexPos[2] = (float)vertices[polygonVertex].mData[2];
->>>>>>> d58fd39d6179db1757e9cfcc4f7a0621cf3d8073
 
 					std::cout << "\n" << "Position: " << (float)vertices[polygonVertex].mData[0] << " " <<
 						(float)vertices[polygonVertex].mData[1] << " " <<
@@ -883,28 +879,28 @@ void FbxImport::processMaterials(FbxMesh * inputMesh)
 
 						float shininess = ((FbxSurfacePhong*)material)->Shininess;
 
-						materialList[importMeshData.materialID].ambientColor[0] = ambientColor.mData[0];
-						materialList[importMeshData.materialID].ambientColor[1] = ambientColor.mData[1];
-						materialList[importMeshData.materialID].ambientColor[2] = ambientColor.mData[2];
+						mMaterialList[importMeshData.materialID].ambientColor[0] = ambientColor.mData[0];
+						mMaterialList[importMeshData.materialID].ambientColor[1] = ambientColor.mData[1];
+						mMaterialList[importMeshData.materialID].ambientColor[2] = ambientColor.mData[2];
 
 						std::cout << "\n" << "Ambient color: " << ambientColor.mData[0] << " " << ambientColor.mData[1] <<
 							" " << ambientColor.mData[2] << "\n";
 
-						materialList[importMeshData.materialID].diffuseColor[0] = diffuseColor.mData[0];
-						materialList[importMeshData.materialID].diffuseColor[1] = diffuseColor.mData[1];
-						materialList[importMeshData.materialID].diffuseColor[2] = diffuseColor.mData[2];
+						mMaterialList[importMeshData.materialID].diffuseColor[0] = diffuseColor.mData[0];
+						mMaterialList[importMeshData.materialID].diffuseColor[1] = diffuseColor.mData[1];
+						mMaterialList[importMeshData.materialID].diffuseColor[2] = diffuseColor.mData[2];
 
 						std::cout << "\n" << "Diffuse color: " << diffuseColor.mData[0] << " " << diffuseColor.mData[1] <<
 							" " << diffuseColor.mData[2] << "\n";
 
-						materialList[importMeshData.materialID].specularColor[0] = specularColor.mData[0];
-						materialList[importMeshData.materialID].specularColor[0] = specularColor.mData[0];
-						materialList[importMeshData.materialID].specularColor[0] = specularColor.mData[0];
+						mMaterialList[importMeshData.materialID].specularColor[0] = specularColor.mData[0];
+						mMaterialList[importMeshData.materialID].specularColor[0] = specularColor.mData[0];
+						mMaterialList[importMeshData.materialID].specularColor[0] = specularColor.mData[0];
 
 						std::cout << "\n" << "Specular color: " << specularColor.mData[0] << " " << specularColor.mData[1] <<
 							" " << specularColor.mData[2] << "\n";
 
-						materialList[importMeshData.materialID].shinyFactor = shininess;
+						mMaterialList[importMeshData.materialID].shinyFactor = shininess;
 
 						std::cout << "\n" << "Shininess factor: " << shininess << "\n";
 
@@ -929,26 +925,26 @@ void FbxImport::processMaterials(FbxMesh * inputMesh)
 						ambientColor = ((FbxSurfaceLambert *)material)->Ambient;
 						diffuseColor = ((FbxSurfaceLambert *)material)->Diffuse;
 
-						materialList[importMeshData.materialID].ambientColor[0] = ambientColor.mData[0];
-						materialList[importMeshData.materialID].ambientColor[1] = ambientColor.mData[1];
-						materialList[importMeshData.materialID].ambientColor[2] = ambientColor.mData[2];
+						mMaterialList[importMeshData.materialID].ambientColor[0] = ambientColor.mData[0];
+						mMaterialList[importMeshData.materialID].ambientColor[1] = ambientColor.mData[1];
+						mMaterialList[importMeshData.materialID].ambientColor[2] = ambientColor.mData[2];
 
 						std::cout << "\n" << "Ambient color: " << ambientColor.mData[0] << " " << ambientColor.mData[1] <<
 							" " << ambientColor.mData[2] << "\n";
 
-						materialList[importMeshData.materialID].diffuseColor[0] = diffuseColor.mData[0];
-						materialList[importMeshData.materialID].diffuseColor[1] = diffuseColor.mData[1];
-						materialList[importMeshData.materialID].diffuseColor[2] = diffuseColor.mData[2];
+						mMaterialList[importMeshData.materialID].diffuseColor[0] = diffuseColor.mData[0];
+						mMaterialList[importMeshData.materialID].diffuseColor[1] = diffuseColor.mData[1];
+						mMaterialList[importMeshData.materialID].diffuseColor[2] = diffuseColor.mData[2];
 
 						std::cout << "\n" << "Diffuse color: " << diffuseColor.mData[0] << " " << diffuseColor.mData[1] <<
 							" " << diffuseColor.mData[2] << "\n";
 
 						/*No specular attributes and shininess for lambert material, so set the values to 0.*/
-						materialList[importMeshData.materialID].specularColor[0] = 0;
-						materialList[importMeshData.materialID].specularColor[1] = 0;
-						materialList[importMeshData.materialID].specularColor[2] = 0;
+						mMaterialList[importMeshData.materialID].specularColor[0] = 0;
+						mMaterialList[importMeshData.materialID].specularColor[1] = 0;
+						mMaterialList[importMeshData.materialID].specularColor[2] = 0;
 
-						materialList[importMeshData.materialID].shinyFactor = 0;
+						mMaterialList[importMeshData.materialID].shinyFactor = 0;
 					}
 				}
 			}
@@ -1138,13 +1134,17 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 
 void FbxImport::processBoundingBoxes()
 {
+	char* popo = "kkk";
+	const char* ooo = popo;
+
 	const unsigned int meshCount = mTempMeshList.size();
 	for (unsigned int i = 0; i < meshCount; i++)
 	{
 		const unsigned int jointCount = mTempMeshList[i].jointList.size();
 		for (unsigned int j = 0; j < jointCount; j++)
 		{
-			findBBoxByName(mTempMeshList[i].jointList[j].bboxMeshName, i, j);
+			if(mTempMeshList[i].jointList[j].bboxMeshName != nullptr)
+				findBBoxByName(mTempMeshList[i].jointList[j].bboxMeshName, i, j);	
 		}
 	}
 }
@@ -1201,7 +1201,7 @@ void FbxImport::processDiffuseMaps(FbxProperty diffuseProp)
 		wchar_t* textureToWchar;
 		FbxUTF8ToWC(fileTextureName.Buffer(), textureToWchar, NULL);
 
-		materialList[importMeshData.materialID].diffuseTexture = textureToWchar;
+		mMaterialList[importMeshData.materialID].diffuseTexture = textureToWchar;
 
 		textureCounter++;
 	}
@@ -1222,7 +1222,7 @@ void FbxImport::processSpecularMaps(FbxProperty propSpecular)
 		wchar_t* textureToWchar;
 		FbxUTF8ToWC(fileTextureName.Buffer(), textureToWchar, NULL);
 
-		materialList[importMeshData.materialID].specularTexture = textureToWchar;
+		mMaterialList[importMeshData.materialID].specularTexture = textureToWchar;
 
 		textureCounter++;
 	}
@@ -1243,7 +1243,7 @@ void FbxImport::processNormalMaps(FbxProperty propNormal)
 		wchar_t* textureToWchar;
 		FbxUTF8ToWC(fileTextureName.Buffer(), textureToWchar, NULL);
 
-		materialList[importMeshData.materialID].normalTexture = textureToWchar;
+		mMaterialList[importMeshData.materialID].normalTexture = textureToWchar;
 
 		textureCounter++;
 	}
@@ -1286,20 +1286,24 @@ void FbxImport::processLight(FbxLight * inputLight)
 
 	if (lightType == 0 || lightType == 1) /*If the lighttype is a Pointlight or a DirectionalLight.*/
 	{
-		std::cout << "\n" << "Light nr " << lightCounter++ << ": " << lightName;
+		std::cout << "\n" << "Light nr " << lightCounter++ << ": " << lightName << "\n\n"; 
+
+		lightData.lightID = lightType;
+
+		cout << "Light type: " << lightType << "\n\n";
 
 		FbxVector4 lightColor = inputLight->Color.Get();
 
-		dirPointData.color[0] = lightColor.mData[0];
-		dirPointData.color[1] = lightColor.mData[1];
-		dirPointData.color[2] = lightColor.mData[2];
+		lightData.color[0] = lightColor.mData[0];
+		lightData.color[1] = lightColor.mData[1];
+		lightData.color[2] = lightColor.mData[2];
 
 		std::cout << "\n" << "Light color: " << lightColor.mData[0] << " "
 			<< lightColor.mData[1] << " " << lightColor.mData[2];
 
 		float lightIntensity = inputLight->Intensity.Get();
 
-		dirPointData.intensity = lightIntensity;
+		lightData.intensity = lightIntensity;
 
 		std::cout << "\n" << "Light intensity: " << lightIntensity;
 
@@ -1311,85 +1315,30 @@ void FbxImport::processLight(FbxLight * inputLight)
 		rot = lightPosition.GetR();
 		scal = lightPosition.GetS();
 
-		dirPointData.lightPos[0] = trans.mData[0];
-		dirPointData.lightPos[1] = trans.mData[1];
-		dirPointData.lightPos[2] = trans.mData[2];
+		lightData.lightPos[0] = trans.mData[0];
+		lightData.lightPos[1] = trans.mData[1];
+		lightData.lightPos[2] = trans.mData[2];
 
 		std::cout << "\n" << "Light position: " << trans.mData[0] << " " << trans.mData[1] << " " << trans.mData[2];
 
-		dirPointData.lightScale[0] = rot.mData[0];
-		dirPointData.lightScale[1] = rot.mData[1];
-		dirPointData.lightScale[2] = rot.mData[2];
+		lightData.lightScale[0] = rot.mData[0];
+		lightData.lightScale[1] = rot.mData[1];
+		lightData.lightScale[2] = rot.mData[2];
 
 		std::cout << "\n" << "Light orientation: " << rot.mData[0] << " " << rot.mData[1] << " " << rot.mData[2];
 
-		dirPointData.lightRot[0] = scal.mData[0];
-		dirPointData.lightRot[0] = scal.mData[1];
-		dirPointData.lightRot[0] = scal.mData[2];
+		lightData.lightRot[0] = scal.mData[0];
+		lightData.lightRot[0] = scal.mData[1];
+		lightData.lightRot[0] = scal.mData[2];
 
 		std::cout << "\n" << "Light scale: " << scal.mData[0] << " " << scal.mData[1] << " " << scal.mData[2] << "\n\n";
 
-		mDirPointList.push_back(dirPointData);
-
-		/*lightData.countDirectionalPoint = mDirPointList.size();*/
+		mLightList.push_back(lightData);
 	}
 
-	if (lightType == 2) /*If the light type is a Spotlight.*/
+	else
 	{
-		std::cout << "\n" << "Light nr " << lightCounter++ << ": " << lightName;
-
-		FbxVector4 lightColor = inputLight->Color.Get();
-
-		dirPointData.color[0] = lightColor.mData[0];
-		dirPointData.color[1] = lightColor.mData[1];
-		dirPointData.color[2] = lightColor.mData[2];
-
-		std::cout << "\n" << "Light color: " << lightColor.mData[0] << " "
-			<< lightColor.mData[1] << " " << lightColor.mData[2];
-
-		float lightIntensity = inputLight->Intensity.Get();
-
-		spotData.intensity = lightIntensity;
-
-		std::cout << "\n" << "Light intensity: " << lightIntensity;
-
-		float innerAngle = inputLight->InnerAngle.Get();
-		float outerAngle = inputLight->OuterAngle.Get();
-
-		spotData.innerAngle = innerAngle;
-		spotData.outerAngle = outerAngle;
-
-		std::cout << "\n" << "Inner angle: " << innerAngle << " " << "Outer angle: " << outerAngle;
-
-		FbxAMatrix lightPosition = inputLight->GetNode()->EvaluateGlobalTransform();
-
-		FbxVector4 trans, rot, scal;
-
-		trans = lightPosition.GetT();
-		rot = lightPosition.GetR();
-		scal = lightPosition.GetS();
-
-		spotData.lightPos[0] = trans.mData[0];
-		spotData.lightPos[1] = trans.mData[1];
-		spotData.lightPos[2] = trans.mData[2];
-
-		std::cout << "\n" << "Light position: " << trans.mData[0] << " " << trans.mData[1] << " " << trans.mData[2];
-
-		spotData.lightScale[0] = rot.mData[0];
-		spotData.lightScale[1] = rot.mData[1];
-		spotData.lightScale[2] = rot.mData[2];
-
-		std::cout << "\n" << "Light orientation: " << rot.mData[0] << " " << rot.mData[1] << " " << rot.mData[2];
-
-		spotData.lightRot[0] = scal.mData[0];
-		spotData.lightRot[0] = scal.mData[1];
-		spotData.lightRot[0] = scal.mData[2];
-
-		std::cout << "\n" << "Light scale: " << scal.mData[0] << " " << scal.mData[1] << " " << scal.mData[2] << "\n\n";
-
-		mSpotList.push_back(spotData);
-
-		/*lightData.countSpotlight = mSpotList.size();*/
+		cout << "Light type is not supported." << "\n\n";
 	}
 }
 
@@ -1440,9 +1389,9 @@ void FbxImport::processCamera(FbxCamera * inputCamera)
 
 bool FbxImport::checkMaterialName(const char* materialName)
 {
-	for (int nameIndex = 0; nameIndex < materialList.size(); nameIndex++)
+	for (int nameIndex = 0; nameIndex < mMaterialList.size(); nameIndex++)
 	{
-		if (std::strcmp(materialList[nameIndex].materialName, materialName) == 0)
+		if (std::strcmp(mMaterialList[nameIndex].materialName, materialName) == 0)
 		{
 			importMeshData.materialID = nameIndex;
 			return false; /*The material names are identical.*/
@@ -1452,15 +1401,15 @@ bool FbxImport::checkMaterialName(const char* materialName)
 	if (materialData.materialName == nullptr)
 	{
 		materialData.materialName = materialName;
-		materialList.push_back(materialData);
+		mMaterialList.push_back(materialData);
 		importMeshData.materialID = 0;
 		firstProcess = false;
 		return true; /*This is the first material name.*/
 	}
 
 	materialData.materialName = materialName;
-	materialList.push_back(materialData);
-	importMeshData.materialID = materialList.size() - 1;
+	mMaterialList.push_back(materialData);
+	importMeshData.materialID = mMaterialList.size() - 1;
 
 	return true; /*The two material names are not identical.*/
 
@@ -1492,11 +1441,8 @@ FbxImport::sBlendData* FbxImport::findBlendDataForControlPoint(std::vector<FbxIm
 void FbxImport::assignToHeaderData()
 {
 	mainHeader.meshCount = mTempMeshList.size();
-	mainHeader.materialCount = materialList.size();
-	mainHeader.lightCount = mDirPointList.size() + mSpotList.size();
-
-	lightData.directionalPointCount = mDirPointList.size();
-	lightData.spotlightCount = mSpotList.size();
+	mainHeader.materialCount = mMaterialList.size();
+	mainHeader.lightCount = mLightList.size();
 
 	mainHeader.cameraCount = mCameraList.size();
 
@@ -1595,7 +1541,6 @@ void FbxImport::convertFbxMatrixToFloatArray(FbxAMatrix inputMatrix, float input
 		}
 	}
 }
-
 void FbxImport::WriteToBinary()
 {
 	cout << ">>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<" << "\n" << "\n" << endl;
@@ -1608,17 +1553,16 @@ void FbxImport::WriteToBinary()
 	outfile.write((const char*)&mainHeader, sizeof(sMainHeader));//				Information av hur många meshes som senare kommer att komma, och efter det hur många material osv, samt hur mycket minne den inten som berättar detta tar upp (reservation för vår header)
 	cout << "______________________" << endl;
 	cout << "Main Header" << endl;
-	cout << "meshCount:" << mainHeader.meshCount << endl;
-	cout << "materialCount:" << mainHeader.materialCount << endl;
+	cout << "meshCount: " << mainHeader.meshCount << endl;
+	cout << "materialCount: " << mainHeader.materialCount << endl;
+	cout << "lightCount: " << mainHeader.lightCount << endl;
+	cout << "cameraCount: " << mainHeader.cameraCount << endl;
 	cout << "______________________" << endl;
-	//cout << mainHeader.lightCount << endl;
-	//cout << mainHeader.cameraCount << endl;
-
 
 	for (int i = 0; i < mainHeader.meshCount; i++)
 	{
 		cout << "Mesh: " << i << endl;
-
+		//sMesh has 2 bools... Hmm
 		outfile.write((const char*)&meshList[i], sizeof(sMesh));//													Information av hur många vertices som senare kommer att komma, och efter det hur många skelAnim verticear som kommer komma osv, samt hur mycket minne den inten som berättar detta tar upp(reservation för vår header).En int kommer först, den har värdet 100.  Och den inten kommer ta upp 4 bytes.
 
 		cout << "Mesh vector: " << endl;
@@ -1661,15 +1605,12 @@ void FbxImport::WriteToBinary()
 		cout << "\t";
 		cout << "Allocated memory for " << meshList[i].vertexCount << " vertices" << endl;
 
+		//Om vertexdata allokerat == 0, problem?
 		outfile.write((const char*)mList[i].vList.data(), sizeof(sVertex) * meshList[i].vertexCount);//				Skriver ut alla vertices i får vArray, pos, nor, rgba 100 gånger. Och minnet 100 Vertices tar upp.
 
 																									 //cout << "SkelAnimVert vector: NULL" << endl;
 
-<<<<<<< HEAD
-=======
 																									 //cout << "Joint vector: NULL" << endl;
-
->>>>>>> d58fd39d6179db1757e9cfcc4f7a0621cf3d8073
 		cout << "______________________" << endl;
 	}
 
@@ -1680,183 +1621,75 @@ void FbxImport::WriteToBinary()
 		cout << "Material vector: " << endl;
 
 		cout << "\t";
-		cout << &materialList[i] << endl;
+		cout << &mMaterialList[i] << endl;
 
 		cout << "\t";
 		cout << "Allocated memory for " << mainHeader.materialCount << " materials" << endl;
 
-		outfile.write((const char*)&materialList[i], sizeof(sMaterial) * mainHeader.materialCount);//				Information av hur många material som senare kommer att komma, samt hur mycket minne den inten som berättar detta tar upp.
+		outfile.write((const char*)&mMaterialList[i], sizeof(sMaterial) * mainHeader.materialCount); //Information av hur många material som senare kommer att komma, samt hur mycket minne den inten som berättar detta tar upp.
+
+		cout << "______________________" << endl;
+	}
+
+	for (int i = 0; i < mainHeader.lightCount; i++)
+	{
+		cout << "Light: " << i << endl;
+
+		cout << "Light vector: " << endl;
+
+		cout << "\t";
+		cout << &mLightList[i] << endl; 
+
+		cout << "\t";
+		cout << "Allocated memory for " << mainHeader.lightCount << " lights" << endl;
+
+		outfile.write((const char*)&mLightList[i], sizeof(sLight) * mainHeader.lightCount);
+
+		cout << "______________________" << endl;
+	}
+
+	for (int i = 0; i < mainHeader.cameraCount; i++)
+	{
+		cout << "Camera: " << i << endl;
+
+		cout << "Camera vector: " << endl;
+
+		cout << "\t";
+		cout << "Allocated memory for " << mainHeader.cameraCount << " cameras" << endl;
+
+		outfile.write((const char*)&mCameraList[i], sizeof(sCamera) * mainHeader.cameraCount);
 
 		cout << "______________________" << endl;
 	}
 
 	outfile.close();
-
-
-	//Read from binary
-
-
-	std::ifstream infile("testBin.bin", std::ifstream::binary);//		Öppnar filen vi nyss skapade men ska nu läsa istället
-
-
-	cout << ">>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<" << "\n" << "\n" << endl;
-	cout << "Binary Reader" << endl;
-	cout << "\n" << endl;
-
-
-	infile.read((char*)&read_mainHeader, sizeof(sMainHeader));//				Information av hur många meshes som senare kommer att komma, och efter det hur många material osv, samt hur mycket minne den inten som berättar detta tar upp (reservation för vår header)
-	cout << "______________________" << endl;
-	cout << "Main Header" << endl;
-	cout << "meshCount:" << read_mainHeader.meshCount << endl;
-	cout << "materialCount:" << read_mainHeader.materialCount << endl;
-	cout << "______________________" << endl;
-	//cout << mainHeader.lightCount << endl;
-	//cout << mainHeader.cameraCount << endl;
-
-
-	for (int i = 0; i < read_mainHeader.meshCount; i++)
-	{
-		cout << "Mesh: " << i << endl;
-
-		read_meshList.resize(read_mainHeader.meshCount);
-
-		infile.read((char*)&read_meshList[i], sizeof(sMesh));//													Information av hur många vertices som senare kommer att komma, och efter det hur många skelAnim verticear som kommer komma osv, samt hur mycket minne den inten som berättar detta tar upp(reservation för vår header).En int kommer först, den har värdet 100.  Och den inten kommer ta upp 4 bytes.
-
-		cout << "Mesh vector: " << endl;
-
-		cout << "\t";
-		cout << "xyz: ";
-		cout << read_meshList[i].translate[0];
-		cout << read_meshList[i].translate[1];
-		cout << read_meshList[i].translate[2] << endl;
-
-		cout << "\t";
-		cout << "rot: ";
-		cout << read_meshList[i].rotation[0];
-		cout << read_meshList[i].rotation[1];
-		cout << read_meshList[i].rotation[2] << endl;
-
-		cout << "\t";
-		cout << "scale: ";
-		cout << read_meshList[i].scale[0];
-		cout << read_meshList[i].scale[1];
-		cout << read_meshList[i].scale[2] << endl;
-
-		cout << "\t";
-		cout << "Vertex Count: ";
-		cout << read_meshList[i].vertexCount << endl;
-		//cout << "SkelAnimVert Count: 0" << endl;
-		//cout << "Joint Count: 0"  << endl;
-
-		cout << "\t";
-		cout << "Material ID: ";
-		cout << read_meshList[i].materialID << endl;
-		//												detta är storleken av innehållet i vList.data()
-
-		cout << "\n";
-		cout << "Vertex vector: " << endl;
-
-		cout << "\t";
-		cout << read_meshList[i].vList.data() << endl;
-
-		cout << "\t";
-		cout << "Allocated memory for " << read_meshList[i].vertexCount << " vertices" << endl;
-
-
-		read_meshList[i].vList.resize(read_meshList[i].vertexCount);
-
-		infile.read((char*)read_meshList[i].vList.data(), sizeof(sVertex) * read_meshList[i].vertexCount);//				Skriver ut alla vertices i får vArray, pos, nor, rgba 100 gånger. Och minnet 100 Vertices tar upp.
-
-																										  //cout << "SkelAnimVert vector: NULL" << endl;
-
-																										  //cout << "Joint vector: NULL" << endl;
-
-		cout << "______________________" << endl;
-	}
-
-	read_materialList.resize(read_mainHeader.materialCount);
-
-	for (int i = 0; i < read_mainHeader.materialCount; i++)
-	{
-		cout << "Material: " << i << endl;
-
-		cout << "Material vector: " << endl;
-
-		cout << "\t";
-		cout << &read_materialList[i] << endl;
-
-		cout << "\t";
-		cout << "Allocated memory for " << read_mainHeader.materialCount << " materials" << endl;
-
-		infile.read((char*)&read_materialList[i], sizeof(sMaterial) * read_mainHeader.materialCount);//				Information av hur många material som senare kommer att komma, samt hur mycket minne den inten som berättar detta tar upp.
-
-		cout << "______________________" << endl;
-<<<<<<< HEAD
-	}	
-
-	outfile.close();
-	
-=======
-	}
-
-
-	infile.close();
-
-	for (int i = 0; i < read_mainHeader.meshCount; i++)
-	{
-		int result = memcmp(read_meshList[i].vList.data(), mList[i].vList.data(), sizeof(read_sVertex) * meshList[i].vertexCount);
-
-		bool equal = true;
-
-		for (int v = 0; v < meshList[i].vertexCount; v++)//							Här jämför vi listan vi hade när vi SKREV ner med listan vi fyller när vi LÄSER in för att se om de är lika
-		{//																	Vi kollar bara position och stegar xyz efter xyz efter xyz
-			read_meshList[i].vList[v].vertexPos[0];
-
-			if (!EQUAL(mList[i].vList[v].vertexPos[0], read_meshList[i].vList[v].vertexPos[0]) ||
-				!EQUAL(mList[i].vList[v].vertexPos[1], read_meshList[i].vList[v].vertexPos[1]) ||
-				!EQUAL(mList[i].vList[v].vertexPos[2], read_meshList[i].vList[v].vertexPos[2]))
-			{
-				equal = false;//											Så fort den finner att någon utav dessa xyzan inte är lika så sätts vår equal bool till false. Standard för den är true
-				break;
-			}
-		}
-
-		std::cout << "Streams positions are equal: " << equal << std::endl;// Om vArray.pos var samma som vArray_read.pos	
-		std::cout << "Memory compare are equal: " << (result == 0) << std::endl;// Om memory compare på dessa listor var samma
-	}
-
->>>>>>> d58fd39d6179db1757e9cfcc4f7a0621cf3d8073
 }
 
 void FbxImport::readFromBinary()
 {
-
 	//Read from binary
 
-
 	std::ifstream infile("testBin.bin", std::ifstream::binary);//		Öppnar filen vi nyss skapade men ska nu läsa istället
-
 
 	cout << ">>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<" << "\n" << "\n" << endl;
 	cout << "Binary Reader" << endl;
 	cout << "\n" << endl;
 
-
 	infile.read((char*)&read_mainHeader, sizeof(read_sMainHeader));//				Information av hur många meshes som senare kommer att komma, och efter det hur många material osv, samt hur mycket minne den inten som berättar detta tar upp (reservation för vår header)
 	cout << "______________________" << endl;
 	cout << "Main Header" << endl;
-	cout << "meshCount:" << read_mainHeader.meshCount << endl;
-	cout << "materialCount:" << read_mainHeader.materialCount << endl;
+	cout << "meshCount: " << read_mainHeader.meshCount << endl;
+	cout << "materialCount: " << read_mainHeader.materialCount << endl;
+	cout << "lightCount: " << read_mainHeader.lightCount << endl;
+	cout << "cameraCount: " << read_mainHeader.cameraCount << endl;
 	cout << "______________________" << endl;
-	//cout << mainHeader.lightCount << endl;
-	//cout << mainHeader.cameraCount << endl;
 
+
+	read_meshList.resize(read_mainHeader.meshCount);
 
 	for (int i = 0; i < read_mainHeader.meshCount; i++)
 	{
 		cout << "Mesh: " << i << endl;
-
-		read_meshList.resize(read_mainHeader.meshCount);
 
 		infile.read((char*)&read_meshList[i], sizeof(read_sMesh));//													Information av hur många vertices som senare kommer att komma, och efter det hur många skelAnim verticear som kommer komma osv, samt hur mycket minne den inten som berättar detta tar upp(reservation för vår header).En int kommer först, den har värdet 100.  Och den inten kommer ta upp 4 bytes.
 
@@ -1903,15 +1736,13 @@ void FbxImport::readFromBinary()
 		cout << "\t";
 		cout << "Allocated memory for " << read_meshList[i].vertexCount << " vertices" << endl;
 
-
 		read_mList[i].vList.resize(read_meshList[i].vertexCount);
 
 		infile.read((char*)read_mList[i].vList.data(), sizeof(read_sVertex) * read_meshList[i].vertexCount);//				Skriver ut alla vertices i får vArray, pos, nor, rgba 100 gånger. Och minnet 100 Vertices tar upp.
 
-																											//cout << "SkelAnimVert vector: NULL" << endl;
+		//cout << "SkelAnimVert vector: NULL" << endl;
 
-																											//cout << "Joint vector: NULL" << endl;
-
+		//cout << "Joint vector: NULL" << endl;
 		cout << "______________________" << endl;
 	}
 
@@ -1934,6 +1765,40 @@ void FbxImport::readFromBinary()
 		cout << "______________________" << endl;
 	}
 
+	read_mLightList.resize(mainHeader.lightCount);
+
+	for (int i = 0; i < mainHeader.lightCount; i++)
+	{
+		cout << "Light: " << i << endl;
+
+		cout << "Light vector: " << endl;
+
+		cout << "\t";
+		cout << &read_mLightList[i] << endl;
+
+		cout << "\t";
+		cout << "Allocated memory for " << read_mainHeader.lightCount << " lights" << endl;
+
+		infile.read((char*)&read_mLightList[i], sizeof(sLight) * read_mainHeader.lightCount);
+
+		cout << "______________________" << endl;
+	}
+
+	read_mCameraList.resize(mainHeader.cameraCount);
+
+	for (int i = 0; i < mainHeader.cameraCount; i++)
+	{
+		cout << "Camera: " << i << endl;
+
+		cout << "Camera vector: " << endl;
+
+		cout << "\t";
+		cout << "Allocated memory for " << read_mainHeader.cameraCount << " cameras" << endl;
+
+		infile.read((char*)&read_mCameraList[i], sizeof(sCamera) * read_mainHeader.cameraCount);
+
+		cout << "______________________" << endl;
+	}
 
 	infile.close();
 }
