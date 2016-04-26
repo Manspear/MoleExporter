@@ -123,6 +123,7 @@ void FbxImport::recursiveJointHierarchyTraversal(FbxNode * inNode, int currIndex
 		currJoint.parentJointID = inNodeParentIndex;
 		currJoint.name = inNode->GetName();
 		currJoint.jointID = currIndex;
+		currJoint.bBoxID = -1337;
 
 		//Adding bbox-children to the joint
 		for(int c = 0; c < inNode->GetChildCount(); c++)
@@ -265,9 +266,8 @@ void FbxImport::initializeImporter(const char* filePath)
 			importMeshData.meshName = childNode->GetName();
 			importMeshData.meshID = meshCounter;
 			importMeshData.isBoundingBox = false; //is by default false.
-
+			
 			processMesh((FbxMesh*)childNode->GetNodeAttribute());
-			meshCounter += 1;
 
 			/*headerData.meshCount = mMeshList.size(); */
 		}
@@ -285,6 +285,60 @@ void FbxImport::initializeImporter(const char* filePath)
 
 			/*headerData.cameraCount = mCameraList.size();*/
 		}
+	}
+	//---------------------------------------------------------
+	//Second pass to get the mesh-bbox-children into the vector
+	//---------------------------------------------------------
+	for (int childIndex = 0; childIndex < pmRootNode->GetChildCount(); childIndex++)
+	{
+		FbxNode* childNode = pmRootNode->GetChild(childIndex);
+		FbxNodeAttribute::EType attributeType = childNode->GetNodeAttribute()->GetAttributeType();
+
+		if (childNode->GetNodeAttribute() == NULL)
+			continue;
+
+		if (attributeType != FbxNodeAttribute::eMesh)
+			continue;
+
+		if (attributeType == FbxNodeAttribute::eMesh)
+		{
+			std::cout << "\n" << "Object nr: " << meshCounter << " Name: " << childNode->GetName() << "\n";
+
+			importMeshData = sImportMeshData();
+			importMeshData.meshID = meshCounter;
+			importMeshData.isBoundingBox = false; //is by default false.
+
+			FbxMesh* currMesh = (FbxMesh*)childNode->GetNodeAttribute();
+
+			unsigned int deformerCount = currMesh->GetDeformerCount(FbxDeformer::eSkin);
+
+			for (unsigned int deformerCounter = 0; deformerCounter < deformerCount; ++deformerCounter)
+			{
+				FbxSkin* currSkin = reinterpret_cast<FbxSkin*>(currMesh->GetDeformer(0, FbxDeformer::eSkin));
+				if (!currSkin)
+					continue;
+
+				const unsigned int clusterCount = currSkin->GetClusterCount();
+				for (unsigned int clusterCounter = 0; clusterCounter < clusterCount; ++clusterCounter)
+				{
+					FbxCluster* currCluster = currSkin->GetCluster(clusterCounter);
+					FbxNode* currJoint = currCluster->GetLink();
+
+					const unsigned int jointChildCount = currJoint->GetChildCount();
+					for (int i = 0; i < jointChildCount; i++)
+					{
+						if(currJoint->GetChild(i)->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eMesh)
+						{
+							importMeshData.meshName = currJoint->GetChild(i)->GetName();
+							importMeshData.isBoundingBox = true;
+							processMesh((FbxMesh*)currJoint->GetChild(i)->GetNodeAttribute());
+						}
+					}
+				}
+			}
+		}
+
+
 	}
 
 	processBoundingBoxes();
@@ -318,6 +372,8 @@ void FbxImport::processMesh(FbxMesh * inputMesh)
 	headerData.materialCount = mMaterialList.size();*/
 
 	mTempMeshList.push_back(importMeshData);
+
+	meshCounter += 1;
 }
 
 void FbxImport::processVertices(FbxMesh * inputMesh)
@@ -1114,6 +1170,33 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 						}
 						currAnimation.keyList.push_back(tempKey);
 					}
+					const unsigned int jointChildCount = currJoint->GetChildCount();
+
+					for (int jointChildCounter = 0; jointChildCounter < jointChildCount; ++jointChildCounter)
+					{
+						FbxNode* childNode = currJoint->GetChild(jointChildCounter);
+						FbxNodeAttribute::EType attributeType = childNode->GetNodeAttribute()->GetAttributeType();
+						if (attributeType == FbxNodeAttribute::eMesh)
+						{
+							//Calling processMesh here because the mesh is "hidden" from the root node by the joint-parent.
+							//Hmm... meshID can be found here. 
+							//WAIT! If the meshCounter is called upon inside of the processMesh-function... Then this processMesh-call will overwrite the previous one. Fucked up.
+							
+							//processMesh((FbxMesh*)childNode->GetNodeAttribute());
+							
+							//Where should the meshIndex be? It is curr inside processMesh. 
+							//Answer: I shouldn't call processMesh inside of processMesh
+
+							//But it's here that I loop through joints. 
+							//Should I have a "second pass" of reading through all of the joints in the scene?
+							//Or should I have a "secondary mesh list" that I add on top of the current mesh list later? <--- Cool idéa. 
+							//I wanna use the same "processMesh" function for it. Or "gate" all functions with a bool saying "isSecondary"
+							//If "isSecondary" then the stuff is appended to the secondary vector.
+
+							//The less messy solution would be to (again) loop through all the meshes in the scene, but now just query for joints and their bBox-children.
+						}
+					}
+
 					pmSceneJoints[currJointIndex].animationState.push_back(currAnimation);
 					//importMeshData.jointList.push_back
 				}
