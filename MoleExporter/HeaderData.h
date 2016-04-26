@@ -17,6 +17,9 @@ struct sMesh
 	float rotation[3];
 	float scale[3];
 
+	bool isBoundingBox;
+	bool isAnimated;
+
 	unsigned int vertexCount;
 	//unsigned int skelAnimVertexCount;
 	//unsigned int jointCount;
@@ -58,6 +61,7 @@ struct sJoint
 {
 	int jointID;
 	int parentJointID;
+	int bBoxID;
 
 	float pos[3];
 	float rot[3];
@@ -76,8 +80,10 @@ struct sAnimationState
 struct sKeyFrame
 {
 	float keyTime;
-	float keyScale;
+	float keyPos[3];
 	float keyRotate[3];
+	float keyScale[3];
+	
 };
 
 struct sMaterial
