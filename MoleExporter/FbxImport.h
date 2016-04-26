@@ -124,7 +124,7 @@ public:
 
 	void assignToHeaderData();
 
-	void WriteToBinary();
+	void WriteToBinary(const char* fileName);
 
 	void readFromBinary();
 

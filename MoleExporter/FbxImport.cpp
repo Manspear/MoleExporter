@@ -1537,14 +1537,14 @@ void FbxImport::convertFbxMatrixToFloatArray(FbxAMatrix inputMatrix, float input
 		}
 	}
 }
-void FbxImport::WriteToBinary()
+void FbxImport::WriteToBinary(const char* fileName)
 {
 	cout << ">>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<" << "\n" << "\n" << endl;
 	cout << "Binary Writer" << endl;
 	cout << "\n" << endl;
 
 
-	std::ofstream outfile("testBin.bin", std::ofstream::binary);//				Öppnar en fil som är redo för binärt skriv
+	std::ofstream outfile(fileName, std::ofstream::binary);//				Öppnar en fil som är redo för binärt skriv
 																//				write header
 	outfile.write((const char*)&gMainHeader, sizeof(sMainHeader));//				Information av hur många meshes som senare kommer att komma, och efter det hur många material osv, samt hur mycket minne den inten som berättar detta tar upp (reservation för vår header)
 	cout << "______________________" << endl;
