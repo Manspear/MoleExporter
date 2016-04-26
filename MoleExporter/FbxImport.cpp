@@ -1190,7 +1190,7 @@ void FbxImport::processDiffuseMaps(FbxProperty diffuseProp)
 	{
 		FbxTexture* texture = diffuseProp.GetSrcObject<FbxTexture>(textureIndex);
 		FbxFileTexture* fileTexture = FbxCast<FbxFileTexture>(texture);
-		FbxString fileTextureName = fileTexture->GetName();
+		FbxString fileTextureName = fileTexture->GetFileName();
 
 		std::cout << "\n" << "Texturename Nr " << textureCounter + 1 << ": " << fileTextureName << "\n";
 
@@ -1211,7 +1211,7 @@ void FbxImport::processSpecularMaps(FbxProperty propSpecular)
 	{
 		FbxTexture* texture = propSpecular.GetSrcObject<FbxTexture>(textureIndex);
 		FbxFileTexture* fileTexture = FbxCast<FbxFileTexture>(texture);
-		FbxString fileTextureName = fileTexture->GetName();
+		FbxString fileTextureName = fileTexture->GetFileName();
 
 		std::cout << "\n" << "Texturename Nr " << textureCounter + 1 << ": " << fileTextureName << "\n";
 
@@ -1232,7 +1232,7 @@ void FbxImport::processNormalMaps(FbxProperty propNormal)
 	{
 		FbxTexture* texture = propNormal.GetSrcObject<FbxTexture>(textureIndex);
 		FbxFileTexture* fileTexture = FbxCast<FbxFileTexture>(texture);
-		FbxString fileTextureName = fileTexture->GetName();
+		FbxString fileTextureName = fileTexture->GetFileName();
 
 		std::cout << "\n" << "Texturename Nr " << textureCounter + 1 << ": " << fileTextureName << "\n";
 
