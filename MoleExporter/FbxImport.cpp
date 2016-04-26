@@ -858,7 +858,7 @@ void FbxImport::processMaterials(FbxMesh * inputMesh)
 
 					if (firstProcess != true)
 					{
-						materialData.materialName = materialName;
+						gMaterialData.materialName = materialName;
 					}
 
 					bool materialFlag = checkMaterialName(materialName);
@@ -1284,22 +1284,22 @@ void FbxImport::processLight(FbxLight * inputLight)
 	{
 		std::cout << "\n" << "Light nr " << lightCounter++ << ": " << lightName << "\n\n"; 
 
-		lightData.lightID = lightType;
+		gLightData.lightID = lightType;
 
 		cout << "Light type: " << lightType << "\n\n";
 
 		FbxVector4 lightColor = inputLight->Color.Get();
 
-		lightData.color[0] = lightColor.mData[0];
-		lightData.color[1] = lightColor.mData[1];
-		lightData.color[2] = lightColor.mData[2];
+		gLightData.color[0] = lightColor.mData[0];
+		gLightData.color[1] = lightColor.mData[1];
+		gLightData.color[2] = lightColor.mData[2];
 
 		std::cout << "\n" << "Light color: " << lightColor.mData[0] << " "
 			<< lightColor.mData[1] << " " << lightColor.mData[2];
 
 		float lightIntensity = inputLight->Intensity.Get();
 
-		lightData.intensity = lightIntensity;
+		gLightData.intensity = lightIntensity;
 
 		std::cout << "\n" << "Light intensity: " << lightIntensity;
 
@@ -1311,25 +1311,25 @@ void FbxImport::processLight(FbxLight * inputLight)
 		rot = lightPosition.GetR();
 		scal = lightPosition.GetS();
 
-		lightData.lightPos[0] = trans.mData[0];
-		lightData.lightPos[1] = trans.mData[1];
-		lightData.lightPos[2] = trans.mData[2];
+		gLightData.lightPos[0] = trans.mData[0];
+		gLightData.lightPos[1] = trans.mData[1];
+		gLightData.lightPos[2] = trans.mData[2];
 
 		std::cout << "\n" << "Light position: " << trans.mData[0] << " " << trans.mData[1] << " " << trans.mData[2];
 
-		lightData.lightScale[0] = rot.mData[0];
-		lightData.lightScale[1] = rot.mData[1];
-		lightData.lightScale[2] = rot.mData[2];
+		gLightData.lightScale[0] = rot.mData[0];
+		gLightData.lightScale[1] = rot.mData[1];
+		gLightData.lightScale[2] = rot.mData[2];
 
 		std::cout << "\n" << "Light orientation: " << rot.mData[0] << " " << rot.mData[1] << " " << rot.mData[2];
 
-		lightData.lightRot[0] = scal.mData[0];
-		lightData.lightRot[0] = scal.mData[1];
-		lightData.lightRot[0] = scal.mData[2];
+		gLightData.lightRot[0] = scal.mData[0];
+		gLightData.lightRot[0] = scal.mData[1];
+		gLightData.lightRot[0] = scal.mData[2];
 
 		std::cout << "\n" << "Light scale: " << scal.mData[0] << " " << scal.mData[1] << " " << scal.mData[2] << "\n\n";
 
-		mLightList.push_back(lightData);
+		mLightList.push_back(gLightData);
 	}
 
 	else
@@ -1349,38 +1349,38 @@ void FbxImport::processCamera(FbxCamera * inputCamera)
 	std::cout << "\n" << "Camera position: " << cameraPos.mData[0] << " " << cameraPos.mData[1]
 		<< " " << cameraPos.mData[2];
 
-	camData.camPos[0] = cameraPos.mData[0];
-	camData.camPos[1] = cameraPos.mData[1];
-	camData.camPos[2] = cameraPos.mData[2];
+	gCamData.camPos[0] = cameraPos.mData[0];
+	gCamData.camPos[1] = cameraPos.mData[1];
+	gCamData.camPos[2] = cameraPos.mData[2];
 
 	FbxVector4 camUpVector = inputCamera->UpVector.Get();
 
 	std::cout << "\n" << "Camera Up Vector: " << camUpVector.mData[0] << " " << camUpVector.mData[1]
 		<< " " << camUpVector.mData[2];
 
-	camData.upVector[0] = camUpVector.mData[0];
-	camData.upVector[1] = camUpVector.mData[1];
-	camData.upVector[2] = camUpVector.mData[2];
+	gCamData.upVector[0] = camUpVector.mData[0];
+	gCamData.upVector[1] = camUpVector.mData[1];
+	gCamData.upVector[2] = camUpVector.mData[2];
 
 	float fov = inputCamera->FieldOfView.Get();
 
 	std::cout << "\n" << "Field of view: " << fov << " degrees";
 
-	camData.fieldOfView = fov;
+	gCamData.fieldOfView = fov;
 
 	float nearPlane = inputCamera->NearPlane.Get();
 
 	std::cout << "\n" << "Near plane: " << nearPlane;
 
-	camData.nearPlane = nearPlane;
+	gCamData.nearPlane = nearPlane;
 
 	float farPlane = inputCamera->FarPlane.Get();
 
 	std::cout << "\n" << "Far plane: " << farPlane;
 
-	camData.farPlane = farPlane;
+	gCamData.farPlane = farPlane;
 
-	mCameraList.push_back(camData);
+	mCameraList.push_back(gCamData);
 }
 
 bool FbxImport::checkMaterialName(const char* materialName)
@@ -1394,17 +1394,17 @@ bool FbxImport::checkMaterialName(const char* materialName)
 		}
 	}
 
-	if (materialData.materialName == nullptr)
+	if (gMaterialData.materialName == nullptr)
 	{
-		materialData.materialName = materialName;
-		mMaterialList.push_back(materialData);
+		gMaterialData.materialName = materialName;
+		mMaterialList.push_back(gMaterialData);
 		importMeshData.materialID = 0;
 		firstProcess = false;
 		return true; /*This is the first material name.*/
 	}
 
-	materialData.materialName = materialName;
-	mMaterialList.push_back(materialData);
+	gMaterialData.materialName = materialName;
+	mMaterialList.push_back(gMaterialData);
 	importMeshData.materialID = mMaterialList.size() - 1;
 
 	return true; /*The two material names are not identical.*/
@@ -1436,23 +1436,23 @@ FbxImport::sBlendData* FbxImport::findBlendDataForControlPoint(std::vector<FbxIm
 
 void FbxImport::assignToHeaderData()
 {
-	mainHeader.meshCount = mTempMeshList.size();
-	mainHeader.materialCount = mMaterialList.size();
-	mainHeader.lightCount = mLightList.size();
+	gMainHeader.meshCount = mTempMeshList.size();
+	gMainHeader.materialCount = mMaterialList.size();
+	gMainHeader.lightCount = mLightList.size();
 
-	mainHeader.cameraCount = mCameraList.size();
+	gMainHeader.cameraCount = mCameraList.size();
 
-	meshList.resize(mainHeader.meshCount);
+	meshList.resize(gMainHeader.meshCount);
 
 	mList.resize(mTempMeshList.size());
 
 	std::cout << meshList.size() << "\n";
 	cout << "\n\n" << "/////////////Information to binary format/////////////" << "\n\n";
 
-	cout << "Count of meshes: " << mainHeader.meshCount << "\n\n";
-	cout << "Count of materials: " << mainHeader.materialCount << "\n\n";
-	cout << "Count of lights: " << mainHeader.lightCount << "\n\n";
-	cout << "Count of cameras: " << mainHeader.cameraCount << "\n\n";
+	cout << "Count of meshes: " << gMainHeader.meshCount << "\n\n";
+	cout << "Count of materials: " << gMainHeader.materialCount << "\n\n";
+	cout << "Count of lights: " << gMainHeader.lightCount << "\n\n";
+	cout << "Count of cameras: " << gMainHeader.cameraCount << "\n\n";
 
 	cout << "////////////////////////////////////////////////" << "\n\n";
 
@@ -1546,16 +1546,16 @@ void FbxImport::WriteToBinary()
 
 	std::ofstream outfile("testBin.bin", std::ofstream::binary);//				Öppnar en fil som är redo för binärt skriv
 																//				write header
-	outfile.write((const char*)&mainHeader, sizeof(sMainHeader));//				Information av hur många meshes som senare kommer att komma, och efter det hur många material osv, samt hur mycket minne den inten som berättar detta tar upp (reservation för vår header)
+	outfile.write((const char*)&gMainHeader, sizeof(sMainHeader));//				Information av hur många meshes som senare kommer att komma, och efter det hur många material osv, samt hur mycket minne den inten som berättar detta tar upp (reservation för vår header)
 	cout << "______________________" << endl;
 	cout << "Main Header" << endl;
-	cout << "meshCount: " << mainHeader.meshCount << endl;
-	cout << "materialCount: " << mainHeader.materialCount << endl;
-	cout << "lightCount: " << mainHeader.lightCount << endl;
-	cout << "cameraCount: " << mainHeader.cameraCount << endl;
+	cout << "meshCount: " << gMainHeader.meshCount << endl;
+	cout << "materialCount: " << gMainHeader.materialCount << endl;
+	cout << "lightCount: " << gMainHeader.lightCount << endl;
+	cout << "cameraCount: " << gMainHeader.cameraCount << endl;
 	cout << "______________________" << endl;
 
-	for (int i = 0; i < mainHeader.meshCount; i++)
+	for (int i = 0; i < gMainHeader.meshCount; i++)
 	{
 		cout << "Mesh: " << i << endl;
 		//sMesh has 2 bools... Hmm
@@ -1610,7 +1610,7 @@ void FbxImport::WriteToBinary()
 		cout << "______________________" << endl;
 	}
 
-	for (int i = 0; i < mainHeader.materialCount; i++)
+	for (int i = 0; i < gMainHeader.materialCount; i++)
 	{
 		cout << "Material: " << i << endl;
 
@@ -1620,14 +1620,14 @@ void FbxImport::WriteToBinary()
 		cout << &mMaterialList[i] << endl;
 
 		cout << "\t";
-		cout << "Allocated memory for " << mainHeader.materialCount << " materials" << endl;
+		cout << "Allocated memory for " << gMainHeader.materialCount << " materials" << endl;
 
-		outfile.write((const char*)&mMaterialList[i], sizeof(sMaterial) * mainHeader.materialCount); //Information av hur många material som senare kommer att komma, samt hur mycket minne den inten som berättar detta tar upp.
+		outfile.write((const char*)&mMaterialList[i], sizeof(sMaterial) * gMainHeader.materialCount); //Information av hur många material som senare kommer att komma, samt hur mycket minne den inten som berättar detta tar upp.
 
 		cout << "______________________" << endl;
 	}
 
-	for (int i = 0; i < mainHeader.lightCount; i++)
+	for (int i = 0; i < gMainHeader.lightCount; i++)
 	{
 		cout << "Light: " << i << endl;
 
@@ -1637,23 +1637,23 @@ void FbxImport::WriteToBinary()
 		cout << &mLightList[i] << endl; 
 
 		cout << "\t";
-		cout << "Allocated memory for " << mainHeader.lightCount << " lights" << endl;
+		cout << "Allocated memory for " << gMainHeader.lightCount << " lights" << endl;
 
-		outfile.write((const char*)&mLightList[i], sizeof(sLight) * mainHeader.lightCount);
+		outfile.write((const char*)&mLightList[i], sizeof(sLight) * gMainHeader.lightCount);
 
 		cout << "______________________" << endl;
 	}
 
-	for (int i = 0; i < mainHeader.cameraCount; i++)
+	for (int i = 0; i < gMainHeader.cameraCount; i++)
 	{
 		cout << "Camera: " << i << endl;
 
 		cout << "Camera vector: " << endl;
 
 		cout << "\t";
-		cout << "Allocated memory for " << mainHeader.cameraCount << " cameras" << endl;
+		cout << "Allocated memory for " << gMainHeader.cameraCount << " cameras" << endl;
 
-		outfile.write((const char*)&mCameraList[i], sizeof(sCamera) * mainHeader.cameraCount);
+		outfile.write((const char*)&mCameraList[i], sizeof(sCamera) * gMainHeader.cameraCount);
 
 		cout << "______________________" << endl;
 	}
@@ -1761,9 +1761,9 @@ void FbxImport::readFromBinary()
 		cout << "______________________" << endl;
 	}
 
-	read_mLightList.resize(mainHeader.lightCount);
+	read_mLightList.resize(gMainHeader.lightCount);
 
-	for (int i = 0; i < mainHeader.lightCount; i++)
+	for (int i = 0; i < gMainHeader.lightCount; i++)
 	{
 		cout << "Light: " << i << endl;
 
@@ -1780,9 +1780,9 @@ void FbxImport::readFromBinary()
 		cout << "______________________" << endl;
 	}
 
-	read_mCameraList.resize(mainHeader.cameraCount);
+	read_mCameraList.resize(gMainHeader.cameraCount);
 
-	for (int i = 0; i < mainHeader.cameraCount; i++)
+	for (int i = 0; i < gMainHeader.cameraCount; i++)
 	{
 		cout << "Camera: " << i << endl;
 
