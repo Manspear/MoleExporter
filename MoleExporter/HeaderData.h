@@ -11,6 +11,8 @@ struct sMainHeader
 
 struct sMesh
 {
+	char meshName[256];
+
 	unsigned int materialID;
 
 	float translate[3];
@@ -88,7 +90,7 @@ struct sKeyFrame
 
 struct sMaterial
 {
-	const char* materialName;
+	char materialName[256];
 
 	float ambientColor[3];
 	float diffuseColor[3];
@@ -96,9 +98,9 @@ struct sMaterial
 
 	float shinyFactor;
 
-	wchar_t* diffuseTexture;
-	wchar_t* specularTexture;
-	wchar_t* normalTexture;
+	char diffuseTexture[256];
+	char specularTexture[256];
+	char normalTexture[256];
 };
 
 static std::vector<sMaterial> mMaterialList;

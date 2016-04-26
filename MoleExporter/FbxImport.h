@@ -55,6 +55,7 @@ public:
 	struct sImportMeshData
 	{
 		const char* meshName; //The meshname is used for finding bboxmeshes. Use a function like "findMeshIDByName" when all of the meshi are processed.
+		char storeName[256];
 		unsigned int meshID; //The "order that the meshes are read" is the mesh ID. 0-based.
 
 		unsigned int materialID;
