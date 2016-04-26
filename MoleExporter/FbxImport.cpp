@@ -124,14 +124,16 @@ void FbxImport::recursiveJointHierarchyTraversal(FbxNode * inNode, int currIndex
 		currJoint.name = inNode->GetName();
 		currJoint.jointID = currIndex;
 		currJoint.bBoxID = -1337;
-
+		currJoint.bboxMeshName = nullptr;
 		//Adding bbox-children to the joint
 		for(int c = 0; c < inNode->GetChildCount(); c++)
 		{
 			FbxNodeAttribute::EType attributeType = inNode->GetChild(c)->GetNodeAttribute()->GetAttributeType();
 			if (attributeType == FbxNodeAttribute::eMesh) 
 			{
-				currJoint.bboxMeshName = inNode->GetChild(c)->GetName();
+				char* bBoxName;
+				bBoxName = const_cast<char*>(inNode->GetChild(c)->GetName());
+				currJoint.bboxMeshName = bBoxName;
 			}
 		}
 
@@ -171,7 +173,8 @@ void FbxImport::findBBoxByName(const char * bBoxName, int meshIndex, int jointIn
 		for (unsigned int i = 0; i < mTempMeshList.size(); ++i)
 		{
 			//Note: * before pointer to get object
-			int compareValue = std::strcmp(bBoxName, mTempMeshList[i].meshName);
+			const char* compareName = mTempMeshList[i].meshName;
+			int compareValue = std::strcmp(bBoxName, compareName);
 			if (compareValue == 0) {
 				//asdf
 				mTempMeshList[i].isBoundingBox = true;
@@ -1209,13 +1212,17 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 
 void FbxImport::processBoundingBoxes()
 {
+	char* popo = "kkk";
+	const char* ooo = popo;
+
 	const unsigned int meshCount = mTempMeshList.size();
 	for (unsigned int i = 0; i < meshCount; i++)
 	{
 		const unsigned int jointCount = mTempMeshList[i].jointList.size();
 		for (unsigned int j = 0; j < jointCount; j++)
 		{
-			findBBoxByName(mTempMeshList[i].jointList[j].bboxMeshName, i, j);
+			if(mTempMeshList[i].jointList[j].bboxMeshName != nullptr)
+				findBBoxByName(mTempMeshList[i].jointList[j].bboxMeshName, i, j);	
 		}
 	}
 }
@@ -1633,7 +1640,7 @@ void FbxImport::WriteToBinary()
 	for (int i = 0; i < mainHeader.meshCount; i++)
 	{
 		cout << "Mesh: " << i << endl;
-
+		//sMesh has 2 bools... Hmm
 		outfile.write((const char*)&meshList[i], sizeof(sMesh));//													Information av hur många vertices som senare kommer att komma, och efter det hur många skelAnim verticear som kommer komma osv, samt hur mycket minne den inten som berättar detta tar upp(reservation för vår header).En int kommer först, den har värdet 100.  Och den inten kommer ta upp 4 bytes.
 
 		cout << "Mesh vector: " << endl;
@@ -1676,6 +1683,7 @@ void FbxImport::WriteToBinary()
 		cout << "\t";
 		cout << "Allocated memory for " << meshList[i].vertexCount << " vertices" << endl;
 
+		//Om vertexdata allokerat == 0, problem?
 		outfile.write((const char*)mList[i].vList.data(), sizeof(sVertex) * meshList[i].vertexCount);//				Skriver ut alla vertices i får vArray, pos, nor, rgba 100 gånger. Och minnet 100 Vertices tar upp.
 
 																									 //cout << "SkelAnimVert vector: NULL" << endl;

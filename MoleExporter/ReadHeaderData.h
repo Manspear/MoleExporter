@@ -26,7 +26,11 @@ struct  read_sMesh
 	float rotation[3];
 	float scale[3];
 
+	bool isBoundingBox;
+	bool isAnimated;
+
 	unsigned int vertexCount;
+
 	//unsigned int skelAnimVertexCount;
 	//unsigned int jointCount;
 

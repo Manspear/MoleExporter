@@ -37,7 +37,7 @@ public:
 	{
 		//Name helps with debugging
 		const char* name;
-		const char* bboxMeshName;
+		char* bboxMeshName;
 		int bBoxID;
 
 		int jointID;
