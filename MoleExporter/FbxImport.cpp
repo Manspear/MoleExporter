@@ -267,6 +267,9 @@ void FbxImport::initializeImporter(const char* filePath)
 
 			importMeshData = sImportMeshData();
 			importMeshData.meshName = childNode->GetName();
+
+			strncpy(importMeshData.storeName, childNode->GetName(), 256);
+
 			importMeshData.meshID = meshCounter;
 			importMeshData.isBoundingBox = false; //is by default false.
 
@@ -316,10 +319,6 @@ void FbxImport::processMesh(FbxMesh * inputMesh)
 	processTransformations(inputMesh);
 
 	processJoints(inputMesh);
-
-	/*meshData.vertexCount = meshTempData.mVertexList.size();
-
-	headerData.materialCount = mMaterialList.size();*/
 
 	mTempMeshList.push_back(importMeshData);
 }
@@ -856,16 +855,9 @@ void FbxImport::processMaterials(FbxMesh * inputMesh)
 				{
 					const char* materialName = material->GetName();
 
-					if (firstProcess != true)
-					{
-						gMaterialData.materialName = materialName;
-					}
-
 					bool materialFlag = checkMaterialName(materialName);
 
-				/*	mMaterialList[meshTempData.materialID];*/
-
-					if (materialFlag = true)
+					if (materialFlag == false)
 					{
 						std::cout << "\n" << "Material Number " << materialCounter << ": " << materialName << "\n";
 
@@ -907,14 +899,9 @@ void FbxImport::processMaterials(FbxMesh * inputMesh)
 				{
 					const char* materialName = material->GetName();
 
-					if (firstProcess != true)
-					{
-						materialName = material->GetName();
-					}
-
 					bool materialFlag = checkMaterialName(materialName);
 
-					if (materialFlag == true)
+					if (materialFlag == false)
 					{
 						std::cout << "\n" << "Material Number " << materialCounter << ": " << materialName << "\n";
 
@@ -946,6 +933,40 @@ void FbxImport::processMaterials(FbxMesh * inputMesh)
 			}
 		}
 	}
+}
+
+bool FbxImport::checkMaterialName(const char* materialName)
+{
+	bool isMatching = false;
+	for (int nameIndex = 0; nameIndex < mMaterialList.size(); nameIndex++)
+	{
+		if (std::strcmp(mMaterialList[nameIndex].materialName, materialName) == 0)
+		{
+			importMeshData.materialID = nameIndex;
+			isMatching = true;
+			return isMatching; /*A duplicate material was found.*/
+		}
+	}
+
+	if (firstProcess == true)
+	{
+		strncpy(gMaterialData.materialName, materialName, 256);
+
+		mMaterialList.push_back(gMaterialData);
+		importMeshData.materialID = 0;
+
+		firstProcess = false;
+
+		return isMatching; /*No duplicate material was found.*/
+	}
+
+	strncpy(gMaterialData.materialName, materialName, 256);
+
+	mMaterialList.push_back(gMaterialData);
+	importMeshData.materialID = mMaterialList.size() - 1;
+	isMatching = false;
+	return isMatching; /*No duplicate material was found.*/
+
 }
 
 void FbxImport::processJoints(FbxMesh * inputMesh)
@@ -1194,10 +1215,16 @@ void FbxImport::processDiffuseMaps(FbxProperty diffuseProp)
 
 		std::cout << "\n" << "Texturename Nr " << textureCounter + 1 << ": " << fileTextureName << "\n";
 
-		wchar_t* textureToWchar;
-		FbxUTF8ToWC(fileTextureName.Buffer(), textureToWchar, NULL);
+		char* textureToChar = fileTextureName.Buffer();
 
-		mMaterialList[importMeshData.materialID].diffuseTexture = textureToWchar;
+		char charObject[256];
+
+		strncpy(charObject, textureToChar, 256);
+
+		for (int i = 0; i < 256; i++)
+		{
+			mMaterialList[importMeshData.materialID].diffuseTexture[i] = charObject[i];
+		}
 
 		textureCounter++;
 	}
@@ -1215,10 +1242,16 @@ void FbxImport::processSpecularMaps(FbxProperty propSpecular)
 
 		std::cout << "\n" << "Texturename Nr " << textureCounter + 1 << ": " << fileTextureName << "\n";
 
-		wchar_t* textureToWchar;
-		FbxUTF8ToWC(fileTextureName.Buffer(), textureToWchar, NULL);
+		char* textureToChar = fileTextureName.Buffer();
 
-		mMaterialList[importMeshData.materialID].specularTexture = textureToWchar;
+		char charObject[256];
+
+		strncpy(charObject, textureToChar, 256);
+
+		for (int i = 0; i < 256; i++)
+		{
+			mMaterialList[importMeshData.materialID].specularTexture[i] = charObject[i];
+		}
 
 		textureCounter++;
 	}
@@ -1236,10 +1269,16 @@ void FbxImport::processNormalMaps(FbxProperty propNormal)
 
 		std::cout << "\n" << "Texturename Nr " << textureCounter + 1 << ": " << fileTextureName << "\n";
 
-		wchar_t* textureToWchar;
-		FbxUTF8ToWC(fileTextureName.Buffer(), textureToWchar, NULL);
+		char* textureToChar = fileTextureName.Buffer();
 
-		mMaterialList[importMeshData.materialID].normalTexture = textureToWchar;
+		char charObject[256];
+
+		strncpy(charObject, textureToChar, 256);
+
+		for (int i = 0; i < 256; i++)
+		{
+			mMaterialList[importMeshData.materialID].normalTexture[i] = charObject[i];
+		}
 
 		textureCounter++;
 	}
@@ -1383,34 +1422,6 @@ void FbxImport::processCamera(FbxCamera * inputCamera)
 	mCameraList.push_back(gCamData);
 }
 
-bool FbxImport::checkMaterialName(const char* materialName)
-{
-	for (int nameIndex = 0; nameIndex < mMaterialList.size(); nameIndex++)
-	{
-		if (std::strcmp(mMaterialList[nameIndex].materialName, materialName) == 0)
-		{
-			importMeshData.materialID = nameIndex;
-			return false; /*The material names are identical.*/
-		}
-	}
-
-	if (gMaterialData.materialName == nullptr)
-	{
-		gMaterialData.materialName = materialName;
-		mMaterialList.push_back(gMaterialData);
-		importMeshData.materialID = 0;
-		firstProcess = false;
-		return true; /*This is the first material name.*/
-	}
-
-	gMaterialData.materialName = materialName;
-	mMaterialList.push_back(gMaterialData);
-	importMeshData.materialID = mMaterialList.size() - 1;
-
-	return true; /*The two material names are not identical.*/
-
-}
-
 FbxImport::sBlendData* FbxImport::findBlendDataForControlPoint(std::vector<FbxImport::sBlendData>& inputVector, unsigned int controlPointIndex)
 {
 	const unsigned int vectorSize = inputVector.size();
@@ -1431,8 +1442,6 @@ FbxImport::sBlendData* FbxImport::findBlendDataForControlPoint(std::vector<FbxIm
 	
 	return &noneInfluence;
 }
-
-
 
 void FbxImport::assignToHeaderData()
 {
@@ -1463,6 +1472,8 @@ void FbxImport::assignToHeaderData()
 		cout << "-------------------------------" << "\n\n";
 		cout << "Mesh: " << sMesh + 1 << "\n\n";
 
+		strncpy(meshList[sMesh].meshName, mTempMeshList[sMesh].storeName, 256);
+		
 		meshList[sMesh].materialID = mTempMeshList[sMesh].materialID;
 
 		meshList[sMesh].translate[0] = mTempMeshList[sMesh].translate[0];
@@ -1542,7 +1553,6 @@ void FbxImport::WriteToBinary(const char* fileName)
 	cout << ">>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<" << "\n" << "\n" << endl;
 	cout << "Binary Writer" << endl;
 	cout << "\n" << endl;
-
 
 	std::ofstream outfile(fileName, std::ofstream::binary);//				Öppnar en fil som är redo för binärt skriv
 																//				write header
@@ -1639,7 +1649,7 @@ void FbxImport::WriteToBinary(const char* fileName)
 		cout << "\t";
 		cout << "Allocated memory for " << gMainHeader.lightCount << " lights" << endl;
 
-		outfile.write((const char*)&mLightList[i], sizeof(sLight) * gMainHeader.lightCount);
+		outfile.write((const char*)&mLightList[i], sizeof(sLight));
 
 		cout << "______________________" << endl;
 	}
@@ -1653,7 +1663,7 @@ void FbxImport::WriteToBinary(const char* fileName)
 		cout << "\t";
 		cout << "Allocated memory for " << gMainHeader.cameraCount << " cameras" << endl;
 
-		outfile.write((const char*)&mCameraList[i], sizeof(sCamera) * gMainHeader.cameraCount);
+		outfile.write((const char*)&mCameraList[i], sizeof(sCamera));
 
 		cout << "______________________" << endl;
 	}
@@ -1756,7 +1766,7 @@ void FbxImport::readFromBinary()
 		cout << "\t";
 		cout << "Allocated memory for " << read_mainHeader.materialCount << " materials" << endl;
 
-		infile.read((char*)&read_materialList[i], sizeof(read_sMaterial) * read_mainHeader.materialCount);//				Information av hur många material som senare kommer att komma, samt hur mycket minne den inten som berättar detta tar upp.
+		infile.read((char*)&read_materialList[i], sizeof(read_sMaterial));//				Information av hur många material som senare kommer att komma, samt hur mycket minne den inten som berättar detta tar upp.
 
 		cout << "______________________" << endl;
 	}
@@ -1775,7 +1785,7 @@ void FbxImport::readFromBinary()
 		cout << "\t";
 		cout << "Allocated memory for " << read_mainHeader.lightCount << " lights" << endl;
 
-		infile.read((char*)&read_mLightList[i], sizeof(sLight) * read_mainHeader.lightCount);
+		infile.read((char*)&read_mLightList[i], sizeof(sLight));
 
 		cout << "______________________" << endl;
 	}
@@ -1791,7 +1801,7 @@ void FbxImport::readFromBinary()
 		cout << "\t";
 		cout << "Allocated memory for " << read_mainHeader.cameraCount << " cameras" << endl;
 
-		infile.read((char*)&read_mCameraList[i], sizeof(sCamera) * read_mainHeader.cameraCount);
+		infile.read((char*)&read_mCameraList[i], sizeof(sCamera));
 
 		cout << "______________________" << endl;
 	}

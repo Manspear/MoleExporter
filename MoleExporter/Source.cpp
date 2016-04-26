@@ -4,7 +4,7 @@ using namespace std;
 int main()
 {
 	FbxImport fbx;
-	fbx.initializeImporter("Models/cubeTest.fbx");
+	fbx.initializeImporter("Models/fbx_test.fbx");
 	
 	fbx.WriteToBinary("testBox.mole");
 	fbx.readFromBinary();
