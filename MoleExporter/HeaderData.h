@@ -80,8 +80,6 @@ struct sKeyFrame
 	float keyRotate[3];
 };
 
-
-
 struct sMaterial
 {
 	const char* materialName;
@@ -101,13 +99,8 @@ static std::vector<sMaterial> materialList;
 
 struct sLight
 {
-	unsigned int directionalPointCount;
-	unsigned int spotlightCount; 
-};
+	int lightID; 
 
-
-struct sDirectionalPoint
-{
 	float lightPos[3];
 	float lightRot[3];
 	float lightScale[3];
@@ -116,21 +109,7 @@ struct sDirectionalPoint
 	float intensity;
 };
 
-struct sSpotLight
-{
-	float lightPos[3];
-	float lightRot[3];
-	float lightScale[3];
-
-	float color[3];
-	float intensity;
-
-	float innerAngle;
-	float outerAngle;
-};
-
-static std::vector<sDirectionalPoint> mDirPointList;
-static std::vector<sSpotLight> mSpotList;
+static std::vector<sLight> mLightList;
 
 struct sCamera
 {
@@ -148,6 +127,4 @@ static std::vector<sCamera> mCameraList;
 sMainHeader static mainHeader;
 sMaterial static materialData;
 sLight static lightData;
-sDirectionalPoint static dirPointData;
-sSpotLight static spotData;
 sCamera static camData;

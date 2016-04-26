@@ -139,9 +139,6 @@ public:
 	//**
 	sImportMeshData importMeshData;
 
-
-
-
 	/*Constructor and destructor*/
 	FbxImport();
 	~FbxImport();
