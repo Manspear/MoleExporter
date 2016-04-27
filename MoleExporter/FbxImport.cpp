@@ -274,22 +274,16 @@ void FbxImport::initializeImporter(const char* filePath)
 
 			processMesh((FbxMesh*)childNode->GetNodeAttribute());
 			meshCounter += 1;
-
-			/*headerData.meshCount = mMeshList.size(); */
 		}
 
 		if (attributeType == FbxNodeAttribute::eLight)
 		{
 			processLight((FbxLight*)childNode->GetNodeAttribute());
-
-			/*headerData.lightCount = mDirPointList.size() + mSpotList.size();*/
 		}
 
 		if (attributeType == FbxNodeAttribute::eCamera)
 		{
 			processCamera((FbxCamera*)childNode->GetNodeAttribute());
-
-			/*headerData.cameraCount = mCameraList.size();*/
 		}
 	}
 
@@ -1489,13 +1483,16 @@ void FbxImport::assignToHeaderData()
 	sVertex vertex;
 	sSkelAnimVertex saVertex;
 
+	sJoint joint;
+	sKeyFrame keyframe;
+
 	for (int sMesh = 0; sMesh < meshList.size(); sMesh++)
 	{
 		cout << "-------------------------------" << "\n\n";
 		cout << "Mesh: " << sMesh + 1 << "\n\n";
 
 		strncpy(meshList[sMesh].meshName, mTempMeshList[sMesh].storeName, 256);
-		
+
 		meshList[sMesh].materialID = mTempMeshList[sMesh].materialID;
 
 		for (int transformIndex = 0; transformIndex < 3; transformIndex++)
@@ -1531,7 +1528,7 @@ void FbxImport::assignToHeaderData()
 
 		if (mTempMeshList[sMesh].isAnimated == true)
 		{
-			for (int skelVertices  = 0; skelVertices < mTempMeshList[sMesh].mSkelVertexList.size(); skelVertices++)
+			for (int skelVertices = 0; skelVertices < mTempMeshList[sMesh].mSkelVertexList.size(); skelVertices++)
 			{
 				std::cout << "Position: " << mTempMeshList[sMesh].mSkelVertexList[skelVertices].vertexPos[0] << " "
 					<< mTempMeshList[sMesh].mSkelVertexList[skelVertices].vertexPos[1] << " "
@@ -1579,7 +1576,7 @@ void FbxImport::assignToHeaderData()
 		}
 
 		/*Transfer the ordinary vertex list for each mesh.*/
-		else 
+		else
 		{
 			for (int vertices = 0; vertices < mTempMeshList[sMesh].mVertexList.size(); vertices++)
 			{
@@ -1603,7 +1600,7 @@ void FbxImport::assignToHeaderData()
 					{
 						vertex.vertexUV[coordUVIndex] = mTempMeshList[sMesh].mVertexList[vertices].vertexUV[coordUVIndex];
 					}
-				
+
 					vertex.tangentNormal[coordIndex] = mTempMeshList[sMesh].mVertexList[vertices].tangentNormal[coordIndex];
 					vertex.biTangentNormal[coordIndex] = mTempMeshList[sMesh].mVertexList[vertices].biTangentNormal[coordIndex];
 				}
@@ -1612,30 +1609,50 @@ void FbxImport::assignToHeaderData()
 			}
 		}
 
-		for (int jointIndex = 0; jointIndex < mTempMeshList[sMesh].jointList.size(); jointIndex++)
+		if (meshList[sMesh].isAnimated == true)
 		{
-			jointList.resize(mTempMeshList[jointIndex].jointList.size());
+			jointList.resize(meshList[sMesh].jointCount);
 
-			jointList[jointIndex].jointID = mTempMeshList[sMesh].jointList[jointIndex].jointID;
-			jointList[jointIndex].parentJointID = mTempMeshList[sMesh].jointList[jointIndex].parentJointID;
-			jointList[jointIndex].bBoxID = mTempMeshList[sMesh].jointList[jointIndex].bBoxID;
-
-			for (int transformIndex = 0; transformIndex < 3; transformIndex++)
+			for (int jointIndex = 0; jointIndex < mTempMeshList[sMesh].jointList.size(); jointIndex++)
 			{
-				jointList[jointIndex].pos[transformIndex] = mTempMeshList[sMesh].jointList[jointIndex].pos[transformIndex];
-				jointList[jointIndex].rot[transformIndex] = mTempMeshList[sMesh].jointList[jointIndex].rot[transformIndex];
-				jointList[jointIndex].scale[transformIndex] = mTempMeshList[sMesh].jointList[jointIndex].scale[transformIndex];
-			}
-			
-			for (int matrixIndex = 0; matrixIndex < 16; matrixIndex++)
-			{
-				jointList[jointIndex].bindPoseInverse[matrixIndex] = mTempMeshList[sMesh].jointList[jointIndex].bindPoseInverse[matrixIndex];
-				jointList[jointIndex].globalBindPoseInverse[matrixIndex] = mTempMeshList[sMesh].jointList[jointIndex].globalBindPoseInverse[matrixIndex];
-			}
+				jointList[jointIndex].jointID = mTempMeshList[sMesh].jointList[jointIndex].jointID;
+				jointList[jointIndex].parentJointID = mTempMeshList[sMesh].jointList[jointIndex].parentJointID;
+				jointList[jointIndex].bBoxID = mTempMeshList[sMesh].jointList[jointIndex].bBoxID;
 
-			jointList[jointIndex].animationStateCount = mTempMeshList[sMesh].jointList[jointIndex].animationState.size();
+				for (int transformIndex = 0; transformIndex < 3; transformIndex++)
+				{
+					jointList[jointIndex].pos[transformIndex] = mTempMeshList[sMesh].jointList[jointIndex].pos[transformIndex];
+					jointList[jointIndex].rot[transformIndex] = mTempMeshList[sMesh].jointList[jointIndex].rot[transformIndex];
+					jointList[jointIndex].scale[transformIndex] = mTempMeshList[sMesh].jointList[jointIndex].scale[transformIndex];
+				}
+
+				for (int matrixIndex = 0; matrixIndex < 16; matrixIndex++)
+				{
+					jointList[jointIndex].bindPoseInverse[matrixIndex] = mTempMeshList[sMesh].jointList[jointIndex].bindPoseInverse[matrixIndex];
+					jointList[jointIndex].globalBindPoseInverse[matrixIndex] = mTempMeshList[sMesh].jointList[jointIndex].globalBindPoseInverse[matrixIndex];
+				}
+
+				jointList[jointIndex].animationStateCount = mTempMeshList[sMesh].jointList[jointIndex].animationState.size();
+
+				for (int animationIndex = 0; animationIndex < jointList[jointIndex].animationStateCount; animationIndex++)
+				{
+					keyframeList.resize(mTempMeshList[sMesh].jointList[jointIndex].animationState[animationIndex].keyList.size());
+
+					for (int keyIndex = 0; keyIndex < mTempMeshList[sMesh].jointList[jointIndex].animationState[animationIndex].keyList.size(); keyIndex++)
+					{
+						keyframeList[keyIndex].keyTime = mTempMeshList[sMesh].jointList[jointIndex].animationState[animationIndex].keyList[keyIndex].keyTime;
+
+						for (int transformIndex = 0; transformIndex < 3; transformIndex++)
+						{
+							keyframeList[keyIndex].keyPos[transformIndex] = mTempMeshList[sMesh].jointList[jointIndex].animationState[animationIndex].keyList[keyIndex].keyPos[transformIndex];
+							keyframeList[keyIndex].keyRotate[transformIndex] = mTempMeshList[sMesh].jointList[jointIndex].animationState[animationIndex].keyList[keyIndex].keyRotate[transformIndex];
+							keyframeList[keyIndex].keyScale[transformIndex] = mTempMeshList[sMesh].jointList[jointIndex].animationState[animationIndex].keyList[keyIndex].keyScale[transformIndex];
+						}
+					}
+				}
+			}
 		}
-	}	
+	}
 }
 
 void FbxImport::convertFbxMatrixToFloatArray(FbxAMatrix inputMatrix, float inputArray[16])
