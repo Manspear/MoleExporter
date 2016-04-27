@@ -1709,7 +1709,7 @@ void FbxImport::WriteToBinary(const char* fileName)
 	outfile.close();
 }
 
-void FbxImport::readFromBinary()
+void FbxImport::readFromBinary(const char* fileName)
 {
 	/*Reading the binary file that we just have been written to.*/
 
