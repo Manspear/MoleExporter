@@ -33,6 +33,12 @@ public:
 		std::vector<sImportKeyFrame> keyList;
 	};
 
+	/**
+	Note: bBoxID has to be changed later on in the importerAPI
+	in order to make it work. This since the "index" of the mesh
+	in question may change depending on if you read in several files 
+	with the same class instance.
+	**/
 	struct sImportJointData
 	{
 		//Name helps with debugging
@@ -49,6 +55,7 @@ public:
 
 		float bindPoseInverse[16];
 		float globalBindPoseInverse[16];
+		//vector<read_sMeshChildIndex> childMeshList;
 		std::vector<sImportAnimationState> animationState;
 	};
 
@@ -68,11 +75,15 @@ public:
 		bool isAnimated;
 		bool isIndexed;
 
+		int parentMeshID = -1337;
+		int parentJointID = -1337;
+		vector<int> childMeshList;
 		vector<int> mIndexList;
 		vector<sVertex> mVertexList;
 		vector<sSkelAnimVertex> mSkelVertexList;
 		std::vector<sImportJointData> jointList;
 	};
+
 
 	/*struct sImportAnimMeshData
 	{
@@ -130,8 +141,6 @@ public:
 	void readFromBinary(const char* fileName);
 
 	void convertFbxMatrixToFloatArray(FbxAMatrix inputMatrix, float inputArray[16]);
-
-	
 
 	/*Lists*/
 	std::vector<sImportMeshData> mTempMeshList;
@@ -193,6 +202,8 @@ private:
 	**/
 	unsigned int findJointIndexByName(const char* jointName);
 	void findBBoxByName(const char* bBoxName, int meshIndex, int jointIndex);
+
+	void recursiveChildTraversal(FbxNode* inputNode);
 };
 
 

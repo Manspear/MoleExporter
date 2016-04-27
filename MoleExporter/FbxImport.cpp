@@ -189,6 +189,46 @@ void FbxImport::findBBoxByName(const char * bBoxName, int meshIndex, int jointIn
 	}
 }
 
+void FbxImport::recursiveChildTraversal(FbxNode * inputNode)
+{
+	//The children here must be added to the current mesh-object.
+	//Use the meshCounter as meshID to find "meshChild - index"
+
+	//Hmm... Is this right? For each child that I process, I process it's children too.
+	int parentIndex = mTempMeshList.size() - 1;
+
+	//Here call the recursive "hierarchy-traversal-function"
+	for (int child = 0; child < inputNode->GetChildCount(); child++)
+	{
+		std::cout << "\n" << "Object nr: " << meshCounter << " Name: " << inputNode->GetName() << "\n";
+
+		FbxNode* currNode = inputNode->GetChild(child);
+		FbxNodeAttribute::EType currAttributeType = currNode->GetNodeAttribute()->GetAttributeType();
+		if (currAttributeType == FbxNodeAttribute::eMesh)
+		{
+			importMeshData = sImportMeshData();
+			importMeshData.isBoundingBox = false; //is by default false.
+			importMeshData.meshName = currNode->GetName();
+			strncpy(importMeshData.storeName, currNode->GetName(), 256);
+			importMeshData.meshID = meshCounter;
+			
+			importMeshData.parentMeshID = parentIndex;
+			mTempMeshList[parentIndex].childMeshList.push_back(meshCounter);
+
+			//When I have(for this child) processed basic things, I move on to that child's children.
+			//I think it's okay.
+			processMesh((FbxMesh*)currNode->GetNodeAttribute());
+			meshCounter += 1;
+
+			//So now, for every child of my mesh, I get the 
+			recursiveChildTraversal(currNode);
+		}
+	}
+
+
+	/*headerData.meshCount = mMeshList.size(); */
+}
+
 FbxImport::FbxImport()
 {
 	meshCounter = 0;
@@ -273,8 +313,25 @@ void FbxImport::initializeImporter(const char* filePath)
 			importMeshData.meshID = meshCounter;
 			importMeshData.isBoundingBox = false; //is by default false.
 
-			processMesh((FbxMesh*)childNode->GetNodeAttribute());
+			FbxMesh* currMesh = (FbxMesh*)childNode->GetNodeAttribute();
+			processMesh(currMesh);
 			meshCounter += 1;
+
+
+			//Here call the recursive "hierarchy-traversal-function"
+			//that roots out all of the mesh-children of this mesh, wherever it may hide.
+			recursiveChildTraversal(childNode);
+			/*for (int child = 0; childNode->GetChildCount(); child++)
+			{
+				FbxNode* currNode = childNode->GetChild(child);
+				FbxNodeAttribute::EType currAttributeType = currNode->GetNodeAttribute()->GetAttributeType();
+				if (currAttributeType == FbxNodeAttribute::eMesh)
+				{
+					processMesh((FbxMesh*)childNode->GetNodeAttribute());
+					meshCounter += 1;
+				}
+			}*/
+		
 
 			/*headerData.meshCount = mMeshList.size(); */
 		}
@@ -294,10 +351,87 @@ void FbxImport::initializeImporter(const char* filePath)
 		}
 	}
 
+	//Second pass to get the mesh-bbox-children into the vector
+	for (int childIndex = 0; childIndex < pmRootNode->GetChildCount(); childIndex++)
+	{
+		FbxNode* childNode = pmRootNode->GetChild(childIndex);
+		FbxNodeAttribute::EType attributeType = childNode->GetNodeAttribute()->GetAttributeType();
+
+		if (childNode->GetNodeAttribute() == NULL)
+			continue;
+
+		if (attributeType != FbxNodeAttribute::eMesh)
+			continue;
+
+		if (attributeType == FbxNodeAttribute::eMesh)
+		{
+			std::cout << "\n" << "Object nr: " << meshCounter << " Name: " << childNode->GetName() << "\n";
+
+			importMeshData = sImportMeshData();
+			importMeshData.meshID = meshCounter;
+			importMeshData.isBoundingBox = false; //is by default false.
+
+			FbxMesh* currMesh = (FbxMesh*)childNode->GetNodeAttribute();
+
+			unsigned int deformerCount = currMesh->GetDeformerCount(FbxDeformer::eSkin);
+
+			for (unsigned int deformerCounter = 0; deformerCounter < deformerCount; ++deformerCounter)
+			{
+				FbxSkin* currSkin = reinterpret_cast<FbxSkin*>(currMesh->GetDeformer(0, FbxDeformer::eSkin));
+				if (!currSkin)
+					continue;
+
+				const unsigned int clusterCount = currSkin->GetClusterCount();
+				for (unsigned int clusterCounter = 0; clusterCounter < clusterCount; ++clusterCounter)
+				{
+					FbxCluster* currCluster = currSkin->GetCluster(clusterCounter);
+					FbxNode* currJoint = currCluster->GetLink();
+
+					const unsigned int jointChildCount = currJoint->GetChildCount();
+					for (int i = 0; i < jointChildCount; i++)
+					{
+						if (currJoint->GetChild(i)->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eMesh)
+						{
+							FbxNode* meshChild = currJoint->GetChild(i);
+							
+							std::cout << "\n" << "Object nr: " << meshCounter << " Name: " << meshChild->GetName() << "\n";
+
+							importMeshData = sImportMeshData();
+							importMeshData.meshName = meshChild->GetName();
+
+							strncpy(importMeshData.storeName, meshChild->GetName(), 256);
+
+							importMeshData.parentJointID = findJointIndexByName(currJoint->GetName());
+							importMeshData.meshID = meshCounter;
+							importMeshData.isBoundingBox = false; //is by default false.
+							if (currMesh->GetControlPointsCount() == 8)
+								importMeshData.isBoundingBox = true;
+
+							FbxMesh* currMesh = (FbxMesh*)meshChild->GetNodeAttribute();
+							processMesh(currMesh);
+							meshCounter += 1;
+
+
+							//Here call the recursive "hierarchy-traversal-function"
+							//that roots out all of the mesh-children of this mesh, wherever it may hide.
+							recursiveChildTraversal(meshChild);
+						}
+					}
+				}
+			}
+			//processMesh();
+		}
+
+
+	}
+
 	processBoundingBoxes();
+
+	mTempMeshList;
 
 	assignToHeaderData();
 
+	
 }
 
 void FbxImport::processMesh(FbxMesh * inputMesh)

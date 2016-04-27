@@ -37,6 +37,19 @@ struct  read_sMesh
 	//unsigned int jointCount;
 };
 
+struct read_sMeshChildIndex
+{
+	int meshID;
+	/**
+	Hmm... What if you read two files..? 
+	The meshID will then point at the wrong mesh.
+	Handle this in the fileImporter? I could. 
+	Since we cannot handle that case here. (or can we?)
+	What if meshID is a "reference" aka pointer to the mesh-object in question?
+	**/
+};
+
+
 static std::vector< read_sMesh>  read_meshList;
 
 struct  read_m
