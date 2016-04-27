@@ -56,6 +56,7 @@ public:
 		float bindPoseInverse[16];
 		float globalBindPoseInverse[16];
 		//vector<read_sMeshChildIndex> childMeshList;
+		vector<int> childMeshList;
 		std::vector<sImportAnimationState> animationState;
 	};
 

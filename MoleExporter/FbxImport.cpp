@@ -350,7 +350,8 @@ void FbxImport::initializeImporter(const char* filePath)
 			/*headerData.cameraCount = mCameraList.size();*/
 		}
 	}
-
+	//For the joint to know which mesh it's inside.
+	int meshCounter2 = 0;
 	//Second pass to get the mesh-bbox-children into the vector
 	for (int childIndex = 0; childIndex < pmRootNode->GetChildCount(); childIndex++)
 	{
@@ -367,10 +368,6 @@ void FbxImport::initializeImporter(const char* filePath)
 		{
 			std::cout << "\n" << "Object nr: " << meshCounter << " Name: " << childNode->GetName() << "\n";
 
-			importMeshData = sImportMeshData();
-			importMeshData.meshID = meshCounter;
-			importMeshData.isBoundingBox = false; //is by default false.
-
 			FbxMesh* currMesh = (FbxMesh*)childNode->GetNodeAttribute();
 
 			unsigned int deformerCount = currMesh->GetDeformerCount(FbxDeformer::eSkin);
@@ -386,6 +383,7 @@ void FbxImport::initializeImporter(const char* filePath)
 				{
 					FbxCluster* currCluster = currSkin->GetCluster(clusterCounter);
 					FbxNode* currJoint = currCluster->GetLink();
+					const int currJointID = findJointIndexByName(currJoint->GetName());
 
 					const unsigned int jointChildCount = currJoint->GetChildCount();
 					for (int i = 0; i < jointChildCount; i++)
@@ -400,18 +398,32 @@ void FbxImport::initializeImporter(const char* filePath)
 							importMeshData.meshName = meshChild->GetName();
 
 							strncpy(importMeshData.storeName, meshChild->GetName(), 256);
-
-							importMeshData.parentJointID = findJointIndexByName(currJoint->GetName());
+							importMeshData.parentJointID = currJointID;
 							importMeshData.meshID = meshCounter;
 							importMeshData.isBoundingBox = false; //is by default false.
 							if (currMesh->GetControlPointsCount() == 8)
 								importMeshData.isBoundingBox = true;
+							/**
+							assign this to the joint... But how to access joint? It's buried inside 
+							the mesh-vector...
+							Loop through each mesh, and try to find the joint? 
+							Do I KNOW where THIS joint is right now?
+							I need to know what index this particular joint is at. 
+							**/
+							for (int thing = 0; thing < mTempMeshList[meshCounter2].jointList.size(); thing++) 
+							{
+								if (mTempMeshList[meshCounter2].jointList[thing].jointID == currJointID)
+								{
+									mTempMeshList[meshCounter2].jointList[thing].childMeshList.push_back(importMeshData.meshID);
+								}
+							}
+								
 
 							FbxMesh* currMesh = (FbxMesh*)meshChild->GetNodeAttribute();
 							processMesh(currMesh);
 							meshCounter += 1;
 
-
+							
 							//Here call the recursive "hierarchy-traversal-function"
 							//that roots out all of the mesh-children of this mesh, wherever it may hide.
 							recursiveChildTraversal(meshChild);
@@ -420,6 +432,7 @@ void FbxImport::initializeImporter(const char* filePath)
 				}
 			}
 			//processMesh();
+			meshCounter2++;
 		}
 
 
