@@ -302,6 +302,7 @@ void FbxImport::initializeImporter(const char* filePath)
 
 void FbxImport::processMesh(FbxMesh * inputMesh)
 {
+	/*Reading all the information for a mesh in FBX.*/
 	processVertices(inputMesh);
 
 	processNormals(inputMesh);
@@ -320,6 +321,7 @@ void FbxImport::processMesh(FbxMesh * inputMesh)
 
 	processJoints(inputMesh);
 
+	/*Appending the current mesh to the temporary mesh list.*/
 	mTempMeshList.push_back(importMeshData);
 }
 
@@ -851,6 +853,7 @@ void FbxImport::processMaterials(FbxMesh * inputMesh)
 
 				FbxDouble3 ambientColor, diffuseColor, specularColor;
 
+				/*The material for the current node is a surface phong.*/
 				if (material->GetClassId().Is(FbxSurfacePhong::ClassId))
 				{
 					const char* materialName = material->GetName();
@@ -861,6 +864,7 @@ void FbxImport::processMaterials(FbxMesh * inputMesh)
 					{
 						std::cout << "\n" << "Material Number " << materialCounter << ": " << materialName << "\n";
 
+						/*Getting the material attributes that are typical for a surface phong.*/
 						ambientColor = ((FbxSurfacePhong *)material)->Ambient;
 						diffuseColor = ((FbxSurfacePhong *)material)->Diffuse;
 						specularColor = ((FbxSurfacePhong *)material)->Specular;
@@ -895,6 +899,7 @@ void FbxImport::processMaterials(FbxMesh * inputMesh)
 					}
 				}
 
+				/*The material for the current node is a surface lambert.*/
 				else if (material->GetClassId().Is(FbxSurfaceLambert::ClassId))
 				{
 					const char* materialName = material->GetName();
@@ -905,6 +910,8 @@ void FbxImport::processMaterials(FbxMesh * inputMesh)
 					{
 						std::cout << "\n" << "Material Number " << materialCounter << ": " << materialName << "\n";
 
+
+						/*Getting the material attributes that are typical for a surface lambert.*/
 						ambientColor = ((FbxSurfaceLambert *)material)->Ambient;
 						diffuseColor = ((FbxSurfaceLambert *)material)->Diffuse;
 
@@ -922,7 +929,8 @@ void FbxImport::processMaterials(FbxMesh * inputMesh)
 						std::cout << "\n" << "Diffuse color: " << diffuseColor.mData[0] << " " << diffuseColor.mData[1] <<
 							" " << diffuseColor.mData[2] << "\n";
 
-						/*No specular attributes and shininess for lambert material, so set the values to 0.*/
+						/*No specular attributes and shininess can't be found with a lambert material, 
+						so we simply set the values for the attributes to 0.*/
 						mMaterialList[importMeshData.materialID].specularColor[0] = 0;
 						mMaterialList[importMeshData.materialID].specularColor[1] = 0;
 						mMaterialList[importMeshData.materialID].specularColor[2] = 0;
@@ -935,11 +943,19 @@ void FbxImport::processMaterials(FbxMesh * inputMesh)
 	}
 }
 
+/*This function checks the material name for each node of the meshes,
+so that we know which material ID each mesh have. Several meshes can
+have the same material and to save processing, we can use the same
+material ID for many meshes with the same material.*/
 bool FbxImport::checkMaterialName(const char* materialName)
 {
 	bool isMatching = false;
 	for (int nameIndex = 0; nameIndex < mMaterialList.size(); nameIndex++)
 	{
+		/*Comparing the characters for all the materials that are in the list
+		with the current material that is being processed. If a current material
+		have the same name with any of the appended materials in the list, we want
+		to give the same material ID.*/
 		if (std::strcmp(mMaterialList[nameIndex].materialName, materialName) == 0)
 		{
 			importMeshData.materialID = nameIndex;
@@ -948,6 +964,9 @@ bool FbxImport::checkMaterialName(const char* materialName)
 		}
 	}
 
+	/*If there are no materials appended to the material list, we can assume
+	that this would be the first material and is unique because it will be 
+	appended first.*/
 	if (firstProcess == true)
 	{
 		strncpy(gMaterialData.materialName, materialName, 256);
@@ -955,18 +974,21 @@ bool FbxImport::checkMaterialName(const char* materialName)
 		mMaterialList.push_back(gMaterialData);
 		importMeshData.materialID = 0;
 
+		/*Setting the flag to false so we can assume that the first
+		material in the list have been appended before.*/
 		firstProcess = false;
 
 		return isMatching; /*No duplicate material was found.*/
 	}
 
+	/*The current material name is unique and is considered to be
+	a new material, appending it to the material list.*/
 	strncpy(gMaterialData.materialName, materialName, 256);
 
 	mMaterialList.push_back(gMaterialData);
 	importMeshData.materialID = mMaterialList.size() - 1;
 	isMatching = false;
 	return isMatching; /*No duplicate material was found.*/
-
 }
 
 void FbxImport::processJoints(FbxMesh * inputMesh)
@@ -1004,15 +1026,12 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 				pmSceneJoints[currJointIndex].scale[x] = bindposeTransform.GetS()[x];
 			}
 			
-
 			FbxAMatrix tempBindMatrix;
 			FbxAMatrix tempParentBindMatrix;
 
 			currCluster->GetTransformMatrix(tempParentBindMatrix);
 			currCluster->GetTransformLinkMatrix(tempBindMatrix);
 			
-
-
 			FbxAMatrix tempGlobalBindPoseInverse;
 			tempGlobalBindPoseInverse = tempBindMatrix * tempParentBindMatrix;
 			tempGlobalBindPoseInverse = tempGlobalBindPoseInverse.Inverse();
@@ -1106,8 +1125,6 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 
 					FbxAnimCurve* translationCurveX = currJoint->LclTranslation.GetCurve(currLayer, FBXSDK_CURVENODE_COMPONENT_X);
 
-					
-
 					if (translationCurveX == nullptr)
 						continue; 
 
@@ -1178,13 +1195,14 @@ void FbxImport::processTextures(FbxMesh * inputMesh)
 
 		if (material)
 		{
+			/*The game engine supports diffuse-, specular- and normal maps*/
 			propDiffus = material->FindProperty(FbxSurfaceMaterial::sDiffuse);
 			propSpecular = material->FindProperty(FbxSurfaceMaterial::sSpecular);
 			propNormal = material->FindProperty(FbxSurfaceMaterial::sNormalMap);
 
 			FbxTexture* texture;
-			int textureCount;
 
+			/*Checking if the properties for the maps are valid.*/
 			if (propDiffus.IsValid())
 			{
 				processDiffuseMaps(propDiffus);
@@ -1445,6 +1463,10 @@ FbxImport::sBlendData* FbxImport::findBlendDataForControlPoint(std::vector<FbxIm
 
 void FbxImport::assignToHeaderData()
 {
+	/*Function that will assign all the sizes of the node types from the scene 
+	and also transfer the mesh data from the temporary list to the real list for
+	the binary file exporting.*/
+
 	gMainHeader.meshCount = mTempMeshList.size();
 	gMainHeader.materialCount = mMaterialList.size();
 	gMainHeader.lightCount = mLightList.size();
@@ -1536,7 +1558,7 @@ void FbxImport::assignToHeaderData()
 
 void FbxImport::convertFbxMatrixToFloatArray(FbxAMatrix inputMatrix, float inputArray[16])
 {
-	//THis function assumes row-major matrices
+	//This function assumes row-major matrices.
 
 	unsigned int localCounter = 0;
 	for (unsigned int g = 0; g < 4; ++g)
@@ -1554,9 +1576,14 @@ void FbxImport::WriteToBinary(const char* fileName)
 	cout << "Binary Writer" << endl;
 	cout << "\n" << endl;
 
-	std::ofstream outfile(fileName, std::ofstream::binary);//				Öppnar en fil som är redo för binärt skriv
-																//				write header
-	outfile.write((const char*)&gMainHeader, sizeof(sMainHeader));//				Information av hur många meshes som senare kommer att komma, och efter det hur många material osv, samt hur mycket minne den inten som berättar detta tar upp (reservation för vår header)
+	/*Open a file that is ready for binary writing.*/
+	std::ofstream outfile(fileName, std::ofstream::binary);			
+	
+	/*Writing the first block of memory that is the main header. This will write 
+	information about how much of each node type we have from a imported scene and
+	how memory they will take up in the binary file.*/
+	outfile.write((const char*)&gMainHeader, sizeof(sMainHeader));
+
 	cout << "______________________" << endl;
 	cout << "Main Header" << endl;
 	cout << "meshCount: " << gMainHeader.meshCount << endl;
@@ -1568,39 +1595,47 @@ void FbxImport::WriteToBinary(const char* fileName)
 	for (int i = 0; i < gMainHeader.meshCount; i++)
 	{
 		cout << "Mesh: " << i << endl;
-		//sMesh has 2 bools... Hmm
-		outfile.write((const char*)&meshList[i], sizeof(sMesh));//													Information av hur många vertices som senare kommer att komma, och efter det hur många skelAnim verticear som kommer komma osv, samt hur mycket minne den inten som berättar detta tar upp(reservation för vår header).En int kommer först, den har värdet 100.  Och den inten kommer ta upp 4 bytes.
+		
+		/*Writing the block of memory that is the meshes. The information from the meshes 
+		will be written here, that includes for example vertex count for a normal mesh 
+		and a skinned mesh. What we do is reserving memory for all the data that is in the
+		struct. For example, Vertex count is a integer and will take up to 4 bytes in the 
+		memory when writing.*/
+		outfile.write((const char*)&meshList[i], sizeof(sMesh));
 
 		cout << "Mesh vector: " << endl;
 
 		cout << "\t";
 		cout << "xyz: ";
-		cout << meshList[i].translate[0];
-		cout << meshList[i].translate[1];
-		cout << meshList[i].translate[2] << endl;
+		cout << meshList[i].translate[0] << " ";
+		cout << meshList[i].translate[1] << " ";
+		cout << meshList[i].translate[2] << " " << endl;
 
 		cout << "\t";
 		cout << "rot: ";
-		cout << meshList[i].rotation[0];
-		cout << meshList[i].rotation[1];
-		cout << meshList[i].rotation[2] << endl;
+		cout << meshList[i].rotation[0] << " ";
+		cout << meshList[i].rotation[1] << " ";
+		cout << meshList[i].rotation[2] << " " << endl;
 
 		cout << "\t";
 		cout << "scale: ";
-		cout << meshList[i].scale[0];
-		cout << meshList[i].scale[1];
-		cout << meshList[i].scale[2] << endl;
+		cout << meshList[i].scale[0] << " ";
+		cout << meshList[i].scale[1] << " ";
+		cout << meshList[i].scale[2] << " " << endl;
 
 		cout << "\t";
 		cout << "Vertex Count: ";
 		cout << meshList[i].vertexCount << endl;
-		//cout << "SkelAnimVert Count: 0" << endl;
-		//cout << "Joint Count: 0"  << endl;
+
+		/*Do we need to have some kind of special treatment when writing
+		the meshes that have skinning???*/
+
+		/*cout << "SkelAnimVert Count: 0" << endl;
+		cout << "Joint Count: 0"  << endl;*/
 
 		cout << "\t";
 		cout << "Material ID: ";
-		cout << meshList[i].materialID << endl;
-		//												detta är storleken av innehållet i vList.data()
+		cout << meshList[i].materialID << endl;						
 
 		cout << "\n";
 		cout << "Vertex vector: " << endl;
@@ -1611,12 +1646,12 @@ void FbxImport::WriteToBinary(const char* fileName)
 		cout << "\t";
 		cout << "Allocated memory for " << meshList[i].vertexCount << " vertices" << endl;
 
-		//Om vertexdata allokerat == 0, problem?
-		outfile.write((const char*)mList[i].vList.data(), sizeof(sVertex) * meshList[i].vertexCount);//				Skriver ut alla vertices i får vArray, pos, nor, rgba 100 gånger. Och minnet 100 Vertices tar upp.
+		/*Writing all the vertex lists for each mesh. For example if a mesh have 200 vertices,
+		we can multiply the count of vertices with the sizes in bytes that the sVertex struct have.
+		This means that we will be writing the pos, nor, uv, tan, bitan 200 times.*/
 
-																									 //cout << "SkelAnimVert vector: NULL" << endl;
-
-																									 //cout << "Joint vector: NULL" << endl;
+		outfile.write((const char*)mList[i].vList.data(), sizeof(sVertex) * meshList[i].vertexCount);
+																									
 		cout << "______________________" << endl;
 	}
 
@@ -1632,7 +1667,8 @@ void FbxImport::WriteToBinary(const char* fileName)
 		cout << "\t";
 		cout << "Allocated memory for " << gMainHeader.materialCount << " materials" << endl;
 
-		outfile.write((const char*)&mMaterialList[i], sizeof(sMaterial) * gMainHeader.materialCount); //Information av hur många material som senare kommer att komma, samt hur mycket minne den inten som berättar detta tar upp.
+		/*Writing all the materials from the list with the size in bytes in mind.*/
+		outfile.write((const char*)&mMaterialList[i], sizeof(sMaterial)); 
 
 		cout << "______________________" << endl;
 	}
@@ -1649,6 +1685,7 @@ void FbxImport::WriteToBinary(const char* fileName)
 		cout << "\t";
 		cout << "Allocated memory for " << gMainHeader.lightCount << " lights" << endl;
 
+		/*Writing all the lights from the list with the size in bytes in mind.*/
 		outfile.write((const char*)&mLightList[i], sizeof(sLight));
 
 		cout << "______________________" << endl;
@@ -1663,6 +1700,7 @@ void FbxImport::WriteToBinary(const char* fileName)
 		cout << "\t";
 		cout << "Allocated memory for " << gMainHeader.cameraCount << " cameras" << endl;
 
+		/*Writing all the cameras from the list with the size in bytes in mind.*/
 		outfile.write((const char*)&mCameraList[i], sizeof(sCamera));
 
 		cout << "______________________" << endl;
@@ -1673,15 +1711,20 @@ void FbxImport::WriteToBinary(const char* fileName)
 
 void FbxImport::readFromBinary()
 {
-	//Read from binary
+	/*Reading the binary file that we just have been written to.*/
 
-	std::ifstream infile("testBin.bin", std::ifstream::binary);//		Öppnar filen vi nyss skapade men ska nu läsa istället
+	std::ifstream infile("testBin.bin", std::ifstream::binary);
 
 	cout << ">>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<" << "\n" << "\n" << endl;
 	cout << "Binary Reader" << endl;
 	cout << "\n" << endl;
 
-	infile.read((char*)&read_mainHeader, sizeof(read_sMainHeader));//				Information av hur många meshes som senare kommer att komma, och efter det hur många material osv, samt hur mycket minne den inten som berättar detta tar upp (reservation för vår header)
+	/*Reading the first block of memory that is the main header. This will read
+	information about how much of each node type we have from a imported scene and
+	how memory they will take up in the binary file.*/
+
+	infile.read((char*)&read_mainHeader, sizeof(read_sMainHeader));
+
 	cout << "______________________" << endl;
 	cout << "Main Header" << endl;
 	cout << "meshCount: " << read_mainHeader.meshCount << endl;
@@ -1697,7 +1740,13 @@ void FbxImport::readFromBinary()
 	{
 		cout << "Mesh: " << i << endl;
 
-		infile.read((char*)&read_meshList[i], sizeof(read_sMesh));//													Information av hur många vertices som senare kommer att komma, och efter det hur många skelAnim verticear som kommer komma osv, samt hur mycket minne den inten som berättar detta tar upp(reservation för vår header).En int kommer först, den har värdet 100.  Och den inten kommer ta upp 4 bytes.
+		/*Reading the block of memory that is the meshes. The information from the meshes
+		will be read here, that includes for example vertex count for a normal mesh
+		and a skinned mesh. What we do is reserving memory for all the data that is in the
+		struct. For example, Vertex count is a integer and will take up to 4 bytes in the
+		memory when reading.*/
+
+		infile.read((char*)&read_meshList[i], sizeof(read_sMesh));									
 
 		cout << "Mesh vector: " << endl;
 
@@ -1722,13 +1771,16 @@ void FbxImport::readFromBinary()
 		cout << "\t";
 		cout << "Vertex Count: ";
 		cout << read_meshList[i].vertexCount << endl;
-		//cout << "SkelAnimVert Count: 0" << endl;
-		//cout << "Joint Count: 0"  << endl;
+
+		/*Do we need to have some kind of special treatment when writing
+		the meshes that have skinning???*/
+
+		/*cout << "SkelAnimVert Count: 0" << endl;
+		cout << "Joint Count: 0"  << endl;*/
 
 		cout << "\t";
 		cout << "Material ID: ";
-		cout << read_meshList[i].materialID << endl;
-		//												detta är storleken av innehållet i vList.data()
+		cout << read_meshList[i].materialID << endl;								
 
 		cout << "\n";
 		cout << "Vertex vector: " << endl;
@@ -1744,11 +1796,11 @@ void FbxImport::readFromBinary()
 
 		read_mList[i].vList.resize(read_meshList[i].vertexCount);
 
-		infile.read((char*)read_mList[i].vList.data(), sizeof(read_sVertex) * read_meshList[i].vertexCount);//				Skriver ut alla vertices i får vArray, pos, nor, rgba 100 gånger. Och minnet 100 Vertices tar upp.
+		/*Reading all the vertex lists for each mesh. For example if a mesh have 200 vertices,
+		we can multiply the count of vertices with the sizes in bytes that the sVertex struct have.
+		This means that we will be reading the pos, nor, uv, tan, bitan 200 times.*/
+		infile.read((char*)read_mList[i].vList.data(), sizeof(read_sVertex) * read_meshList[i].vertexCount);
 
-		//cout << "SkelAnimVert vector: NULL" << endl;
-
-		//cout << "Joint vector: NULL" << endl;
 		cout << "______________________" << endl;
 	}
 
@@ -1766,7 +1818,7 @@ void FbxImport::readFromBinary()
 		cout << "\t";
 		cout << "Allocated memory for " << read_mainHeader.materialCount << " materials" << endl;
 
-		infile.read((char*)&read_materialList[i], sizeof(read_sMaterial));//				Information av hur många material som senare kommer att komma, samt hur mycket minne den inten som berättar detta tar upp.
+		infile.read((char*)&read_materialList[i], sizeof(read_sMaterial));
 
 		cout << "______________________" << endl;
 	}
