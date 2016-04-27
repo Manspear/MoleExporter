@@ -7,7 +7,7 @@ int main()
 	fbx.initializeImporter("Models/fbx_test.fbx");
 	
 	fbx.WriteToBinary("testBox2.mole");
-	fbx.readFromBinary();
+	fbx.readFromBinary("testBox.mole");
 
 	cin.get();
 	return 0;

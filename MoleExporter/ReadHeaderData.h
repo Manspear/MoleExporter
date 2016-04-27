@@ -99,7 +99,6 @@ struct  read_sCamera
 static std::vector<read_sCamera>  read_mCameraList;
 
 //Struct objects
-
 read_sMainHeader read_gMainHeader;
 read_sVertex read_gVertex;
 read_sMaterial read_gMaterialData;

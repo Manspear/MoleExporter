@@ -127,7 +127,7 @@ public:
 
 	void WriteToBinary(const char* fileName);
 
-	void readFromBinary();
+	void readFromBinary(const char* fileName);
 
 	void convertFbxMatrixToFloatArray(FbxAMatrix inputMatrix, float inputArray[16]);
 
