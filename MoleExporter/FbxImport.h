@@ -74,17 +74,6 @@ public:
 		std::vector<sImportJointData> jointList;
 	};
 
-	/*struct sImportAnimMeshData
-	{
-		unsigned int materialID;
-
-		float translate[3];
-		float rotation[3];
-		float scale[3];
-
-		vector<sSkelAnimVertex> mVertexList;
-	};*/
-
 	struct sBlendData
 	{
 		int jointID, controlPointIndex;
@@ -127,7 +116,7 @@ public:
 
 	void WriteToBinary(const char* fileName);
 
-	void readFromBinary(const char* fileName);
+	/*void readFromBinary(const char* fileName);*/
 
 	void convertFbxMatrixToFloatArray(FbxAMatrix inputMatrix, float inputArray[16]);
 
