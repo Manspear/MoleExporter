@@ -22,12 +22,27 @@ struct sMesh
 	bool isBoundingBox;
 	bool isAnimated;
 
+	unsigned int meshChildCount = 0;
 	unsigned int vertexCount = 0;
 	unsigned int skelAnimVertexCount = 0;
 	unsigned int jointCount = 0;
 };
 
 static std::vector<sMesh> meshList;
+
+struct sMeshChild
+{
+	int meshChildID;
+};
+
+/**
+WIll be held in a vector the same length as mTempMeshList.size();
+Holds a vector containing meshChildren.
+**/
+struct sMChildHolder
+{
+	std::vector<sMeshChild> meshChildList;
+};
 
 struct sVertex
 {
@@ -70,7 +85,7 @@ struct sJoint
 {
 	int jointID;
 	int parentJointID;
-	int bBoxID;
+	//int bBoxID;
 
 	float pos[3];
 	float rot[3];
@@ -79,27 +94,68 @@ struct sJoint
 	float bindPoseInverse[16];
 	float globalBindPoseInverse[16];
 
+	int meshChildCount;
 	int animationStateCount;
 };
-
-static std::vector<sJoint> jointList;
-
-struct sAnimationState
-{
-	int keyFrames;
-};
-
-static std::vector<sAnimationState> animStateList;
 
 struct sKeyFrame
 {
 	float keyTime;
 	float keyPos[3];
 	float keyRotate[3];
-	float keyScale[3];	
+	float keyScale[3];
 };
 
-static std::vector<sKeyFrame> keyList;
+
+struct sAnimationState
+{
+	std::vector<sKeyFrame> keyFrames;
+};
+
+/**
+JointHolder --> Holds things for on per-joint basis
+**/
+struct sJHolder
+{
+	std::vector<sMeshChild> meshChildren; //resize(mesh[0].joint[0].meshChildCount)
+	std::vector<sAnimationState> animationStates; //resize(mesh[0].joint[0].animationStateCount);
+};
+/**
+Held per mesh.
+Used as such:
+vector<sMJHolder> thing;
+thing.resize(mTempMeshList.size());
+thing[0].jointList.resize(mTempMeshList[0].jointList.size());
+**/
+struct sMJHolder
+{
+	std::vector<sJoint> jointList; // .resize(mesh[0].jointCount)
+	std::vector<sJHolder> perJoint;
+};
+
+/**
+Used as such:
+vector<sMJHolder> thing;
+thing.resize(mTempMeshList.size());
+thing[0].jointList.resize(mTempMeshList[0].jointList.size());
+//Fills the thing.jointList
+
+vector<sMJHolder2> thing2;
+thing2.resize(thing[0].jointList.size());
+thing2[0].perJoint.resize(thing[0].jointList.size();
+thing2.perJoint[0].meshChildren.resize(thing[0].jointList.meshChildCount);
+**/
+//struct sMJ2Holder
+//{
+//	std::vector<sJHolder> perJoint;
+//};
+
+//static std::vector<sJoint> jointList;
+
+
+
+
+//static std::vector<sKeyFrame> keyList;
 
 struct sMaterial
 {
