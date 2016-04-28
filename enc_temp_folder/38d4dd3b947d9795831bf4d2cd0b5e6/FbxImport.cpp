@@ -1953,12 +1953,10 @@ void FbxImport::WriteToBinary(const char* fileName)
 			const int JCount = meshList[meshCounter].jointCount;
 			for (int JCounter = 0; JCounter < JCount; JCounter++)
 			{
-				const int animStateCount = meshJointHolder[meshCounter].jointList[JCounter].animationStateCount;
-				outfile.write((const char*)meshJointHolder[meshCounter].perJoint[JCounter].animationStateTracker.data(), sizeof(sAnimationStateTracker) * animStateCount);
-
-
 				const int meshChildCount = meshJointHolder[meshCounter].jointList[JCounter].meshChildCount;
 				outfile.write((const char*)meshJointHolder[meshCounter].perJoint[JCounter].meshChildren.data(), sizeof(int) * meshChildCount);
+				const int animStateCount = meshJointHolder[meshCounter].jointList[JCounter].animationStateCount;
+				outfile.write((const char*)meshJointHolder[meshCounter].perJoint[JCounter].animationStateTracker.data(), sizeof(sAnimationStateTracker) * animStateCount);
 				
 				for (int animStateCounter = 0; animStateCounter < animStateCount; animStateCounter++)
 				{
