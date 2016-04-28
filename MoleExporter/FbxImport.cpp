@@ -1260,7 +1260,7 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 				//Start processing layers, each working as an "key-data source" 
 				for (unsigned int layerCounter = 0; layerCounter < layerCount; layerCounter++)
 				{
-					FbxAnimLayer* currLayer = currStack->GetMember<FbxAnimLayer>();
+					FbxAnimLayer* currLayer = currStack->GetMember<FbxAnimLayer>(layerCounter);
 
 					FbxString stackName = currStack->GetName();
 
