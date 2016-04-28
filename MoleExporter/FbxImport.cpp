@@ -1820,7 +1820,6 @@ void FbxImport::assignToHeaderData()
 							meshJointHolder[sMesh].perJoint[jointIndex].animationStates[animationIndex].keyFrames[keyIndex].keyScale[transformIndex] = mTempMeshList[sMesh].jointList[jointIndex].animationState[animationIndex].keyList[keyIndex].keyScale[transformIndex];
 						}
 					}
-					//animStateList[animationIndex].keyFrames = keyList.size();
 				}
 
 				const int meshChildCount = mTempMeshList[sMesh].jointList[jointIndex].childMeshList.size();
