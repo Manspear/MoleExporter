@@ -14,6 +14,8 @@ struct sMesh
 	char meshName[256];
 
 	unsigned int materialID;
+	int parentMeshID;
+	int parentJointID;
 
 	float translate[3];
 	float rotation[3];
@@ -43,6 +45,8 @@ struct sMChildHolder
 {
 	std::vector<sMeshChild> meshChildList;
 };
+
+static std::vector<sMChildHolder> meshChildHolder;
 
 struct sVertex
 {
@@ -107,6 +111,11 @@ struct sKeyFrame
 };
 
 
+struct sAnimationStateTracker
+{
+	int keyCount;
+};
+
 struct sAnimationState
 {
 	std::vector<sKeyFrame> keyFrames;
@@ -118,7 +127,8 @@ JointHolder --> Holds things for on per-joint basis
 struct sJHolder
 {
 	std::vector<sMeshChild> meshChildren; //resize(mesh[0].joint[0].meshChildCount)
-	std::vector<sAnimationState> animationStates; //resize(mesh[0].joint[0].animationStateCount);
+	std::vector<sAnimationStateTracker> animationStateTracker; //resize(mesh[0].joint[0].animationStateCount);
+	std::vector<sAnimationState> animationStates;
 };
 /**
 Held per mesh.
@@ -132,6 +142,8 @@ struct sMJHolder
 	std::vector<sJoint> jointList; // .resize(mesh[0].jointCount)
 	std::vector<sJHolder> perJoint;
 };
+
+static std::vector<sMJHolder> meshJointHolder;
 
 /**
 Used as such:

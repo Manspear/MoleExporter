@@ -1618,14 +1618,14 @@ void FbxImport::assignToHeaderData()
 	mkList.resize(mTempMeshList.size());
 
 	std::cout << meshList.size() << "\n";
-	cout << "\n\n" << "/////////////Information to binary format/////////////" << "\n\n";
+	std::cout << "\n\n" << "/////////////Information to binary format/////////////" << "\n\n";
 
-	cout << "Count of meshes: " << gMainHeader.meshCount << "\n\n";
-	cout << "Count of materials: " << gMainHeader.materialCount << "\n\n";
-	cout << "Count of lights: " << gMainHeader.lightCount << "\n\n";
-	cout << "Count of cameras: " << gMainHeader.cameraCount << "\n\n";
+	std::cout << "Count of meshes: " << gMainHeader.meshCount << "\n\n";
+	std::cout << "Count of materials: " << gMainHeader.materialCount << "\n\n";
+	std::cout << "Count of lights: " << gMainHeader.lightCount << "\n\n";
+	std::cout << "Count of cameras: " << gMainHeader.cameraCount << "\n\n";
 
-	cout << "////////////////////////////////////////////////" << "\n\n";
+	std::cout << "////////////////////////////////////////////////" << "\n\n";
 
 	sVertex vertex;
 	sSkelAnimVertex saVertex;
@@ -1633,10 +1633,16 @@ void FbxImport::assignToHeaderData()
 	sJoint joint;
 	sKeyFrame keyframe;
 
+	
+	meshChildHolder.resize(meshList.size());
+
+	
+	meshJointHolder.resize(meshList.size());
+
 	for (int sMesh = 0; sMesh < meshList.size(); sMesh++)
 	{
-		cout << "-------------------------------" << "\n\n";
-		cout << "Mesh: " << sMesh + 1 << "\n\n";
+		std::cout << "-------------------------------" << "\n\n";
+		std::cout << "Mesh: " << sMesh + 1 << "\n\n";
 
 		strncpy(meshList[sMesh].meshName, mTempMeshList[sMesh].storeName, 256);
 
@@ -1651,6 +1657,17 @@ void FbxImport::assignToHeaderData()
 
 		meshList[sMesh].isAnimated = mTempMeshList[sMesh].isAnimated;
 		meshList[sMesh].isBoundingBox = mTempMeshList[sMesh].isBoundingBox;
+
+		meshList[sMesh].meshChildCount = mTempMeshList[sMesh].childMeshList.size();
+
+		meshList[sMesh].parentJointID = mTempMeshList[sMesh].parentJointID;
+		meshList[sMesh].parentMeshID = mTempMeshList[sMesh].parentMeshID;
+
+		meshChildHolder[sMesh].meshChildList.resize(meshList[sMesh].meshChildCount);
+		for (int meshChildCounter = 0; meshChildCounter < meshList[sMesh].meshChildCount; meshChildCounter++)
+		{
+			meshChildHolder[sMesh].meshChildList[meshChildCounter].meshChildID = mTempMeshList[sMesh].childMeshList[meshChildCounter];
+		}
 
 		/*If the mesh is skinned, we should instead transfer skeleton vertex count
 		and the count of joints.*/
@@ -1667,11 +1684,11 @@ void FbxImport::assignToHeaderData()
 		}
 
 		std::cout << "Vertex count: " << meshList[sMesh].vertexCount << "\n";
-		cout << "-------------------------------" << "\n\n";
+		std::cout << "-------------------------------" << "\n\n";
 
-		cout << "Vertex count: " << meshList[sMesh].vertexCount << "\n\n";
+		std::cout << "Vertex count: " << meshList[sMesh].vertexCount << "\n\n";
 
-		cout << "Vertex information: " << "\n\n";
+		std::cout << "Vertex information: " << "\n\n";
 
 		if (mTempMeshList[sMesh].isAnimated == true)
 		{
@@ -1688,7 +1705,7 @@ void FbxImport::assignToHeaderData()
 				std::cout << "UV: " << mTempMeshList[sMesh].mSkelVertexList[skelVertices].vertexUV[0] << " "
 					<< mTempMeshList[sMesh].mSkelVertexList[skelVertices].vertexUV[1] << "\n\n";
 
-				cout << "Position: " << mTempMeshList[sMesh].mSkelVertexList[skelVertices].vertexPos[0] << " "
+				std::cout << "Position: " << mTempMeshList[sMesh].mSkelVertexList[skelVertices].vertexPos[0] << " "
 					<< mTempMeshList[sMesh].mSkelVertexList[skelVertices].vertexPos[1] << " "
 					<< mTempMeshList[sMesh].mSkelVertexList[skelVertices].vertexPos[2] << "\n\n";
 
@@ -1727,7 +1744,7 @@ void FbxImport::assignToHeaderData()
 		{
 			for (int vertices = 0; vertices < mTempMeshList[sMesh].mVertexList.size(); vertices++)
 			{
-				cout << "Position: " << mTempMeshList[sMesh].mVertexList[vertices].vertexPos[0] << " "
+				std::cout << "Position: " << mTempMeshList[sMesh].mVertexList[vertices].vertexPos[0] << " "
 					<< mTempMeshList[sMesh].mVertexList[vertices].vertexPos[1] << " "
 					<< mTempMeshList[sMesh].mVertexList[vertices].vertexPos[2] << "\n\n";
 
@@ -1758,46 +1775,58 @@ void FbxImport::assignToHeaderData()
 
 		if (meshList[sMesh].isAnimated == true)
 		{
-			jointList.resize(meshList[sMesh].jointCount);
+			meshJointHolder[sMesh].jointList.resize(meshList[sMesh].jointCount);
+			meshJointHolder[sMesh].perJoint.resize(meshList[sMesh].jointCount);
 
 			for (int jointIndex = 0; jointIndex < mTempMeshList[sMesh].jointList.size(); jointIndex++)
 			{
-				jointList[jointIndex].jointID = mTempMeshList[sMesh].jointList[jointIndex].jointID;
-				jointList[jointIndex].parentJointID = mTempMeshList[sMesh].jointList[jointIndex].parentJointID;
-				jointList[jointIndex].bBoxID = mTempMeshList[sMesh].jointList[jointIndex].bBoxID;
+				meshJointHolder[sMesh].jointList[jointIndex].jointID = mTempMeshList[sMesh].jointList[jointIndex].jointID;
+				meshJointHolder[sMesh].jointList[jointIndex].parentJointID = mTempMeshList[sMesh].jointList[jointIndex].parentJointID;
+				meshJointHolder[sMesh].perJoint[jointIndex].meshChildren.resize(mTempMeshList[sMesh].jointList[jointIndex].childMeshList.size());
+			//	meshJointHolder[sMesh].jointList[jointIndex].bBoxID = mTempMeshList[sMesh].jointList[jointIndex].bBoxID;
 
 				for (int transformIndex = 0; transformIndex < 3; transformIndex++)
 				{
-					jointList[jointIndex].pos[transformIndex] = mTempMeshList[sMesh].jointList[jointIndex].pos[transformIndex];
-					jointList[jointIndex].rot[transformIndex] = mTempMeshList[sMesh].jointList[jointIndex].rot[transformIndex];
-					jointList[jointIndex].scale[transformIndex] = mTempMeshList[sMesh].jointList[jointIndex].scale[transformIndex];
+					meshJointHolder[sMesh].jointList[jointIndex].pos[transformIndex] = mTempMeshList[sMesh].jointList[jointIndex].pos[transformIndex];
+					meshJointHolder[sMesh].jointList[jointIndex].rot[transformIndex] = mTempMeshList[sMesh].jointList[jointIndex].rot[transformIndex];
+					meshJointHolder[sMesh].jointList[jointIndex].scale[transformIndex] = mTempMeshList[sMesh].jointList[jointIndex].scale[transformIndex];
 				}
 
 				for (int matrixIndex = 0; matrixIndex < 16; matrixIndex++)
 				{
-					jointList[jointIndex].bindPoseInverse[matrixIndex] = mTempMeshList[sMesh].jointList[jointIndex].bindPoseInverse[matrixIndex];
-					jointList[jointIndex].globalBindPoseInverse[matrixIndex] = mTempMeshList[sMesh].jointList[jointIndex].globalBindPoseInverse[matrixIndex];
+					meshJointHolder[sMesh].jointList[jointIndex].bindPoseInverse[matrixIndex] = mTempMeshList[sMesh].jointList[jointIndex].bindPoseInverse[matrixIndex];
+					meshJointHolder[sMesh].jointList[jointIndex].globalBindPoseInverse[matrixIndex] = mTempMeshList[sMesh].jointList[jointIndex].globalBindPoseInverse[matrixIndex];
 				}
 
-				jointList[jointIndex].animationStateCount = mTempMeshList[sMesh].jointList[jointIndex].animationState.size();
-				animStateList.resize(jointList[jointIndex].animationStateCount);
+				meshJointHolder[sMesh].jointList[jointIndex].animationStateCount = mTempMeshList[sMesh].jointList[jointIndex].animationState.size();
+				
+				meshJointHolder[sMesh].perJoint[jointIndex].animationStates.resize(meshJointHolder[sMesh].jointList[jointIndex].animationStateCount);
+				meshJointHolder[sMesh].perJoint[jointIndex].animationStateTracker.resize(meshJointHolder[sMesh].jointList[jointIndex].animationStateCount);
 
-				for (int animationIndex = 0; animationIndex < jointList[jointIndex].animationStateCount; animationIndex++)
+				for (int animationIndex = 0; animationIndex < meshJointHolder[sMesh].jointList[jointIndex].animationStateCount; animationIndex++)
 				{
-					keyList.resize(mTempMeshList[sMesh].jointList[jointIndex].animationState[animationIndex].keyList.size());
-
-					for (int keyIndex = 0; keyIndex < mTempMeshList[sMesh].jointList[jointIndex].animationState[animationIndex].keyList.size(); keyIndex++)
+					const int keyFrameCount = mTempMeshList[sMesh].jointList[jointIndex].animationState[animationIndex].keyList.size();
+					meshJointHolder[sMesh].perJoint[jointIndex].animationStates[animationIndex].keyFrames.resize(keyFrameCount);
+					meshJointHolder[sMesh].perJoint[jointIndex].animationStateTracker[animationIndex].keyCount = keyFrameCount;
+					
+					for (int keyIndex = 0; keyIndex < keyFrameCount; keyIndex++)
 					{
-						keyList[keyIndex].keyTime = mTempMeshList[sMesh].jointList[jointIndex].animationState[animationIndex].keyList[keyIndex].keyTime;
+						meshJointHolder[sMesh].perJoint[jointIndex].animationStates[animationIndex].keyFrames[keyIndex].keyTime = mTempMeshList[sMesh].jointList[jointIndex].animationState[animationIndex].keyList[keyIndex].keyTime;
 
 						for (int transformIndex = 0; transformIndex < 3; transformIndex++)
 						{
-							keyList[keyIndex].keyPos[transformIndex] = mTempMeshList[sMesh].jointList[jointIndex].animationState[animationIndex].keyList[keyIndex].keyPos[transformIndex];
-							keyList[keyIndex].keyRotate[transformIndex] = mTempMeshList[sMesh].jointList[jointIndex].animationState[animationIndex].keyList[keyIndex].keyRotate[transformIndex];
-							keyList[keyIndex].keyScale[transformIndex] = mTempMeshList[sMesh].jointList[jointIndex].animationState[animationIndex].keyList[keyIndex].keyScale[transformIndex];
+							meshJointHolder[sMesh].perJoint[jointIndex].animationStates[animationIndex].keyFrames[keyIndex].keyPos[transformIndex] = mTempMeshList[sMesh].jointList[jointIndex].animationState[animationIndex].keyList[keyIndex].keyPos[transformIndex];
+							meshJointHolder[sMesh].perJoint[jointIndex].animationStates[animationIndex].keyFrames[keyIndex].keyRotate[transformIndex] = mTempMeshList[sMesh].jointList[jointIndex].animationState[animationIndex].keyList[keyIndex].keyRotate[transformIndex];
+							meshJointHolder[sMesh].perJoint[jointIndex].animationStates[animationIndex].keyFrames[keyIndex].keyScale[transformIndex] = mTempMeshList[sMesh].jointList[jointIndex].animationState[animationIndex].keyList[keyIndex].keyScale[transformIndex];
 						}
 					}
-					animStateList[animationIndex].keyFrames = keyList.size();
+					//animStateList[animationIndex].keyFrames = keyList.size();
+				}
+
+				const int meshChildCount = mTempMeshList[sMesh].jointList[jointIndex].childMeshList.size();
+				for (int meshChildCounter = 0; meshChildCounter < meshChildCount; meshChildCounter++)
+				{
+					meshJointHolder[sMesh].perJoint[jointIndex].meshChildren[meshChildCounter].meshChildID = mTempMeshList[sMesh].jointList[jointIndex].childMeshList[meshChildCounter];
 				}
 			}
 		}
@@ -1821,9 +1850,9 @@ void FbxImport::convertFbxMatrixToFloatArray(FbxAMatrix inputMatrix, float input
 
 void FbxImport::WriteToBinary(const char* fileName)
 {
-	cout << ">>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<" << "\n" << "\n" << endl;
-	cout << "Binary Writer" << endl;
-	cout << "\n" << endl;
+	std::cout << ">>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<" << "\n" << "\n" << endl;
+	std::cout << "Binary Writer" << endl;
+	std::cout << "\n" << endl;
 
 	/*Open a file that is ready for binary writing.*/
 	std::ofstream outfile(fileName, std::ofstream::binary);			
@@ -1833,161 +1862,182 @@ void FbxImport::WriteToBinary(const char* fileName)
 	how memory they will take up in the binary file.*/
 	outfile.write((const char*)&gMainHeader, sizeof(sMainHeader));
 
-	cout << "______________________" << endl;
-	cout << "Main Header" << endl;
-	cout << "meshCount: " << gMainHeader.meshCount << endl;
-	cout << "materialCount: " << gMainHeader.materialCount << endl;
-	cout << "lightCount: " << gMainHeader.lightCount << endl;
-	cout << "cameraCount: " << gMainHeader.cameraCount << endl;
-	cout << "______________________" << endl;
+	std::cout << "______________________" << endl;
+	std::cout << "Main Header" << endl;
+	std::cout << "meshCount: " << gMainHeader.meshCount << endl;
+	std::cout << "materialCount: " << gMainHeader.materialCount << endl;
+	std::cout << "lightCount: " << gMainHeader.lightCount << endl;
+	std::cout << "cameraCount: " << gMainHeader.cameraCount << endl;
+	std::cout << "______________________" << endl;
 
-	for (int i = 0; i < gMainHeader.meshCount; i++)
+	for (int meshCounter = 0; meshCounter < gMainHeader.meshCount; meshCounter++)
 	{
-		cout << i << " " << meshList[i].meshName << endl;
+		std::cout << meshCounter << " " << meshList[meshCounter].meshName << endl;
 		
 		/*Writing the block of memory that is the meshes. The information from the meshes 
 		will be written here, that includes for example vertex count for a ordinary mesh 
 		and a skinned mesh. What we do is reserving memory for all the data that is in the
 		struct. For example, Vertex count is a integer and will take up to 4 bytes in the 
 		memory when writing.*/
-		outfile.write((const char*)&meshList[i], sizeof(sMesh));
+		outfile.write((const char*)&meshList[meshCounter], sizeof(sMesh));
 
-		cout << "Mesh vector: " << endl;
+		std::cout << "Mesh vector: " << endl;
 
-		cout << "\t";
-		cout << "Material ID: ";
-		cout << meshList[i].materialID << endl;
+		std::cout << "\t";
+		std::cout << "Material ID: ";
+		std::cout << meshList[meshCounter].materialID << endl;
 
-		cout << "\t";
-		cout << "xyz: ";
-		cout << meshList[i].translate[0] << " ";
-		cout << meshList[i].translate[1] << " ";
-		cout << meshList[i].translate[2] << " " << endl;
+		std::cout << "\t";
+		std::cout << "xyz: ";
+		std::cout << meshList[meshCounter].translate[0] << " ";
+		std::cout << meshList[meshCounter].translate[1] << " ";
+		std::cout << meshList[meshCounter].translate[2] << " " << endl;
 
-		cout << "\t";
-		cout << "rot: ";
-		cout << meshList[i].rotation[0] << " ";
-		cout << meshList[i].rotation[1] << " ";
-		cout << meshList[i].rotation[2] << " " << endl;
+		std::cout << "\t";
+		std::cout << "rot: ";
+		std::cout << meshList[meshCounter].rotation[0] << " ";
+		std::cout << meshList[meshCounter].rotation[1] << " ";
+		std::cout << meshList[meshCounter].rotation[2] << " " << endl;
 
-		cout << "\t";
-		cout << "scale: ";
-		cout << meshList[i].scale[0] << " ";
-		cout << meshList[i].scale[1] << " ";
-		cout << meshList[i].scale[2] << " " << endl;
+		std::cout << "\t";
+		std::cout << "scale: ";
+		std::cout << meshList[meshCounter].scale[0] << " ";
+		std::cout << meshList[meshCounter].scale[1] << " ";
+		std::cout << meshList[meshCounter].scale[2] << " " << endl;
 
-		cout << "\t";
-		cout << "Vertex Count: ";
-		cout << meshList[i].vertexCount << endl;
+		std::cout << "\t";
+		std::cout << "Vertex Count: ";
+		std::cout << meshList[meshCounter].vertexCount << endl;
 
-		cout << "\t";
-		cout << "SkelAnimVert Count: ";
-		cout << meshList[i].skelAnimVertexCount << endl;
+		std::cout << "\t";
+		std::cout << "SkelAnimVert Count: ";
+		std::cout << meshList[meshCounter].skelAnimVertexCount << endl;
 
-		cout << "\t";
-		cout << "Joint Count: ";
-		cout << meshList[i].jointCount << endl;
+		std::cout << "\t";
+		std::cout << "Joint Count: ";
+		std::cout << meshList[meshCounter].jointCount << endl;
 
-		if (meshList[i].isAnimated == true)
+		if (meshList[meshCounter].isAnimated == true)
 		{
-			cout << "\n";
-			cout << "Skeleton Vertex vector: " << endl;
+			std::cout << "\n";
+			std::cout << "Skeleton Vertex vector: " << endl;
 
-			cout << "\t";
-			cout << mkList[i].vskList.data() << endl;
+			std::cout << "\t";
+			std::cout << mkList[meshCounter].vskList.data() << endl;
 
-			cout << "\t";
-			cout << "Allocated memory for: " << meshList[i].skelAnimVertexCount << " skel vertices" << endl;
+			std::cout << "\t";
+			std::cout << "Allocated memory for: " << meshList[meshCounter].skelAnimVertexCount << " skel vertices" << endl;
 
 			/*Writing all the vertex lists for each mesh. For example if a mesh have 200 vertices,
 			we can multiply the count of vertices with the sizes in bytes that the sVertex struct have.
 			This means that we will be writing the pos, nor, uv, tan, bitan 200 times.*/
-			outfile.write((const char*)mkList[i].vskList.data(), sizeof(sSkelAnimVertex) * meshList[i].skelAnimVertexCount);
+			outfile.write((const char*)mkList[meshCounter].vskList.data(), sizeof(sSkelAnimVertex) * meshList[meshCounter].skelAnimVertexCount);
 
 			/*Writing the joint list for each mesh. Every joint in the list have individual data 
 			that we have to process when writing to the file.*/
-			cout << "\n";
-			cout << "Joint vector: " << endl;
+			std::cout << "\n";
+			std::cout << "Joint vector: " << endl;
 
-			cout << "\t";
-			cout << jointList.data() << endl;
+			std::cout << "\t";
+			//std::cout << jointList.data() << endl;
 
-			cout << "\t";
-			cout << "Allocated memory for: " << meshList[i].jointCount << " joints" << endl;
+			std::cout << "\t";
+			std::cout << "Allocated memory for: " << meshList[meshCounter].jointCount << " joints" << endl;
 
 			/*Writing the data for all the joints that a skinned mesh have.*/
-			outfile.write((const char*)jointList.data(), sizeof(sJoint));
+			const int jointCount = meshList[meshCounter].jointCount;
+			outfile.write((const char*)meshJointHolder[meshCounter].jointList.data(), sizeof(sJoint) * jointCount);
+			
+			const int JCount = meshList[meshCounter].jointCount;
+			for (int JCounter = 0; JCounter < JCount; JCounter++)
+			{
+				const int meshChildCount = meshJointHolder[meshCounter].jointList[JCounter].meshChildCount;
+				outfile.write((const char*)meshJointHolder[meshCounter].perJoint[JCounter].meshChildren.data(), sizeof(int) * meshChildCount);
+				const int animStateCount = meshJointHolder[meshCounter].jointList[JCounter].animationStateCount;
+				outfile.write((const char*)meshJointHolder[meshCounter].perJoint[JCounter].animationStateTracker.data(), sizeof(sAnimationStateTracker) * animStateCount);
+				
+				for (int animStateCounter = 0; animStateCounter < animStateCount; animStateCounter++)
+				{
+					const int keyCount = meshJointHolder[meshCounter].perJoint[JCounter].animationStateTracker[animStateCounter].keyCount;
+					outfile.write((const char*)meshJointHolder[meshCounter].perJoint[JCounter].animationStates[animStateCounter].keyFrames.data(), sizeof(sKeyFrame) * keyCount);
+				}
+
+			}
+			//outfile.write((const char*)jointList.data(), sizeof(sJoint));
 		}
 
 		else
 		{
-			cout << "\n";
-			cout << "Vertex vector: " << endl;
+			std::cout << "\n";
+			std::cout << "Vertex vector: " << endl;
 
-			cout << "\t";
-			cout << mList[i].vList.data() << endl;
+			std::cout << "\t";
+			std::cout << mList[meshCounter].vList.data() << endl;
 
-			cout << "\t";
-			cout << "Allocated memory for: " << meshList[i].vertexCount << " vertices" << endl;
+			std::cout << "\t";
+			std::cout << "Allocated memory for: " << meshList[meshCounter].vertexCount << " vertices" << endl;
 
 			/*Writing all the vertex lists for each mesh. For example if a mesh have 200 vertices,
 			we can multiply the count of vertices with the sizes in bytes that the sVertex struct have.
 			This means that we will be writing the pos, nor, uv, tan, bitan 200 times.*/
-			outfile.write((const char*)mList[i].vList.data(), sizeof(sVertex) * meshList[i].vertexCount);
+			outfile.write((const char*)mList[meshCounter].vList.data(), sizeof(sVertex) * meshList[meshCounter].vertexCount);
 		}
 
-		cout << "______________________" << endl;
+		std::cout << "______________________" << endl;
+
+		
+
 	}
 
 	for (int i = 0; i < gMainHeader.materialCount; i++)
 	{
-		cout << "Material: " << i << endl;
+		std::cout << "Material: " << i << endl;
 
-		cout << "Material vector: " << endl;
+		std::cout << "Material vector: " << endl;
 
-		cout << "\t";
-		cout << &mMaterialList[i] << endl;
+		std::cout << "\t";
+		std::cout << &mMaterialList[i] << endl;
 
-		cout << "\t";
-		cout << "Allocated memory for " << gMainHeader.materialCount << " materials" << endl;
+		std::cout << "\t";
+		std::cout << "Allocated memory for " << gMainHeader.materialCount << " materials" << endl;
 
 		/*Writing all the materials from the list with the size in bytes in mind.*/
 		outfile.write((const char*)&mMaterialList[i], sizeof(sMaterial)); 
 
-		cout << "______________________" << endl;
+		std::cout << "______________________" << endl;
 	}
 
 	for (int i = 0; i < gMainHeader.lightCount; i++)
 	{
-		cout << "Light: " << i << endl;
+		std::cout << "Light: " << i << endl;
 
-		cout << "Light vector: " << endl;
+		std::cout << "Light vector: " << endl;
 
-		cout << "\t";
-		cout << &mLightList[i] << endl; 
+		std::cout << "\t";
+		std::cout << &mLightList[i] << endl; 
 
-		cout << "\t";
-		cout << "Allocated memory for " << gMainHeader.lightCount << " lights" << endl;
+		std::cout << "\t";
+		std::cout << "Allocated memory for " << gMainHeader.lightCount << " lights" << endl;
 
 		/*Writing all the lights from the list with the size in bytes in mind.*/
 		outfile.write((const char*)&mLightList[i], sizeof(sLight));
 
-		cout << "______________________" << endl;
+		std::cout << "______________________" << endl;
 	}
 
 	for (int i = 0; i < gMainHeader.cameraCount; i++)
 	{
-		cout << "Camera: " << i << endl;
+		std::cout << "Camera: " << i << endl;
 
-		cout << "Camera vector: " << endl;
+		std::cout << "Camera vector: " << endl;
 
-		cout << "\t";
-		cout << "Allocated memory for " << gMainHeader.cameraCount << " cameras" << endl;
+		std::cout << "\t";
+		std::cout << "Allocated memory for " << gMainHeader.cameraCount << " cameras" << endl;
 
 		/*Writing all the cameras from the list with the size in bytes in mind.*/
 		outfile.write((const char*)&mCameraList[i], sizeof(sCamera));
 
-		cout << "______________________" << endl;
+		std::cout << "______________________" << endl;
 	}
 
 	outfile.close();
@@ -1999,7 +2049,7 @@ void FbxImport::WriteToBinary(const char* fileName)
 //
 //	std::ifstream infile(fileName, std::ifstream::binary);
 //
-//	cout << ">>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<" << "\n" << "\n" << endl;
+//	std::cout << ">>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<" << "\n" << "\n" << endl;
 //	cout << "Binary Reader" << endl;
 //	cout << "\n" << endl;
 //
