@@ -78,6 +78,7 @@ struct sJoint
 
 	float bindPoseInverse[16];
 	float globalBindPoseInverse[16];
+
 	int animationStateCount;
 };
 
@@ -88,6 +89,8 @@ struct sAnimationState
 	int keyFrames;
 };
 
+static std::vector<sAnimationState> animStateList;
+
 struct sKeyFrame
 {
 	float keyTime;
@@ -96,7 +99,7 @@ struct sKeyFrame
 	float keyScale[3];	
 };
 
-static std::vector<sKeyFrame> keyframeList;
+static std::vector<sKeyFrame> keyList;
 
 struct sMaterial
 {

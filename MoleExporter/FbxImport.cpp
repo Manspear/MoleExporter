@@ -1633,22 +1633,24 @@ void FbxImport::assignToHeaderData()
 				}
 
 				jointList[jointIndex].animationStateCount = mTempMeshList[sMesh].jointList[jointIndex].animationState.size();
+				animStateList.resize(jointList[jointIndex].animationStateCount);
 
 				for (int animationIndex = 0; animationIndex < jointList[jointIndex].animationStateCount; animationIndex++)
 				{
-					keyframeList.resize(mTempMeshList[sMesh].jointList[jointIndex].animationState[animationIndex].keyList.size());
+					keyList.resize(mTempMeshList[sMesh].jointList[jointIndex].animationState[animationIndex].keyList.size());
 
 					for (int keyIndex = 0; keyIndex < mTempMeshList[sMesh].jointList[jointIndex].animationState[animationIndex].keyList.size(); keyIndex++)
 					{
-						keyframeList[keyIndex].keyTime = mTempMeshList[sMesh].jointList[jointIndex].animationState[animationIndex].keyList[keyIndex].keyTime;
+						keyList[keyIndex].keyTime = mTempMeshList[sMesh].jointList[jointIndex].animationState[animationIndex].keyList[keyIndex].keyTime;
 
 						for (int transformIndex = 0; transformIndex < 3; transformIndex++)
 						{
-							keyframeList[keyIndex].keyPos[transformIndex] = mTempMeshList[sMesh].jointList[jointIndex].animationState[animationIndex].keyList[keyIndex].keyPos[transformIndex];
-							keyframeList[keyIndex].keyRotate[transformIndex] = mTempMeshList[sMesh].jointList[jointIndex].animationState[animationIndex].keyList[keyIndex].keyRotate[transformIndex];
-							keyframeList[keyIndex].keyScale[transformIndex] = mTempMeshList[sMesh].jointList[jointIndex].animationState[animationIndex].keyList[keyIndex].keyScale[transformIndex];
+							keyList[keyIndex].keyPos[transformIndex] = mTempMeshList[sMesh].jointList[jointIndex].animationState[animationIndex].keyList[keyIndex].keyPos[transformIndex];
+							keyList[keyIndex].keyRotate[transformIndex] = mTempMeshList[sMesh].jointList[jointIndex].animationState[animationIndex].keyList[keyIndex].keyRotate[transformIndex];
+							keyList[keyIndex].keyScale[transformIndex] = mTempMeshList[sMesh].jointList[jointIndex].animationState[animationIndex].keyList[keyIndex].keyScale[transformIndex];
 						}
 					}
+					animStateList[animationIndex].keyFrames = keyList.size();
 				}
 			}
 		}
@@ -1754,6 +1756,20 @@ void FbxImport::WriteToBinary(const char* fileName)
 			we can multiply the count of vertices with the sizes in bytes that the sVertex struct have.
 			This means that we will be writing the pos, nor, uv, tan, bitan 200 times.*/
 			outfile.write((const char*)mkList[i].vskList.data(), sizeof(sSkelAnimVertex) * meshList[i].skelAnimVertexCount);
+
+			/*Writing the joint list for each mesh. Every joint in the list have individual data 
+			that we have to process when writing to the file.*/
+			cout << "\n";
+			cout << "Joint vector: " << endl;
+
+			cout << "\t";
+			cout << jointList.data() << endl;
+
+			cout << "\t";
+			cout << "Allocated memory for: " << meshList[i].jointCount << " joints" << endl;
+
+			/*Writing the data for all the joints that a skinned mesh have.*/
+			outfile.write((const char*)jointList.data(), sizeof(sJoint));
 		}
 
 		else
