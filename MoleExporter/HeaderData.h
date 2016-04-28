@@ -22,9 +22,9 @@ struct sMesh
 	bool isBoundingBox;
 	bool isAnimated;
 
-	unsigned int vertexCount;
-	//unsigned int skelAnimVertexCount;
-	//unsigned int jointCount;
+	unsigned int vertexCount = 0;
+	unsigned int skelAnimVertexCount = 0;
+	unsigned int jointCount = 0;
 };
 
 static std::vector<sMesh> meshList;
@@ -59,6 +59,13 @@ struct sSkelAnimVertex
 	float weights[4];
 };
 
+struct mk
+{
+	std::vector<sSkelAnimVertex> vskList;
+};
+
+static std::vector<mk> mkList;
+
 struct sJoint
 {
 	int jointID;
@@ -71,22 +78,28 @@ struct sJoint
 
 	float bindPoseInverse[16];
 	float globalBindPoseInverse[16];
+
 	int animationStateCount;
 };
+
+static std::vector<sJoint> jointList;
 
 struct sAnimationState
 {
 	int keyFrames;
 };
 
+static std::vector<sAnimationState> animStateList;
+
 struct sKeyFrame
 {
 	float keyTime;
 	float keyPos[3];
 	float keyRotate[3];
-	float keyScale[3];
-	
+	float keyScale[3];	
 };
+
+static std::vector<sKeyFrame> keyList;
 
 struct sMaterial
 {
