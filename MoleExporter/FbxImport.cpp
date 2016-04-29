@@ -1326,7 +1326,7 @@ void FbxImport::processBoundingBoxes()
 
 void FbxImport::processTextures(FbxMesh * inputMesh)
 {
-	FbxProperty propDiffus, propSpecular, propNormal;
+	FbxProperty propDiffuse, propSpecular, propNormal;
 
 	int materialCount = inputMesh->GetNode()->GetSrcObjectCount<FbxSurfaceMaterial>();
 
@@ -1336,28 +1336,17 @@ void FbxImport::processTextures(FbxMesh * inputMesh)
 
 		if (material)
 		{
-			/*The game engine supports diffuse-, specular- and normal maps*/
-			propDiffus = material->FindProperty(FbxSurfaceMaterial::sDiffuse);
+			/*The game engine supports diffuse-, specular- and normal maps.*/
+			propDiffuse = material->FindProperty(FbxSurfaceMaterial::sDiffuse);
 			propSpecular = material->FindProperty(FbxSurfaceMaterial::sSpecular);
 			propNormal = material->FindProperty(FbxSurfaceMaterial::sNormalMap);
 
-			FbxTexture* texture;
+			/*Processing the three different type of textures in these functions.*/
+			processDiffuseMaps(propDiffuse);
 
-			/*Checking if the properties for the maps are valid.*/
-			if (propDiffus.IsValid())
-			{
-				processDiffuseMaps(propDiffus);
-			}
-
-			if (propSpecular.IsValid())
-			{
-				processSpecularMaps(propSpecular);
-			}
-
-			if (propNormal.IsValid())
-			{
-				processNormalMaps(propNormal);
-			}
+			processSpecularMaps(propSpecular);
+	
+			processNormalMaps(propNormal);
 		}
 	}
 }
@@ -1366,15 +1355,23 @@ void FbxImport::processDiffuseMaps(FbxProperty diffuseProp)
 {
 	int textureCount = diffuseProp.GetSrcObjectCount<FbxTexture>();
 
+	/*Return from function if there are no diffuse maps in the material.*/
+	if (textureCount <= 0)
+		return;
+
 	for (int textureIndex = 0; textureIndex < textureCount; textureIndex++)
 	{
 		FbxTexture* texture = diffuseProp.GetSrcObject<FbxTexture>(textureIndex);
+
 		FbxFileTexture* fileTexture = FbxCast<FbxFileTexture>(texture);
 		FbxString fileTextureName = fileTexture->GetFileName();
 
-		std::cout << "\n" << "Texturename Nr " << textureCounter + 1 << ": " << fileTextureName << "\n";
+		/*Modify the FbxString to match the filepath to the textures folder, which will be a part of the game project.*/
+		FbxString fileTextureNameModified = FbxString("Textures") + fileTextureName.Right(fileTextureName.Size() - fileTextureName.ReverseFind('/'));
 
-		char* textureToChar = fileTextureName.Buffer();
+		std::cout << "\n" << "Texturename Nr " << textureCounter + 1 << ": " << fileTextureNameModified << "\n";
+
+		char* textureToChar = fileTextureNameModified.Buffer();
 
 		char charObject[256];
 
@@ -1393,15 +1390,22 @@ void FbxImport::processSpecularMaps(FbxProperty propSpecular)
 {
 	int textureCount = propSpecular.GetSrcObjectCount<FbxTexture>();
 
+	/*Return from function if there are no specular maps in the material.*/
+	if (textureCount <= 0)
+		return;
+
 	for (int textureIndex = 0; textureIndex < textureCount; textureIndex++)
 	{
 		FbxTexture* texture = propSpecular.GetSrcObject<FbxTexture>(textureIndex);
 		FbxFileTexture* fileTexture = FbxCast<FbxFileTexture>(texture);
 		FbxString fileTextureName = fileTexture->GetFileName();
 
-		std::cout << "\n" << "Texturename Nr " << textureCounter + 1 << ": " << fileTextureName << "\n";
+		/*Modify the FbxString to match the filepath to the textures folder, which will be a part of the game project.*/
+		FbxString fileTextureNameModified = FbxString("Textures") + fileTextureName.Right(fileTextureName.Size() - fileTextureName.ReverseFind('/'));
 
-		char* textureToChar = fileTextureName.Buffer();
+		std::cout << "\n" << "Texturename Nr " << textureCounter + 1 << ": " << fileTextureNameModified << "\n";
+
+		char* textureToChar = fileTextureNameModified.Buffer();
 
 		char charObject[256];
 
@@ -1420,15 +1424,22 @@ void FbxImport::processNormalMaps(FbxProperty propNormal)
 {
 	int textureCount = propNormal.GetSrcObjectCount<FbxTexture>();
 
+	/*Return from function if there are no normal maps in the material.*/
+	if (textureCount <= 0)
+		return;
+
 	for (int textureIndex = 0; textureIndex < textureCount; textureIndex++)
 	{
 		FbxTexture* texture = propNormal.GetSrcObject<FbxTexture>(textureIndex);
 		FbxFileTexture* fileTexture = FbxCast<FbxFileTexture>(texture);
 		FbxString fileTextureName = fileTexture->GetFileName();
 
-		std::cout << "\n" << "Texturename Nr " << textureCounter + 1 << ": " << fileTextureName << "\n";
+		/*Modify the FbxString to match the filepath to the textures folder, which will be a part of the game project.*/
+		FbxString fileTextureNameModified = FbxString("Textures") + fileTextureName.Right(fileTextureName.Size() - fileTextureName.ReverseFind('/'));
 
-		char* textureToChar = fileTextureName.Buffer();
+		std::cout << "\n" << "Texturename Nr " << textureCounter + 1 << ": " << fileTextureNameModified << "\n";
+
+		char* textureToChar = fileTextureNameModified.Buffer();
 
 		char charObject[256];
 
