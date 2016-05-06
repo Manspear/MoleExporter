@@ -54,7 +54,7 @@ struct sVertex
 	float vertexNormal[3];
 	float vertexUV[2];
 	float tangentNormal[3];
-	float biTangentNormal[3];
+	float biTangentNormal[3]; //Bitangent not needed. For anything. But can be used.
 };
 
 struct m
