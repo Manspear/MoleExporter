@@ -4,9 +4,9 @@ using namespace std;
 int main()
 {
 	FbxImport fbx;
-	fbx.initializeImporter("Models/Kurtj4ckB0x.fbx");
+	fbx.initializeImporter("Models/Molebat.fbx");
 	
-	fbx.WriteToBinary("Kurtj4ckB0x.mole");
+	fbx.WriteToBinary("molebat.mole");
 
 	cin.get();
 	return 0;

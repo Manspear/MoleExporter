@@ -1147,7 +1147,8 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 			{
 				FbxImport::sBlendData temp;
 				//The index of this joint serves as it's ID
-				int jointID = clusterCounter;
+				//int jointID = clusterCounter;
+				int jointID = pmSceneJoints[currJointIndex].jointID;
 				//The control point that this joint affects
 				int controlPointIndex = currCluster->GetControlPointIndices()[i];
 				//The weight from this joint that the control point get
