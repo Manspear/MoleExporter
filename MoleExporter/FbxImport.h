@@ -94,7 +94,7 @@ public:
 
 	/*Functions*/
 
-	void initializeImporter(const char* filePath);
+	void initializeImporter(const char* filePath, float animationFramerate);
 	void processMesh(FbxMesh* inputMesh);
 
 	void processVertices(FbxMesh* inputMesh);
@@ -158,6 +158,8 @@ private:
 	int textureCounter;
 	int cameraCounter;
 	int lightCounter;
+
+	int animationFramerate;
 
 	bool firstProcess;
 	/**

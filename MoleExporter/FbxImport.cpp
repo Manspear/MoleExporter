@@ -240,7 +240,7 @@ void FbxImport::recursiveChildTraversal(FbxNode * inputNode)
 	/*headerData.meshCount = mMeshList.size(); */
 }
 
-void FbxImport::initializeImporter(const char* filePath)
+void FbxImport::initializeImporter(const char* filePath, float frameRate)
 {
 	/*Initialize memory allocator.*/
 	pmManager = FbxManager::Create();
@@ -284,6 +284,9 @@ void FbxImport::initializeImporter(const char* filePath)
 
 	//Fill the "scene-joint-graph" with basic "parenting" values
 	processJointHierarchy(pmRootNode);
+
+	//Setting the framerate
+	animationFramerate = frameRate;
 
 	for (int childIndex = 0; childIndex < pmRootNode->GetChildCount(); childIndex++)
 	{
@@ -1233,7 +1236,7 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 
 						//add these values to a sKey-struct, then append it to the keyFrame vector.
 						sImportKeyFrame tempKey;
-						tempKey.keyTime = keyTime;
+						tempKey.keyTime = (keyTime / 24) * animationFramerate;
 
 						for (unsigned int k = 0; k < 3; k++)
 						{
