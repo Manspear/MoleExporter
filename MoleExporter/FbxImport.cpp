@@ -1122,8 +1122,8 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 			currCluster->GetTransformLinkMatrix(tempBindMatrix);
 			
 			FbxAMatrix tempGlobalBindPoseInverse;
-			tempGlobalBindPoseInverse = tempBindMatrix * tempParentBindMatrix;
-			tempGlobalBindPoseInverse = tempGlobalBindPoseInverse.Inverse();
+			tempGlobalBindPoseInverse = tempBindMatrix.Inverse() * tempParentBindMatrix;
+			//tempGlobalBindPoseInverse = tempGlobalBindPoseInverse.Inverse();
 			
 			FbxAMatrix tempBindPoseInverse;
 			tempBindPoseInverse = tempBindMatrix.Inverse();
@@ -1197,7 +1197,7 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 					indexCounter++;
 				}
 			}
-
+			
 			//Start processing stacks holding animation layers.
 			const unsigned int stackCount = pmScene->GetSrcObjectCount<FbxAnimStack>();
 			for (unsigned int stackCounter = 0; stackCounter < stackCount; ++stackCounter)
@@ -1227,12 +1227,23 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 
 						FbxVector4 tempTranslation = animationEvaluator->GetNodeLocalTranslation(currJoint, currKey.GetTime());
 						FbxVector4 tempRotation = animationEvaluator->GetNodeLocalRotation(currJoint, currKey.GetTime());
-						FbxVector4 tempScale = animationEvaluator->GetNodeLocalRotation(currJoint, currKey.GetTime());
+						FbxVector4 tempScale = animationEvaluator->GetNodeLocalScaling(currJoint, currKey.GetTime());
+
+						float o = PI / 180;
 
 						float keyTime = currKey.GetTime().GetSecondDouble();
 						float translation[3] = { tempTranslation[0],  tempTranslation[1], tempTranslation[2] };
-						float rotation[3] = { tempRotation[0], tempRotation[1], tempRotation[2] };
+						float rotation[3] = { tempRotation[0] * o, tempRotation[1] * o, tempRotation[2] * o };
 						float scale[3] = { tempScale[0], tempScale[1], tempScale[2] };
+
+						
+						/**
+						pi = 180*
+						2pi = 360*
+						1* = pi / 180
+						90* * pi / 180 = 90 degrees in radians
+
+						**/
 
 						//add these values to a sKey-struct, then append it to the keyFrame vector.
 						sImportKeyFrame tempKey;
@@ -1248,9 +1259,19 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 					}
 					pmSceneJoints[currJointIndex].animationState.push_back(currAnimation);
 				}
+
 			}
 
 			importMeshData.jointList.push_back(pmSceneJoints[currJointIndex]);
+		}
+	}
+
+	for (int j = 0; j < importMeshData.mSkelVertexList.size(); j++)
+	{
+		for (int i = 0; i < 4; i++)
+		{
+			if (importMeshData.mSkelVertexList[j].influences[i] == -1337)
+				importMeshData.mSkelVertexList[j].influences[i] = 0;
 		}
 	}
 }
@@ -1695,12 +1716,22 @@ void FbxImport::assignToHeaderData()
 			}
 		}
 	}
+	mTempMeshList[0].jointList[0].animationState[0].keyList;
+	mTempMeshList[0].jointList[1].animationState[0].keyList;
+	mTempMeshList[0].mSkelVertexList;
+	int aids = 5;
 }
 
 void FbxImport::convertFbxMatrixToFloatArray(FbxAMatrix inputMatrix, float inputArray[16])
 {
 	//This function assumes row-major matrices.
-
+	/**
+	row column		n	r	c	n	 r c	n r c
+0	0	0			4	1	0	8  	 2 0	12  3 0
+1	0	1			5	1	1	9	 2 1	13  3 1
+2	0	2			6	1	2	10	 2 2	14  3 2
+3	0	3			7	1	3	11	 2 3	15 3 3
+	**/
 	unsigned int localCounter = 0;
 	for (unsigned int g = 0; g < 4; ++g)
 	{
@@ -1829,7 +1860,6 @@ void FbxImport::WriteToBinary(const char* fileName)
 					const int keyCount = meshJointHolder[meshCounter].perJoint[JCounter].animationStateTracker[animStateCounter].keyCount;
 					outfile.write((const char*)meshJointHolder[meshCounter].perJoint[JCounter].animationStates[animStateCounter].keyFrames.data(), sizeof(sKeyFrame) * keyCount);
 				}
-
 			}
 		}
 
