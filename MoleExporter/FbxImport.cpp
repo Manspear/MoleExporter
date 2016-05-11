@@ -577,6 +577,7 @@ void FbxImport::processVertices(FbxMesh * inputMesh)
 				}
 			}
 		}
+		int lii = 0;
 	}
 }
 
@@ -1165,6 +1166,7 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 			}
 			
 			const unsigned int polyCount = inputMesh->GetPolygonCount();
+			//The way that the vertices are "truly" indexed.
 			unsigned int indexCounter = 0;
 			for (unsigned int polyCounter = 0; polyCounter < polyCount; polyCounter++)
 			{
@@ -1266,6 +1268,39 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 		}
 	}
 
+	//Make the sum of the weights 1.
+	for (int j = 0; j < importMeshData.mSkelVertexList.size(); j++)
+	{
+		float sumW = 0;
+		for (int i = 0; i < 4; i++)
+		{
+			sumW += importMeshData.mSkelVertexList[j].weights[i];
+		}
+		for (int i = 0; i < 4; i++)
+		{
+			importMeshData.mSkelVertexList[j].weights[i] = importMeshData.mSkelVertexList[j].weights[i] / sumW;
+		}
+		float sumPost;
+		sumPost = importMeshData.mSkelVertexList[j].weights[0] + importMeshData.mSkelVertexList[j].weights[1] 
+				+ importMeshData.mSkelVertexList[j].weights[2] + importMeshData.mSkelVertexList[j].weights[3];
+		
+		if (sumPost != 1.f) {
+			float difference = 1.f - sumPost;
+			for (int i = 0; i < 4; i++)
+			{
+				importMeshData.mSkelVertexList[j].weights[i] += difference;
+				if (importMeshData.mSkelVertexList[j].weights[i] > 1.f) {
+					difference = importMeshData.mSkelVertexList[j].weights[i] - 1.f;
+				}
+				else
+				{
+					break;
+				}
+			}
+		}
+		importMeshData.mSkelVertexList;
+	}
+	//Set non-set influences to 0 to avoid crashes in the Engine's vertex shader.
 	for (int j = 0; j < importMeshData.mSkelVertexList.size(); j++)
 	{
 		for (int i = 0; i < 4; i++)
@@ -1274,6 +1309,8 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 				importMeshData.mSkelVertexList[j].influences[i] = 0;
 		}
 	}
+	importMeshData.mSkelVertexList;
+	int ipp = 5;
 }
 
 void FbxImport::processBoundingBoxes()
