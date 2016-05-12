@@ -1090,6 +1090,55 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 	{
 		
 	}
+	//Index this by controlPointIndices.
+	//Have this be the size of controlPointIndicesCount + prevIndices... Etc
+	//When you've filled this with indices, use a function that "makes the array fit"
+	//When you've made bdList2 big enough, fill it's "inside vector" with BlendData-values.
+	//This should be faster... I hope. Truly.
+	vector<vector <FbxImport::sBlendData>> bdList2;
+	int prevSizes = 0;
+	for (int pie = 0; pie < deformerCount; pie++)
+	{
+
+		FbxSkin* currSkin = reinterpret_cast<FbxSkin*>(inputMesh->GetDeformer(0, FbxDeformer::eSkin));
+		if (!currSkin)
+			continue;
+
+		const unsigned int clusterCount = currSkin->GetClusterCount();
+		for (unsigned int clusterCounter = 0; clusterCounter < clusterCount; ++clusterCounter)
+		{
+			FbxCluster* currCluster = currSkin->GetCluster(clusterCounter);
+			//FbxNode* currJoint = currCluster->GetLink();
+			const unsigned int controlPointIndicesCount = currCluster->GetControlPointIndicesCount();
+			bdList2.resize(controlPointIndicesCount + prevSizes);
+			prevSizes += controlPointIndicesCount;
+		}
+		for (unsigned int clusterCounter = 0; clusterCounter < clusterCount; ++clusterCounter)
+		{
+			FbxCluster* currCluster = currSkin->GetCluster(clusterCounter);
+			FbxNode* currJoint = currCluster->GetLink();
+			int currJointIndex = findJointIndexByName(currJoint->GetName());
+			const unsigned int controlPointIndicesCount = currCluster->GetControlPointIndicesCount();
+			for (int i = 0; i < controlPointIndicesCount; i++)
+			{
+				FbxImport::sBlendData temp;
+				//The index of this joint serves as it's ID
+				//int jointID = clusterCounter;
+				int jointID = pmSceneJoints[currJointIndex].jointID;
+				//The control point that this joint affects
+				int controlPointIndex = currCluster->GetControlPointIndices()[i];
+				//The weight from this joint that the control point get
+				float blendingWeight = currCluster->GetControlPointWeights()[i];
+
+				temp.jointID = jointID;
+				temp.controlPointIndex = controlPointIndex; //Use controlPointIndex to "find" the joints that affect the control point.
+				temp.blendingWeight = blendingWeight;
+				bdList2[controlPointIndex].push_back(temp);
+			}
+		}
+	}
+
+	int i = 5;
 
 	for (unsigned int deformerCounter = 0; deformerCounter < deformerCount; ++deformerCounter)
 	{
@@ -1165,6 +1214,43 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 				bdList.push_back(temp);
 			}
 			
+			//VVVVVVVVVVVVVVVV REMOVE OLD THING bdList USER!
+			//const unsigned int polyCount = inputMesh->GetPolygonCount();
+			////The way that the vertices are "truly" indexed.
+			//unsigned int indexCounter = 0;
+			//for (unsigned int polyCounter = 0; polyCounter < polyCount; polyCounter++)
+			//{
+			//	const unsigned int polySize = inputMesh->GetPolygonSize(polyCounter);
+
+			//	for (unsigned int polyCorner = 0; polyCorner < polySize; polyCorner++)
+			//	{
+			//		const unsigned index = inputMesh->GetPolygonVertex(polyCounter, polyCorner);
+			//		sBlendData* currBlendData = findBlendDataForControlPoint(bdList, index);
+			//		if (currBlendData->blendingWeight < 0.0001)
+			//		{
+			//			//If the weight is 0, this joint is not an influence of the current vertex. 
+			//			indexCounter++;
+			//			continue;
+			//		}
+			//		//Add the weights and influences to the animated vertex
+			//		//got to make sure that I don't replace shit thats already assignesd
+			//		for (int i = 0; i < 4; i++)
+			//		{
+			//			//If we've already added this joint as an influence to the current vertex, continue to the next vertex.
+			//			if (importMeshData.mSkelVertexList[indexCounter].influences[i] == currBlendData->jointID)
+			//				break;
+			//			if(importMeshData.mSkelVertexList[indexCounter].influences[i] == -1337)
+			//			{
+			//				importMeshData.mSkelVertexList[indexCounter].influences[i] = currBlendData->jointID;
+			//				importMeshData.mSkelVertexList[indexCounter].weights[i] = currBlendData->blendingWeight;
+			//				break;
+			//			}
+			//		}
+			//		indexCounter++;
+			//	}
+			//}
+
+			//HAIL bdList2!!!!
 			const unsigned int polyCount = inputMesh->GetPolygonCount();
 			//The way that the vertices are "truly" indexed.
 			unsigned int indexCounter = 0;
@@ -1175,26 +1261,12 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 				for (unsigned int polyCorner = 0; polyCorner < polySize; polyCorner++)
 				{
 					const unsigned index = inputMesh->GetPolygonVertex(polyCounter, polyCorner);
-					sBlendData* currBlendData = findBlendDataForControlPoint(bdList, index);
-					if (currBlendData->blendingWeight < 0.0001)
+					bdList2[index];
+					
+					for (int i = 0; i < bdList2[index].size(); i++)
 					{
-						//If the weight is 0, this joint is not an influence of the current vertex. 
-						indexCounter++;
-						continue;
-					}
-					//Add the weights and influences to the animated vertex
-					//got to make sure that I don't replace shit thats already assignesd
-					for (int i = 0; i < 4; i++)
-					{
-						//If we've already added this joint as an influence to the current vertex, continue to the next vertex.
-						if (importMeshData.mSkelVertexList[indexCounter].influences[i] == currBlendData->jointID)
-							break;
-						if(importMeshData.mSkelVertexList[indexCounter].influences[i] == -1337)
-						{
-							importMeshData.mSkelVertexList[indexCounter].influences[i] = currBlendData->jointID;
-							importMeshData.mSkelVertexList[indexCounter].weights[i] = currBlendData->blendingWeight;
-							break;
-						}
+						importMeshData.mSkelVertexList[indexCounter].influences[i] = bdList2[index][i].jointID;
+						importMeshData.mSkelVertexList[indexCounter].weights[i] = bdList2[index][i].blendingWeight;
 					}
 					indexCounter++;
 				}
