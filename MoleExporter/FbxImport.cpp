@@ -1279,11 +1279,17 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 				FbxAnimStack* currStack = pmScene->GetSrcObject<FbxAnimStack>(stackCounter);
 
 				int layerCount = currStack->GetMemberCount<FbxAnimLayer>();
+				for (unsigned int layerCounter = 0; layerCounter < layerCount; layerCounter++)
+				{
+					FbxAnimLayer* currLayer = currStack->GetMember<FbxAnimLayer>(layerCounter);
+					currLayer->Weight = 0; //Zero out all animation layers, so that none affect the final animation.
+				}
 
 				//Start processing layers, each working as an "key-data source" 
 				for (unsigned int layerCounter = 0; layerCounter < layerCount; layerCounter++)
 				{
 					FbxAnimLayer* currLayer = currStack->GetMember<FbxAnimLayer>(layerCounter);
+					currLayer->Weight = 100; //Set this layer's influence to 100%, so that it "becomes" the animation.
 
 					FbxString stackName = currStack->GetName();
 
@@ -1298,26 +1304,36 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 					for (unsigned int keyCounter = 0; keyCounter < keyCount; keyCounter++)
 					{
 						FbxAnimCurveKey currKey = translationCurveX->KeyGet(keyCounter);
+						float asRadians = PI / 180;
 
 						FbxVector4 tempTranslation = animationEvaluator->GetNodeLocalTranslation(currJoint, currKey.GetTime());
 						FbxVector4 tempRotation = animationEvaluator->GetNodeLocalRotation(currJoint, currKey.GetTime());
 						FbxVector4 tempScale = animationEvaluator->GetNodeLocalScaling(currJoint, currKey.GetTime());
 
-						float o = PI / 180;
+						//float o = PI / 180;
 
-						float keyTime = currKey.GetTime().GetSecondDouble();
-						float translation[3] = { tempTranslation[0],  tempTranslation[1], tempTranslation[2] };
-						float rotation[3] = { tempRotation[0] * o, tempRotation[1] * o, tempRotation[2] * o };
-						float scale[3] = { tempScale[0], tempScale[1], tempScale[2] };
-
-						
+						/*float keyTime1 = currKey.GetTime().GetSecondDouble();
+						float translation1[3] = { tempTranslation1[0],  tempTranslation1[1], tempTranslation1[2] };
+						float rotation1[3] = { tempRotation1[0] * asRadians, tempRotation1[1] * asRadians, tempRotation1[2] * asRadians };
+						float scale1[3] = { tempScale1[0], tempScale1[1], tempScale1[2] };
+						*/
 						/**
 						pi = 180*
 						2pi = 360*
 						1* = pi / 180
 						90* * pi / 180 = 90 degrees in radians
-
 						**/
+						
+
+	/*					FbxAMatrix currTransform = currJoint->EvaluateGlobalTransform(currKey.GetTime());
+						FbxVector4 tempTranslation = currTransform.GetT();
+						FbxVector4 tempRotation = currTransform.GetR();
+						FbxVector4 tempScale = currTransform.GetS();*/
+
+						float keyTime = currKey.GetTime().GetSecondDouble();
+						float translation[3] = { tempTranslation[0],  tempTranslation[1], tempTranslation[2] };
+						float rotation[3] = { tempRotation[0] * asRadians, tempRotation[1] * asRadians, tempRotation[2] * asRadians };
+						float scale[3] = { tempScale[0], tempScale[1], tempScale[2] };
 
 						//add these values to a sKey-struct, then append it to the keyFrame vector.
 						sImportKeyFrame tempKey;
@@ -1332,6 +1348,7 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 						currAnimation.keyList.push_back(tempKey);
 					}
 					pmSceneJoints[currJointIndex].animationState.push_back(currAnimation);
+					currLayer->Weight = 0; //Sets it to 0 again, in preparation for the coming layer to be set to 100%
 				}
 
 			}
@@ -1825,10 +1842,6 @@ void FbxImport::assignToHeaderData()
 			}
 		}
 	}
-	mTempMeshList[0].jointList[0].animationState[0].keyList;
-	mTempMeshList[0].jointList[1].animationState[0].keyList;
-	mTempMeshList[0].mSkelVertexList;
-	int aids = 5;
 }
 
 void FbxImport::convertFbxMatrixToFloatArray(FbxAMatrix inputMatrix, float inputArray[16])
