@@ -36,7 +36,7 @@ public:
 	/**
 	Note: bBoxID has to be changed later on in the importerAPI
 	in order to make it work. This since the "index" of the mesh
-	in question may change depending on if you read in several files 
+	in question may change depending on if you read in several files
 	with the same class instance.
 	**/
 	struct sImportJointData
@@ -71,7 +71,7 @@ public:
 		float translate[3];
 		float rotation[3];
 		float scale[3];
-		
+
 		bool isBoundingBox;
 		bool isAnimated;
 		bool isIndexed;
@@ -133,7 +133,7 @@ public:
 	/*Lists*/
 	std::vector<sImportMeshData> mTempMeshList;
 	//want to have mTempMeshList 
-	
+
 	//**
 	sImportMeshData importMeshData;
 
@@ -168,10 +168,10 @@ private:
 	For UV, mappingmode is not functional, so a logical solution is made
 	**/
 	bool determineIfIndexed(FbxMesh* inputMesh);
-	/** 
+	/**
 	If the model is indexed, result gotten from determineIfIndexed(FbxMesh* inputMesh)
-	Loop through each vertex, for each polygon, and query it's index from FBX. 
-	Indices are put into the sImportMeshData::mIndexData - vector. 
+	Loop through each vertex, for each polygon, and query it's index from FBX.
+	Indices are put into the sImportMeshData::mIndexData - vector.
 	**/
 	void processIndices(FbxMesh* inputMesh);
 	/**
@@ -187,7 +187,7 @@ private:
 	**/
 	void recursiveJointHierarchyTraversal(FbxNode* inNode, int currIndex, int inNodeParentIndex);
 	/**
-	Looks through the std::vector<sImportJointData> pmSceneJoints vector for a name matching the 
+	Looks through the std::vector<sImportJointData> pmSceneJoints vector for a name matching the
 	input parameter jointName.
 	**/
 	unsigned int findJointIndexByName(const char* jointName);

@@ -50,7 +50,7 @@ bool FbxImport::determineIfIndexed(FbxMesh * inputMesh)
 
 				/*if (UVElement->GetMappingMode() == FbxGeometryElement::eByControlPoint)
 				{
-					isIndexed = true;
+				isIndexed = true;
 				}*/
 				break;
 			}
@@ -137,10 +137,10 @@ void FbxImport::recursiveJointHierarchyTraversal(FbxNode * inNode, int currIndex
 		currJoint.bBoxID = -1337;
 		currJoint.bboxMeshName = nullptr;
 		//Adding bbox-children to the joint
-		for(int c = 0; c < inNode->GetChildCount(); c++)
+		for (int c = 0; c < inNode->GetChildCount(); c++)
 		{
 			FbxNodeAttribute::EType attributeType = inNode->GetChild(c)->GetNodeAttribute()->GetAttributeType();
-			if (attributeType == FbxNodeAttribute::eMesh) 
+			if (attributeType == FbxNodeAttribute::eMesh)
 			{
 				char* bBoxName;
 				bBoxName = const_cast<char*>(inNode->GetChild(c)->GetName());
@@ -222,7 +222,7 @@ void FbxImport::recursiveChildTraversal(FbxNode * inputNode)
 			importMeshData.meshName = currNode->GetName();
 			strncpy(importMeshData.storeName, currNode->GetName(), 256);
 			importMeshData.meshID = meshCounter;
-			
+
 			importMeshData.parentMeshID = parentIndex;
 			mTempMeshList[parentIndex].childMeshList.push_back(meshCounter);
 
@@ -323,15 +323,15 @@ void FbxImport::initializeImporter(const char* filePath, float frameRate)
 			recursiveChildTraversal(childNode);
 			/*for (int child = 0; childNode->GetChildCount(); child++)
 			{
-				FbxNode* currNode = childNode->GetChild(child);
-				FbxNodeAttribute::EType currAttributeType = currNode->GetNodeAttribute()->GetAttributeType();
-				if (currAttributeType == FbxNodeAttribute::eMesh)
-				{
-					processMesh((FbxMesh*)childNode->GetNodeAttribute());
-					meshCounter += 1;
-				}
+			FbxNode* currNode = childNode->GetChild(child);
+			FbxNodeAttribute::EType currAttributeType = currNode->GetNodeAttribute()->GetAttributeType();
+			if (currAttributeType == FbxNodeAttribute::eMesh)
+			{
+			processMesh((FbxMesh*)childNode->GetNodeAttribute());
+			meshCounter += 1;
+			}
 			}*/
-		
+
 		}
 
 		if (attributeType == FbxNodeAttribute::eLight)
@@ -385,7 +385,7 @@ void FbxImport::initializeImporter(const char* filePath, float frameRate)
 						if (currJoint->GetChild(i)->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eMesh)
 						{
 							FbxNode* meshChild = currJoint->GetChild(i);
-						
+
 							importMeshData = sImportMeshData();
 							importMeshData.meshName = meshChild->GetName();
 
@@ -396,26 +396,26 @@ void FbxImport::initializeImporter(const char* filePath, float frameRate)
 							if (currMesh->GetControlPointsCount() == 8)
 								importMeshData.isBoundingBox = true;
 							/**
-							assign this to the joint... But how to access joint? It's buried inside 
+							assign this to the joint... But how to access joint? It's buried inside
 							the mesh-vector...
-							Loop through each mesh, and try to find the joint? 
+							Loop through each mesh, and try to find the joint?
 							Do I KNOW where THIS joint is right now?
-							I need to know what index this particular joint is at. 
+							I need to know what index this particular joint is at.
 							**/
-							for (int thing = 0; thing < mTempMeshList[meshCounter2].jointList.size(); thing++) 
+							for (int thing = 0; thing < mTempMeshList[meshCounter2].jointList.size(); thing++)
 							{
 								if (mTempMeshList[meshCounter2].jointList[thing].jointID == currJointID)
 								{
 									mTempMeshList[meshCounter2].jointList[thing].childMeshList.push_back(importMeshData.meshID);
 								}
 							}
-								
+
 
 							FbxMesh* currMesh = (FbxMesh*)meshChild->GetNodeAttribute();
 							processMesh(currMesh);
 							meshCounter += 1;
 
-							
+
 							//Here call the recursive "hierarchy-traversal-function"
 							//that roots out all of the mesh-children of this mesh, wherever it may hide.
 							recursiveChildTraversal(meshChild);
@@ -436,7 +436,7 @@ void FbxImport::initializeImporter(const char* filePath, float frameRate)
 
 	assignToHeaderData();
 
-	
+
 }
 
 void FbxImport::processMesh(FbxMesh * inputMesh)
@@ -484,7 +484,7 @@ void FbxImport::processVertices(FbxMesh * inputMesh)
 			for (unsigned int cpCounter = 0; cpCounter < controlPointCount; cpCounter++)
 			{
 				sSkelAnimVertex animVertex;
-				
+
 				animVertex.vertexPos[0] = vertices[cpCounter].mData[0];
 				animVertex.vertexPos[1] = vertices[cpCounter].mData[1];
 				animVertex.vertexPos[2] = vertices[cpCounter].mData[2];
@@ -568,7 +568,7 @@ void FbxImport::processVertices(FbxMesh * inputMesh)
 					sVertex vertex;
 					/*Getting the index to a control point "vertex".*/
 					int polygonVertex = inputMesh->GetPolygonVertex(i, j);
-		
+
 					vertex.vertexPos[0] = (float)vertices[polygonVertex].mData[0];
 					vertex.vertexPos[1] = (float)vertices[polygonVertex].mData[1];
 					vertex.vertexPos[2] = (float)vertices[polygonVertex].mData[2];
@@ -623,7 +623,7 @@ void FbxImport::processNormals(FbxMesh * inputMesh)
 					importMeshData.mVertexList.at(vertexIndex).vertexNormal[1] = normals.mData[1];
 					importMeshData.mVertexList.at(vertexIndex).vertexNormal[2] = normals.mData[2];
 				}
-				
+
 			}
 		}
 
@@ -792,7 +792,7 @@ void FbxImport::processBiTangents(FbxMesh * inputMesh)
 
 					FbxVector4 biTangents = biElement->GetDirectArray().GetAt(biTangentIndex);
 
-					if(importMeshData.isAnimated)
+					if (importMeshData.isAnimated)
 					{
 						importMeshData.mSkelVertexList.at(vertexIndex).biTangentNormal[0] = biTangents.mData[0];
 						importMeshData.mSkelVertexList.at(vertexIndex).biTangentNormal[1] = biTangents.mData[1];
@@ -902,7 +902,7 @@ void FbxImport::processUVs(FbxMesh * inputMesh)
 
 					UVs = UVElement->GetDirectArray().GetAt(UVIndex); //Getting the UV coordinates.
 
-					if(importMeshData.isAnimated)
+					if (importMeshData.isAnimated)
 					{
 						importMeshData.mSkelVertexList.at(vertexIndex).vertexUV[0] = UVs.mData[0];
 						importMeshData.mSkelVertexList.at(vertexIndex).vertexUV[1] = UVs.mData[1];
@@ -912,7 +912,7 @@ void FbxImport::processUVs(FbxMesh * inputMesh)
 						importMeshData.mVertexList.at(vertexIndex).vertexUV[0] = UVs.mData[0];
 						importMeshData.mVertexList.at(vertexIndex).vertexUV[1] = UVs.mData[1];
 					}
-					
+
 				}
 			}
 		}
@@ -1018,7 +1018,7 @@ void FbxImport::processMaterials(FbxMesh * inputMesh)
 						mMaterialList[importMeshData.materialID].diffuseColor[1] = diffuseColor.mData[1];
 						mMaterialList[importMeshData.materialID].diffuseColor[2] = diffuseColor.mData[2];
 
-						/*No specular attributes and shininess can't be found with a lambert material, 
+						/*No specular attributes and shininess can't be found with a lambert material,
 						so we simply set the values for the attributes to 0.*/
 						mMaterialList[importMeshData.materialID].specularColor[0] = 0;
 						mMaterialList[importMeshData.materialID].specularColor[1] = 0;
@@ -1055,7 +1055,7 @@ bool FbxImport::checkMaterialName(const char* materialName)
 	}
 
 	/*If there are no materials appended to the material list, we can assume
-	that this would be the first material and is unique because it will be 
+	that this would be the first material and is unique because it will be
 	appended first.*/
 	if (firstProcess == true)
 	{
@@ -1084,11 +1084,11 @@ bool FbxImport::checkMaterialName(const char* materialName)
 void FbxImport::processJoints(FbxMesh * inputMesh)
 {
 	unsigned int deformerCount = inputMesh->GetDeformerCount(FbxDeformer::eSkin);
-
+	pmSceneJoints;
 	//If we have a skeleton attacked to this mesh
 	if (deformerCount > 0)
 	{
-		
+
 	}
 	//Index this by controlPointIndices.
 	//Have this be the size of controlPointIndicesCount + prevIndices... Etc
@@ -1157,24 +1157,24 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 			FbxAMatrix bindposeTransform = currJoint->EvaluateGlobalTransform();
 
 			int currJointIndex = findJointIndexByName(currJoint->GetName());
-			
+
 			for (unsigned int x = 0; x < 3; x++)
 			{
 				pmSceneJoints[currJointIndex].pos[x] = bindposeTransform.GetT()[x];
 				pmSceneJoints[currJointIndex].rot[x] = bindposeTransform.GetR()[x];
 				pmSceneJoints[currJointIndex].scale[x] = bindposeTransform.GetS()[x];
 			}
-			
+
 			FbxAMatrix tempBindMatrix;
 			FbxAMatrix tempParentBindMatrix;
 
 			currCluster->GetTransformMatrix(tempParentBindMatrix);
 			currCluster->GetTransformLinkMatrix(tempBindMatrix);
-			
+
 			FbxAMatrix tempGlobalBindPoseInverse;
 			tempGlobalBindPoseInverse = tempBindMatrix.Inverse() * tempParentBindMatrix;
 			//tempGlobalBindPoseInverse = tempGlobalBindPoseInverse.Inverse();
-			
+
 			FbxAMatrix tempBindPoseInverse;
 			tempBindPoseInverse = tempBindMatrix.Inverse();
 
@@ -1213,7 +1213,7 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 
 				bdList.push_back(temp);
 			}
-			
+
 			//VVVVVVVVVVVVVVVV REMOVE OLD THING bdList USER!
 			//const unsigned int polyCount = inputMesh->GetPolygonCount();
 			////The way that the vertices are "truly" indexed.
@@ -1262,7 +1262,7 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 				{
 					const unsigned index = inputMesh->GetPolygonVertex(polyCounter, polyCorner);
 					bdList2[index];
-					
+
 					for (int i = 0; i < bdList2[index].size(); i++)
 					{
 						importMeshData.mSkelVertexList[indexCounter].influences[i] = bdList2[index][i].jointID;
@@ -1271,7 +1271,7 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 					indexCounter++;
 				}
 			}
-			
+
 			//Start processing stacks holding animation layers.
 			const unsigned int stackCount = pmScene->GetSrcObjectCount<FbxAnimStack>();
 			for (unsigned int stackCounter = 0; stackCounter < stackCount; ++stackCounter)
@@ -1279,33 +1279,67 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 				FbxAnimStack* currStack = pmScene->GetSrcObject<FbxAnimStack>(stackCounter);
 
 				int layerCount = currStack->GetMemberCount<FbxAnimLayer>();
-				for (unsigned int layerCounter = 0; layerCounter < layerCount; layerCounter++)
+				for (int ior = 0; ior < layerCount; ior++)
 				{
-					FbxAnimLayer* currLayer = currStack->GetMember<FbxAnimLayer>(layerCounter);
-					currLayer->Weight = 0; //Zero out all animation layers, so that none affect the final animation.
+					FbxAnimLayer* currLayer = currStack->GetMember<FbxAnimLayer>(ior);
+					currLayer->Weight = 0;
+					currLayer->Mute = false;
+					currLayer->Solo = false;
 				}
 
 				//Start processing layers, each working as an "key-data source" 
 				for (unsigned int layerCounter = 0; layerCounter < layerCount; layerCounter++)
 				{
+					unsigned int keyCount = 0;
+
 					FbxAnimLayer* currLayer = currStack->GetMember<FbxAnimLayer>(layerCounter);
-					currLayer->Weight = 100; //Set this layer's influence to 100%, so that it "becomes" the animation.
-
+					currLayer->Weight = 100;
 					FbxString stackName = currStack->GetName();
+					int currCurve = 0;
+					FbxAnimCurve* storeCurve[6];
+					storeCurve[0] = currJoint->LclRotation.GetCurve(currLayer, FBXSDK_CURVENODE_COMPONENT_X);
+					storeCurve[1] = currJoint->LclRotation.GetCurve(currLayer, FBXSDK_CURVENODE_COMPONENT_Y);
+					storeCurve[2] = currJoint->LclRotation.GetCurve(currLayer, FBXSDK_CURVENODE_COMPONENT_Z);
+					storeCurve[3] = currJoint->LclTranslation.GetCurve(currLayer, FBXSDK_CURVENODE_COMPONENT_X);
+					storeCurve[4] = currJoint->LclTranslation.GetCurve(currLayer, FBXSDK_CURVENODE_COMPONENT_Y);
+					storeCurve[5] = currJoint->LclTranslation.GetCurve(currLayer, FBXSDK_CURVENODE_COMPONENT_Z);
 
-					FbxAnimCurve* translationCurveX = currJoint->LclTranslation.GetCurve(currLayer, FBXSDK_CURVENODE_COMPONENT_X);
+					if (keyCount < storeCurve[0]->KeyGetCount())
+					{
+						keyCount = storeCurve[0]->KeyGetCount();
+						currCurve = 0;
+					}
+					if (keyCount < storeCurve[1]->KeyGetCount())
+					{
+						keyCount = storeCurve[1]->KeyGetCount();
+						currCurve = 1;
+					}
+					if (keyCount < storeCurve[2]->KeyGetCount())
+					{
+						keyCount = storeCurve[2]->KeyGetCount();
+						currCurve = 2;
+					}
+					if (keyCount < storeCurve[3]->KeyGetCount())
+					{
+						keyCount = storeCurve[3]->KeyGetCount();
+						currCurve = 3;
+					}
+					if (keyCount < storeCurve[4]->KeyGetCount())
+					{
+						keyCount = storeCurve[4]->KeyGetCount();
+						currCurve = 4;
+					}
+					if (keyCount < storeCurve[5]->KeyGetCount())
+					{
+						keyCount = storeCurve[5]->KeyGetCount();
+						currCurve = 5;
+					}
 
-					if (translationCurveX == nullptr)
-						continue; 
-
-					const unsigned int keyCount = translationCurveX->KeyGetCount();
-					
 					sImportAnimationState currAnimation;
 					for (unsigned int keyCounter = 0; keyCounter < keyCount; keyCounter++)
 					{
-						FbxAnimCurveKey currKey = translationCurveX->KeyGet(keyCounter);
+						FbxAnimCurveKey currKey = storeCurve[currCurve]->KeyGet(keyCounter);
 						float asRadians = PI / 180;
-
 						FbxVector4 tempTranslation = animationEvaluator->GetNodeLocalTranslation(currJoint, currKey.GetTime());
 						FbxVector4 tempRotation = animationEvaluator->GetNodeLocalRotation(currJoint, currKey.GetTime());
 						FbxVector4 tempScale = animationEvaluator->GetNodeLocalScaling(currJoint, currKey.GetTime());
@@ -1323,9 +1357,9 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 						1* = pi / 180
 						90* * pi / 180 = 90 degrees in radians
 						**/
-						
 
-	/*					FbxAMatrix currTransform = currJoint->EvaluateGlobalTransform(currKey.GetTime());
+
+						/*					FbxAMatrix currTransform = currJoint->EvaluateGlobalTransform(currKey.GetTime());
 						FbxVector4 tempTranslation = currTransform.GetT();
 						FbxVector4 tempRotation = currTransform.GetR();
 						FbxVector4 tempScale = currTransform.GetS();*/
@@ -1348,7 +1382,7 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 						currAnimation.keyList.push_back(tempKey);
 					}
 					pmSceneJoints[currJointIndex].animationState.push_back(currAnimation);
-					currLayer->Weight = 0; //Sets it to 0 again, in preparation for the coming layer to be set to 100%
+					currLayer->Weight = 0;
 				}
 
 			}
@@ -1370,9 +1404,9 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 			importMeshData.mSkelVertexList[j].weights[i] = importMeshData.mSkelVertexList[j].weights[i] / sumW;
 		}
 		float sumPost;
-		sumPost = importMeshData.mSkelVertexList[j].weights[0] + importMeshData.mSkelVertexList[j].weights[1] 
-				+ importMeshData.mSkelVertexList[j].weights[2] + importMeshData.mSkelVertexList[j].weights[3];
-		
+		sumPost = importMeshData.mSkelVertexList[j].weights[0] + importMeshData.mSkelVertexList[j].weights[1]
+			+ importMeshData.mSkelVertexList[j].weights[2] + importMeshData.mSkelVertexList[j].weights[3];
+
 		if (sumPost != 1.f) {
 			float difference = 1.f - sumPost;
 			for (int i = 0; i < 4; i++)
@@ -1413,8 +1447,8 @@ void FbxImport::processBoundingBoxes()
 		const unsigned int jointCount = mTempMeshList[i].jointList.size();
 		for (unsigned int j = 0; j < jointCount; j++)
 		{
-			if(mTempMeshList[i].jointList[j].bboxMeshName != nullptr)
-				findBBoxByName(mTempMeshList[i].jointList[j].bboxMeshName, i, j);	
+			if (mTempMeshList[i].jointList[j].bboxMeshName != nullptr)
+				findBBoxByName(mTempMeshList[i].jointList[j].bboxMeshName, i, j);
 		}
 	}
 }
@@ -1440,7 +1474,7 @@ void FbxImport::processTextures(FbxMesh * inputMesh)
 			processDiffuseMaps(propDiffuse);
 
 			processSpecularMaps(propSpecular);
-	
+
 			processNormalMaps(propNormal);
 		}
 	}
@@ -1663,13 +1697,13 @@ FbxImport::sBlendData* FbxImport::findBlendDataForControlPoint(std::vector<FbxIm
 	noneInfluence.jointID = inputVector[0].jointID;
 	//The control point that isn't influenced.
 	noneInfluence.controlPointIndex = controlPointIndex;
-	
+
 	return &noneInfluence;
 }
 
 void FbxImport::assignToHeaderData()
 {
-	/*Function that will assign all the sizes of the node types from the scene 
+	/*Function that will assign all the sizes of the node types from the scene
 	and also transfer the mesh data from the temporary list to the real list for
 	the binary file exporting.*/
 
@@ -1688,10 +1722,10 @@ void FbxImport::assignToHeaderData()
 	sJoint joint;
 	sKeyFrame keyframe;
 
-	
+
 	meshChildHolder.resize(meshList.size());
 
-	
+
 	meshJointHolder.resize(meshList.size());
 
 	for (int sMesh = 0; sMesh < meshList.size(); sMesh++)
@@ -1795,7 +1829,7 @@ void FbxImport::assignToHeaderData()
 				meshJointHolder[sMesh].jointList[jointIndex].jointID = mTempMeshList[sMesh].jointList[jointIndex].jointID;
 				meshJointHolder[sMesh].jointList[jointIndex].parentJointID = mTempMeshList[sMesh].jointList[jointIndex].parentJointID;
 				meshJointHolder[sMesh].perJoint[jointIndex].meshChildren.resize(mTempMeshList[sMesh].jointList[jointIndex].childMeshList.size());
-			//	meshJointHolder[sMesh].jointList[jointIndex].bBoxID = mTempMeshList[sMesh].jointList[jointIndex].bBoxID;
+				//	meshJointHolder[sMesh].jointList[jointIndex].bBoxID = mTempMeshList[sMesh].jointList[jointIndex].bBoxID;
 
 				for (int transformIndex = 0; transformIndex < 3; transformIndex++)
 				{
@@ -1811,7 +1845,7 @@ void FbxImport::assignToHeaderData()
 				}
 
 				meshJointHolder[sMesh].jointList[jointIndex].animationStateCount = mTempMeshList[sMesh].jointList[jointIndex].animationState.size();
-				
+
 				meshJointHolder[sMesh].perJoint[jointIndex].animationStates.resize(meshJointHolder[sMesh].jointList[jointIndex].animationStateCount);
 				meshJointHolder[sMesh].perJoint[jointIndex].animationStateTracker.resize(meshJointHolder[sMesh].jointList[jointIndex].animationStateCount);
 
@@ -1820,7 +1854,7 @@ void FbxImport::assignToHeaderData()
 					const int keyFrameCount = mTempMeshList[sMesh].jointList[jointIndex].animationState[animationIndex].keyList.size();
 					meshJointHolder[sMesh].perJoint[jointIndex].animationStates[animationIndex].keyFrames.resize(keyFrameCount);
 					meshJointHolder[sMesh].perJoint[jointIndex].animationStateTracker[animationIndex].keyCount = keyFrameCount;
-					
+
 					for (int keyIndex = 0; keyIndex < keyFrameCount; keyIndex++)
 					{
 						meshJointHolder[sMesh].perJoint[jointIndex].animationStates[animationIndex].keyFrames[keyIndex].keyTime = mTempMeshList[sMesh].jointList[jointIndex].animationState[animationIndex].keyList[keyIndex].keyTime;
@@ -1849,10 +1883,10 @@ void FbxImport::convertFbxMatrixToFloatArray(FbxAMatrix inputMatrix, float input
 	//This function assumes row-major matrices.
 	/**
 	row column		n	r	c	n	 r c	n r c
-0	0	0			4	1	0	8  	 2 0	12  3 0
-1	0	1			5	1	1	9	 2 1	13  3 1
-2	0	2			6	1	2	10	 2 2	14  3 2
-3	0	3			7	1	3	11	 2 3	15 3 3
+	0	0	0			4	1	0	8  	 2 0	12  3 0
+	1	0	1			5	1	1	9	 2 1	13  3 1
+	2	0	2			6	1	2	10	 2 2	14  3 2
+	3	0	3			7	1	3	11	 2 3	15 3 3
 	**/
 	unsigned int localCounter = 0;
 	for (unsigned int g = 0; g < 4; ++g)
@@ -1867,14 +1901,15 @@ void FbxImport::convertFbxMatrixToFloatArray(FbxAMatrix inputMatrix, float input
 
 void FbxImport::WriteToBinary(const char* fileName)
 {
+	//pmSceneJoints;
 	std::cout << ">>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<" << "\n" << "\n" << endl;
 	std::cout << "Binary Writer" << endl;
 	std::cout << "\n" << endl;
 
 	/*Open a file that is ready for binary writing.*/
-	std::ofstream outfile(fileName, std::ofstream::binary);			
-	
-	/*Writing the first block of memory that is the main header. This will write 
+	std::ofstream outfile(fileName, std::ofstream::binary);
+
+	/*Writing the first block of memory that is the main header. This will write
 	information about how much of each node type we have from a imported scene and
 	how memory they will take up in the binary file.*/
 	outfile.write((const char*)&gMainHeader, sizeof(sMainHeader));
@@ -1890,11 +1925,11 @@ void FbxImport::WriteToBinary(const char* fileName)
 	for (int meshCounter = 0; meshCounter < gMainHeader.meshCount; meshCounter++)
 	{
 		std::cout << meshCounter << " " << meshList[meshCounter].meshName << endl;
-		
-		/*Writing the block of memory that is the meshes. The information from the meshes 
-		will be written here, that includes for example vertex count for a ordinary mesh 
+
+		/*Writing the block of memory that is the meshes. The information from the meshes
+		will be written here, that includes for example vertex count for a ordinary mesh
 		and a skinned mesh. What we do is reserving memory for all the data that is in the
-		struct. For example, Vertex count is a integer and will take up to 4 bytes in the 
+		struct. For example, Vertex count is a integer and will take up to 4 bytes in the
 		memory when writing.*/
 		outfile.write((const char*)&meshList[meshCounter], sizeof(sMesh));
 
@@ -1952,7 +1987,7 @@ void FbxImport::WriteToBinary(const char* fileName)
 			This means that we will be writing the pos, nor, uv, tan, bitan 200 times.*/
 			outfile.write((const char*)mkList[meshCounter].vskList.data(), sizeof(sSkelAnimVertex) * meshList[meshCounter].skelAnimVertexCount);
 
-			/*Writing the joint list for each mesh. Every joint in the list have individual data 
+			/*Writing the joint list for each mesh. Every joint in the list have individual data
 			that we have to process when writing to the file.*/
 			std::cout << "\n";
 			std::cout << "Joint vector: " << endl;
@@ -1966,7 +2001,7 @@ void FbxImport::WriteToBinary(const char* fileName)
 			/*Writing the data for all the joints that a skinned mesh have.*/
 			const int jointCount = meshList[meshCounter].jointCount;
 			outfile.write((const char*)meshJointHolder[meshCounter].jointList.data(), sizeof(sJoint) * jointCount);
-			
+
 			const int JCount = meshList[meshCounter].jointCount;
 			for (int JCounter = 0; JCounter < JCount; JCounter++)
 			{
@@ -1976,7 +2011,7 @@ void FbxImport::WriteToBinary(const char* fileName)
 
 				const int meshChildCount = meshJointHolder[meshCounter].jointList[JCounter].meshChildCount;
 				outfile.write((const char*)meshJointHolder[meshCounter].perJoint[JCounter].meshChildren.data(), sizeof(int) * meshChildCount);
-				
+
 				for (int animStateCounter = 0; animStateCounter < animStateCount; animStateCounter++)
 				{
 					const int keyCount = meshJointHolder[meshCounter].perJoint[JCounter].animationStateTracker[animStateCounter].keyCount;
@@ -2024,7 +2059,7 @@ void FbxImport::WriteToBinary(const char* fileName)
 		std::cout << "Allocated memory for " << gMainHeader.materialCount << " materials" << endl;
 
 		/*Writing all the materials from the list with the size in bytes in mind.*/
-		outfile.write((const char*)&mMaterialList[i], sizeof(sMaterial)); 
+		outfile.write((const char*)&mMaterialList[i], sizeof(sMaterial));
 
 		std::cout << "______________________" << endl;
 	}
@@ -2036,7 +2071,7 @@ void FbxImport::WriteToBinary(const char* fileName)
 		std::cout << "Light vector: " << endl;
 
 		std::cout << "\t";
-		std::cout << &mLightList[i] << endl; 
+		std::cout << &mLightList[i] << endl;
 
 		std::cout << "\t";
 		std::cout << "Allocated memory for " << gMainHeader.lightCount << " lights" << endl;
