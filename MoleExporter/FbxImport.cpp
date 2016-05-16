@@ -1304,35 +1304,54 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 					storeCurve[4] = currJoint->LclTranslation.GetCurve(currLayer, FBXSDK_CURVENODE_COMPONENT_Y);
 					storeCurve[5] = currJoint->LclTranslation.GetCurve(currLayer, FBXSDK_CURVENODE_COMPONENT_Z);
 
-					if (keyCount < storeCurve[0]->KeyGetCount())
+					if (storeCurve[0] != nullptr)
 					{
-						keyCount = storeCurve[0]->KeyGetCount();
-						currCurve = 0;
+						if (keyCount < storeCurve[0]->KeyGetCount())
+						{
+							keyCount = storeCurve[0]->KeyGetCount();
+							currCurve = 0;
+						}
 					}
-					if (keyCount < storeCurve[1]->KeyGetCount())
+					if (storeCurve[1] != nullptr)
 					{
-						keyCount = storeCurve[1]->KeyGetCount();
-						currCurve = 1;
+
+						if (keyCount < storeCurve[1]->KeyGetCount())
+						{
+							keyCount = storeCurve[1]->KeyGetCount();
+							currCurve = 1;
+						}
 					}
-					if (keyCount < storeCurve[2]->KeyGetCount())
+					if (storeCurve[2] != nullptr)
 					{
-						keyCount = storeCurve[2]->KeyGetCount();
-						currCurve = 2;
+						if (keyCount < storeCurve[2]->KeyGetCount())
+						{
+							keyCount = storeCurve[2]->KeyGetCount();
+							currCurve = 2;
+						}
 					}
-					if (keyCount < storeCurve[3]->KeyGetCount())
+					if (storeCurve[3] != nullptr)
 					{
-						keyCount = storeCurve[3]->KeyGetCount();
-						currCurve = 3;
+						if (keyCount < storeCurve[3]->KeyGetCount())
+						{
+							keyCount = storeCurve[3]->KeyGetCount();
+							currCurve = 3;
+						}
 					}
-					if (keyCount < storeCurve[4]->KeyGetCount())
+					if (storeCurve[4] != nullptr)
 					{
-						keyCount = storeCurve[4]->KeyGetCount();
-						currCurve = 4;
+						if (keyCount < storeCurve[4]->KeyGetCount())
+						{
+							keyCount = storeCurve[4]->KeyGetCount();
+							currCurve = 4;
+						}
 					}
-					if (keyCount < storeCurve[5]->KeyGetCount())
+					if (storeCurve[5] != nullptr)
 					{
-						keyCount = storeCurve[5]->KeyGetCount();
-						currCurve = 5;
+						if (keyCount < storeCurve[5]->KeyGetCount())
+						{
+							keyCount = storeCurve[5]->KeyGetCount();
+							currCurve = 5;
+						}
 					}
 
 					sImportAnimationState currAnimation;
