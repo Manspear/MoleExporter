@@ -1512,22 +1512,24 @@ void FbxImport::processDiffuseMaps(FbxProperty diffuseProp)
 		FbxTexture* texture = diffuseProp.GetSrcObject<FbxTexture>(textureIndex);
 
 		FbxFileTexture* fileTexture = FbxCast<FbxFileTexture>(texture);
-		FbxString fileTextureName = fileTexture->GetFileName();
+		FbxString srcFilePath = fileTexture->GetFileName();
+	
+		/*Modify the FbxString to match the filepath to the textures folder.*/
+		FbxString srcFilePathModified = FbxString("Textures") + srcFilePath.Right(srcFilePath.Size() - srcFilePath.ReverseFind('/'));
 
-		/*Modify the FbxString to match the filepath to the textures folder, which will be a part of the game project.*/
-		FbxString fileTextureNameModified = FbxString("Textures") + fileTextureName.Right(fileTextureName.Size() - fileTextureName.ReverseFind('/'));
+		char* destFilePath = srcFilePathModified.Buffer();
 
-		char* textureToChar = fileTextureNameModified.Buffer();
+		char tempCharArray[256];
 
-		char charObject[256];
-
-		strncpy(charObject, textureToChar, 256);
+		strncpy(tempCharArray, destFilePath, 256);
 
 		for (int i = 0; i < 256; i++)
 		{
-			mMaterialList[importMeshData.materialID].diffuseTexture[i] = charObject[i];
+			mMaterialList[importMeshData.materialID].diffuseTexture[i] = tempCharArray[i];
 		}
 
+		copyTextures(srcFilePath.Buffer(), destFilePath);
+		
 		textureCounter++;
 	}
 }
@@ -1544,21 +1546,23 @@ void FbxImport::processSpecularMaps(FbxProperty propSpecular)
 	{
 		FbxTexture* texture = propSpecular.GetSrcObject<FbxTexture>(textureIndex);
 		FbxFileTexture* fileTexture = FbxCast<FbxFileTexture>(texture);
-		FbxString fileTextureName = fileTexture->GetFileName();
+		FbxString srcFilePath = fileTexture->GetFileName();
 
-		/*Modify the FbxString to match the filepath to the textures folder, which will be a part of the game project.*/
-		FbxString fileTextureNameModified = FbxString("Textures") + fileTextureName.Right(fileTextureName.Size() - fileTextureName.ReverseFind('/'));
+		/*Modify the FbxString to match the filepath to the textures folder.*/
+		FbxString srcFilePathModified = FbxString("Textures") + srcFilePath.Right(srcFilePath.Size() - srcFilePath.ReverseFind('/'));
 
-		char* textureToChar = fileTextureNameModified.Buffer();
+		char* destFilePath = srcFilePathModified.Buffer();
 
-		char charObject[256];
+		char tempCharArray[256];
 
-		strncpy(charObject, textureToChar, 256);
+		strncpy(tempCharArray, destFilePath, 256);
 
 		for (int i = 0; i < 256; i++)
 		{
-			mMaterialList[importMeshData.materialID].specularTexture[i] = charObject[i];
+			mMaterialList[importMeshData.materialID].specularTexture[i] = tempCharArray[i];
 		}
+
+		copyTextures(srcFilePath.Buffer(), destFilePath);
 
 		textureCounter++;
 	}
@@ -1576,24 +1580,55 @@ void FbxImport::processNormalMaps(FbxProperty propNormal)
 	{
 		FbxTexture* texture = propNormal.GetSrcObject<FbxTexture>(textureIndex);
 		FbxFileTexture* fileTexture = FbxCast<FbxFileTexture>(texture);
-		FbxString fileTextureName = fileTexture->GetFileName();
+		FbxString srcFilePath = fileTexture->GetFileName();
 
-		/*Modify the FbxString to match the filepath to the textures folder, which will be a part of the game project.*/
-		FbxString fileTextureNameModified = FbxString("Textures") + fileTextureName.Right(fileTextureName.Size() - fileTextureName.ReverseFind('/'));
+		/*Modify the FbxString to match the filepath to the textures folder.*/
+		FbxString srcFilePathModified = FbxString("Textures") + srcFilePath.Right(srcFilePath.Size() - srcFilePath.ReverseFind('/'));
 
-		char* textureToChar = fileTextureNameModified.Buffer();
+		char* destFilePath = srcFilePathModified.Buffer();
 
-		char charObject[256];
+		char tempCharArray[256];
 
-		strncpy(charObject, textureToChar, 256);
+		strncpy(tempCharArray, destFilePath, 256);
 
 		for (int i = 0; i < 256; i++)
 		{
-			mMaterialList[importMeshData.materialID].normalTexture[i] = charObject[i];
+			mMaterialList[importMeshData.materialID].normalTexture[i] = tempCharArray[i];
 		}
+
+		copyTextures(srcFilePath.Buffer(), destFilePath);
 
 		textureCounter++;
 	}
+}
+
+/*A function that copy a texture to a new location.*/
+void FbxImport::copyTextures(char * srcPath, char * destPath)
+{
+	/*The input filepath we read from the texture filepath source.*/
+	std::ifstream inputTexture(srcPath, std::ofstream::binary);
+
+	/*The output texture filepath that we write to copy texture to destination.
+	A folder we copy the file to have be created before, otherwise this won't work.*/
+	std::ofstream outputTexture(destPath, std::ofstream::binary);
+
+	/*Get the length of the input filepath.*/
+	inputTexture.seekg(0, inputTexture.end);
+	long size = inputTexture.tellg();
+	inputTexture.seekg(0);
+
+	/*Allocate pointer for both read and write operations.*/
+	char* pBuffer = new char[size];
+
+	inputTexture.read(pBuffer, size);
+	outputTexture.write(pBuffer, size);
+
+	/*Delete allocated pointer.*/
+	delete[] pBuffer;
+
+	/*Close input/output files.*/
+	inputTexture.close();
+	outputTexture.close();
 }
 
 void FbxImport::processTransformations(FbxMesh* inputMesh)

@@ -6,6 +6,7 @@
 #include <string>
 #include "fbxsdk.h"
 #include <fstream>
+#include <Windows.h>
 
 #include "HeaderData.h"
 
@@ -114,6 +115,8 @@ public:
 	void processDiffuseMaps(FbxProperty inputProp);
 	void processSpecularMaps(FbxProperty inputProp);
 	void processNormalMaps(FbxProperty inputProp);
+
+	void copyTextures(char* srcPath, char* destPath);
 
 	void processTransformations(FbxMesh* inputMesh);
 
