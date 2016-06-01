@@ -5,10 +5,6 @@
 FbxImport::FbxImport()
 {
 	meshCounter = 0;
-	materialCounter = 1;
-	textureCounter = 0;
-	cameraCounter = 1;
-	lightCounter = 1;
 
 	firstProcess = true;
 }
@@ -48,10 +44,6 @@ bool FbxImport::determineIfIndexed(FbxMesh * inputMesh)
 					return isIndexed;
 				}
 
-				/*if (UVElement->GetMappingMode() == FbxGeometryElement::eByControlPoint)
-				{
-				isIndexed = true;
-				}*/
 				break;
 			}
 		}
@@ -187,7 +179,7 @@ void FbxImport::findBBoxByName(const char * bBoxName, int meshIndex, int jointIn
 			const char* compareName = mTempMeshList[i].meshName;
 			int compareValue = std::strcmp(bBoxName, compareName);
 			if (compareValue == 0) {
-				//asdf
+				
 				mTempMeshList[i].isBoundingBox = true;
 				mTempMeshList[meshIndex].jointList[jointIndex].bBoxID = mTempMeshList[i].meshID;
 			}
@@ -321,16 +313,6 @@ void FbxImport::initializeImporter(const char* filePath, float frameRate)
 			//Here call the recursive "hierarchy-traversal-function"
 			//that roots out all of the mesh-children of this mesh, wherever it may hide.
 			recursiveChildTraversal(childNode);
-			/*for (int child = 0; childNode->GetChildCount(); child++)
-			{
-			FbxNode* currNode = childNode->GetChild(child);
-			FbxNodeAttribute::EType currAttributeType = currNode->GetNodeAttribute()->GetAttributeType();
-			if (currAttributeType == FbxNodeAttribute::eMesh)
-			{
-			processMesh((FbxMesh*)childNode->GetNodeAttribute());
-			meshCounter += 1;
-			}
-			}*/
 
 		}
 
@@ -423,7 +405,7 @@ void FbxImport::initializeImporter(const char* filePath, float frameRate)
 					}
 				}
 			}
-			//processMesh();
+
 			meshCounter2++;
 		}
 
@@ -681,6 +663,7 @@ void FbxImport::processTangents(FbxMesh * inputMesh)
 
 	for (int i = 0; i < tangentCount; i++)
 	{
+		/*Get the tangent element of the mesh.*/
 		FbxGeometryElementTangent* tangentElement = inputMesh->GetElementTangent(i);
 
 		if (tangentElement)
@@ -770,6 +753,7 @@ void FbxImport::processBiTangents(FbxMesh * inputMesh)
 
 	for (int biIndex = 0; biIndex < biTangentCount; biIndex++)
 	{
+		/*Get the binormal element for the mesh.*/
 		FbxGeometryElementBinormal* biElement = inputMesh->GetElementBinormal(biIndex);
 
 		if (biElement)
@@ -1108,7 +1092,6 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 		for (unsigned int clusterCounter = 0; clusterCounter < clusterCount; ++clusterCounter)
 		{
 			FbxCluster* currCluster = currSkin->GetCluster(clusterCounter);
-			//FbxNode* currJoint = currCluster->GetLink();
 			const unsigned int controlPointIndicesCount = currCluster->GetControlPointIndicesCount();
 			bdList2.resize(controlPointIndicesCount + prevSizes);
 			prevSizes += controlPointIndicesCount;
@@ -1173,7 +1156,6 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 
 			FbxAMatrix tempGlobalBindPoseInverse;
 			tempGlobalBindPoseInverse = tempBindMatrix.Inverse() * tempParentBindMatrix;
-			//tempGlobalBindPoseInverse = tempGlobalBindPoseInverse.Inverse();
 
 			FbxAMatrix tempBindPoseInverse;
 			tempBindPoseInverse = tempBindMatrix.Inverse();
@@ -1214,43 +1196,6 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 				bdList.push_back(temp);
 			}
 
-			//VVVVVVVVVVVVVVVV REMOVE OLD THING bdList USER!
-			//const unsigned int polyCount = inputMesh->GetPolygonCount();
-			////The way that the vertices are "truly" indexed.
-			//unsigned int indexCounter = 0;
-			//for (unsigned int polyCounter = 0; polyCounter < polyCount; polyCounter++)
-			//{
-			//	const unsigned int polySize = inputMesh->GetPolygonSize(polyCounter);
-
-			//	for (unsigned int polyCorner = 0; polyCorner < polySize; polyCorner++)
-			//	{
-			//		const unsigned index = inputMesh->GetPolygonVertex(polyCounter, polyCorner);
-			//		sBlendData* currBlendData = findBlendDataForControlPoint(bdList, index);
-			//		if (currBlendData->blendingWeight < 0.0001)
-			//		{
-			//			//If the weight is 0, this joint is not an influence of the current vertex. 
-			//			indexCounter++;
-			//			continue;
-			//		}
-			//		//Add the weights and influences to the animated vertex
-			//		//got to make sure that I don't replace shit thats already assignesd
-			//		for (int i = 0; i < 4; i++)
-			//		{
-			//			//If we've already added this joint as an influence to the current vertex, continue to the next vertex.
-			//			if (importMeshData.mSkelVertexList[indexCounter].influences[i] == currBlendData->jointID)
-			//				break;
-			//			if(importMeshData.mSkelVertexList[indexCounter].influences[i] == -1337)
-			//			{
-			//				importMeshData.mSkelVertexList[indexCounter].influences[i] = currBlendData->jointID;
-			//				importMeshData.mSkelVertexList[indexCounter].weights[i] = currBlendData->blendingWeight;
-			//				break;
-			//			}
-			//		}
-			//		indexCounter++;
-			//	}
-			//}
-
-			//HAIL bdList2!!!!
 			const unsigned int polyCount = inputMesh->GetPolygonCount();
 			//The way that the vertices are "truly" indexed.
 			unsigned int indexCounter = 0;
@@ -1363,26 +1308,6 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 						FbxVector4 tempRotation = animationEvaluator->GetNodeLocalRotation(currJoint, currKey.GetTime());
 						FbxVector4 tempScale = animationEvaluator->GetNodeLocalScaling(currJoint, currKey.GetTime());
 
-						//float o = PI / 180;
-
-						/*float keyTime1 = currKey.GetTime().GetSecondDouble();
-						float translation1[3] = { tempTranslation1[0],  tempTranslation1[1], tempTranslation1[2] };
-						float rotation1[3] = { tempRotation1[0] * asRadians, tempRotation1[1] * asRadians, tempRotation1[2] * asRadians };
-						float scale1[3] = { tempScale1[0], tempScale1[1], tempScale1[2] };
-						*/
-						/**
-						pi = 180*
-						2pi = 360*
-						1* = pi / 180
-						90* * pi / 180 = 90 degrees in radians
-						**/
-
-
-						/*					FbxAMatrix currTransform = currJoint->EvaluateGlobalTransform(currKey.GetTime());
-						FbxVector4 tempTranslation = currTransform.GetT();
-						FbxVector4 tempRotation = currTransform.GetR();
-						FbxVector4 tempScale = currTransform.GetS();*/
-
 						float keyTime = currKey.GetTime().GetSecondDouble();
 						float translation[3] = { tempTranslation[0],  tempTranslation[1], tempTranslation[2] };
 						float rotation[3] = { tempRotation[0] * asRadians, tempRotation[1] * asRadians, tempRotation[2] * asRadians };
@@ -1457,9 +1382,6 @@ void FbxImport::processJoints(FbxMesh * inputMesh)
 
 void FbxImport::processBoundingBoxes()
 {
-	char* popo = "kkk";
-	const char* ooo = popo;
-
 	const unsigned int meshCount = mTempMeshList.size();
 	for (unsigned int i = 0; i < meshCount; i++)
 	{
@@ -1528,9 +1450,8 @@ void FbxImport::processDiffuseMaps(FbxProperty diffuseProp)
 			mMaterialList[importMeshData.materialID].diffuseTexture[i] = tempCharArray[i];
 		}
 
+		/*Copy texture to destination.*/
 		copyTextures(srcFilePath.Buffer(), destFilePath);
-		
-		textureCounter++;
 	}
 }
 
@@ -1562,9 +1483,8 @@ void FbxImport::processSpecularMaps(FbxProperty propSpecular)
 			mMaterialList[importMeshData.materialID].specularTexture[i] = tempCharArray[i];
 		}
 
+		/*Copy texture to destination.*/
 		copyTextures(srcFilePath.Buffer(), destFilePath);
-
-		textureCounter++;
 	}
 }
 
@@ -1596,9 +1516,8 @@ void FbxImport::processNormalMaps(FbxProperty propNormal)
 			mMaterialList[importMeshData.materialID].normalTexture[i] = tempCharArray[i];
 		}
 
+		/*Copy texture to destination.*/
 		copyTextures(srcFilePath.Buffer(), destFilePath);
-
-		textureCounter++;
 	}
 }
 

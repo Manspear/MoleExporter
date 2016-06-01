@@ -56,8 +56,7 @@ public:
 
 		float bindPoseInverse[16];
 		float globalBindPoseInverse[16];
-		//vector<read_sMeshChildIndex> childMeshList;
-		vector<int> childMeshList;
+		std::vector<int> childMeshList;
 		std::vector<sImportAnimationState> animationState;
 	};
 
@@ -79,10 +78,10 @@ public:
 
 		int parentMeshID = -1337;
 		int parentJointID = -1337;
-		vector<int> childMeshList;
-		vector<int> mIndexList;
-		vector<sVertex> mVertexList;
-		vector<sSkelAnimVertex> mSkelVertexList;
+		std::vector<int> childMeshList;
+		std::vector<int> mIndexList;
+		std::vector<sVertex> mVertexList;
+		std::vector<sSkelAnimVertex> mSkelVertexList;
 		std::vector<sImportJointData> jointList;
 	};
 
@@ -157,10 +156,6 @@ private:
 	FbxScene* pmScene;
 
 	int meshCounter;
-	int materialCounter;
-	int textureCounter;
-	int cameraCounter;
-	int lightCounter;
 
 	int animationFramerate;
 
